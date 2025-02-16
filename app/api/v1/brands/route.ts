@@ -9,7 +9,6 @@ import { loadSearchParams } from '@/core/domain/params/brand.param';
 export async function GET(request: NextRequest) {
   const filter = loadSearchParams(request);
   const data = await getBrands(filter);
-
   return NextResponse.json(data);
 }
 

@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import intlMiddleware from 'next-intl/middleware';
-import { routing } from './i18n/routing';
+
 import { betterFetch } from '@better-fetch/fetch';
+
 import type { auth } from '@/auth';
 
 type Session = typeof auth.$Infer.Session;
@@ -9,9 +9,7 @@ type Session = typeof auth.$Infer.Session;
 const UNPROTECTED_ROUTES = ['/login', '/register'];
 const PROTECTED_ROUTES = ['/d'];
 
-const i18nMiddleware = intlMiddleware(routing);
-
-export default async function middleware(request: NextRequest) {
+export default async function authMiddleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const { data: session } = await betterFetch<Session>('/api/auth/get-session', {
@@ -21,23 +19,22 @@ export default async function middleware(request: NextRequest) {
     },
   });
 
+  // Handle protected routes (dashboard)
   if (PROTECTED_ROUTES.some((route) => pathname.startsWith(route))) {
     if (!session) {
       return NextResponse.redirect(new URL('/', request.url));
     }
+    return NextResponse.next();
   }
 
+  // Handle unprotected routes (auth-related)
   if (session && UNPROTECTED_ROUTES.includes(pathname)) {
     return NextResponse.redirect(new URL('/d', request.url));
   }
 
-  return i18nMiddleware(request);
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    '/',
-    '/(de|en)/:path*',
-    '/((?!api|_next/static|_next/image|favicon.ico|public).*)',
-  ],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|public).*)'],
 };

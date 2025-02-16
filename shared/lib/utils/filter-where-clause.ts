@@ -6,7 +6,7 @@ export function filterSearchCondition(columns: string[], searchTerm?: string) {
   if (!searchTerm) return undefined;
 
   const searchConditions = columns.map(
-    (column) => sql`${sql.identifier(column)} @@@ paradedb.fuzzy_term(${column}, ${searchTerm})`,
+    (column) => sql`${sql.identifier(column)} @@ to_tsquery(${searchTerm})`
   );
 
   return searchConditions.length === 1
@@ -17,8 +17,8 @@ export function filterSearchCondition(columns: string[], searchTerm?: string) {
 export function filterArrayCondition(column: string, values?: string[]) {
   if (!values?.length) return undefined;
   return sql`${sql.identifier(column)} IN (${sql.join(
-    values.map((value) => sql`${value}`),
-    sql`, `,
+          values.map((value) => sql`${value}`),
+          sql`, `,
   )})`;
 }
 

@@ -21,9 +21,9 @@ interface RootLayoutProps {
   params: {locale : string}
 }
 
-export default async function RootLayout({ children , params: { locale} }: RootLayoutProps) {
+export default async function RootLayout({ children , params }: RootLayoutProps) {
   const inter = fontMap['inter'].next;
-  const session = await auth.api.getSession({ headers: await headers() });
+  const { locale } = await params;
   if (!routing.locales.includes(locale as "en" | "fr")) {
     notFound();
   }
