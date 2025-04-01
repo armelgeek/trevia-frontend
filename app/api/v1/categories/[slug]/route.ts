@@ -2,9 +2,7 @@ import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { auth } from '@/auth';
-import { deleteCategory } from '@/features/category/domain/use-cases/delete-category.use-case';
-import { getCategory } from '@/features/category/domain/use-cases/get-category.use-case';
-import { updateCategory } from '@/features/category/domain/use-cases/update-category.use-case';
+import { deleteCategory, getCategory, updateCategory } from '@/features/category/domain/use-cases';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   const slug = (await params).slug;

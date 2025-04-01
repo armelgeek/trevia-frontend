@@ -8,7 +8,7 @@ import { Category, CategoryPayload } from '../../config/category.type';
 import { CategoryFormSchema } from '../../config/category.schema';
 
 interface CategoryFormProps {
-  initialData: Category | null;
+  initialData: Pick<Category, 'name'> | null;
   onSubmit: (input: CategoryPayload) => Promise<void>;
   onSuccess?: () => void;
 }

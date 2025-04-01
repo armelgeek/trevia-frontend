@@ -48,13 +48,10 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
       >
         <Edit
           slug={category.slug}
-          isOpenDropdown={isOpen}
-          setIsOpenDropdown={setIsOpen}
+        
         />
         <Delete
           slug={category.slug}
-          isOpenDropdown={isOpen}
-          setIsOpenDropdown={setIsOpen}
         />
       </DropdownMenuContent>
     </DropdownMenu>

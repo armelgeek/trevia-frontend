@@ -1,9 +1,6 @@
-import type { Filter } from '@/shared/lib/types/filter';
+import { createQueryKeys } from '@/shared/lib/utils/query-keys';
 
-export const categoryKeys = {
-  all: ['category'] as const,
-  sub: ['subcategory'] as const,
-  lists: () => [...categoryKeys.all, 'list'] as const,
-  list: (filter: Filter) => [...categoryKeys.lists(), filter] as const,
-  detail: (slug: string) => [...categoryKeys.all, 'detail', slug] as const,
-};
+export const categoryKeys = createQueryKeys({
+  entity: 'category',
+  subEntity: 'subcategory'
+});

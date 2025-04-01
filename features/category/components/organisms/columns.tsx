@@ -2,10 +2,10 @@
 
 import { ColumnDef } from '@tanstack/react-table';
 
-import { DataTableColumnHeader } from '@/shared/components/molecules/datatable/data-table-column-header';
 import type { Category } from '@/features/category/config/category.type';
 
 import { DataTableRowActions } from './data-table-row-actions';
+import { DataTableColumnHeader } from '@/shared/components/molecules/datatable/data-table-column-header';
 
 export const columns: ColumnDef<Category>[] = [
   {

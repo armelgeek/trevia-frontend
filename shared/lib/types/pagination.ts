@@ -1,8 +1,13 @@
 export interface Pagination {
   page: number;
   pageSize: number;
+  pageCount: number;
   total: number;
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: {
+    pagination: Pagination;
+  };
 }
