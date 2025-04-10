@@ -1,9 +1,14 @@
+
+import { Metadata } from 'next';
 import AppSidebar from '@/shared/layout/admin/app-sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import Header from '@/shared/components/molecules/layout/app-header';
 import { cookies, headers } from 'next/headers';
 import { auth } from '@/auth';
-
+export const metadata: Metadata = {
+  title: 'Admin Dashboard',
+  description: 'Manage Products, Categories, Users and Orders',
+};
 interface AdminLayoutProps {
   readonly children: React.ReactNode;
 }

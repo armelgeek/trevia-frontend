@@ -14,9 +14,9 @@ export default function CategoryPage() {
     <div className="space-y-4">
       <div className='flex items-center justify-between'>
         <div className='flex flex-col'>
-          <h2 className="text-2xl font-bold tracking-tight">Gestion des catégories</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Manage Category</h2>
           <p className="text-muted-foreground">
-            Gérez vos catégories ici. Vous pouvez créer, modifier et supprimer des catégories.
+            You can create, edit, and delete products here.
           </p>
         </div>
         <Add />
