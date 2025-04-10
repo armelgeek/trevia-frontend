@@ -71,34 +71,34 @@ const ensureDirectoryExists = async (dirPath) => {
 const parseSchema = async (schemaPath) => {
   try {
     const schemaContent = await readFile(schemaPath, 'utf8');
-    
+
     // Extract the table definition
     const tableMatch = schemaContent.match(/export\s+const\s+(\w+)\s*=\s*\w+Table\s*\(\s*['"](\w+)['"]\s*,\s*{([^}]*)}\s*\)/s);
-    
+
     if (!tableMatch) {
       throw new Error(`Could not find table definition in ${schemaPath}`);
     }
-    
+
     const tableName = tableMatch[1];
     const dbTableName = tableMatch[2];
     const fieldsBlock = tableMatch[3];
-    
+
     // Extract fields
     const fields = [];
     const fieldsRegex = /(\w+):\s*(\w+)\(['"](\w+)['"](,\s*{([^}]*)})?/g;
     let match;
-    
+
     while ((match = fieldsRegex.exec(fieldsBlock)) !== null) {
       const fieldName = match[1];
       const fieldType = match[2];
       const dbFieldName = match[3];
       const options = match[5] || '';
-      
+
       // Check if field is primary key or has other constraints
       const isPrimaryKey = options.includes('primaryKey');
       const isNotNull = options.includes('notNull');
       const isUnique = options.includes('unique');
-      
+
       fields.push({
         name: fieldName,
         type: fieldType,
@@ -108,7 +108,7 @@ const parseSchema = async (schemaPath) => {
         isUnique,
       });
     }
-    
+
     return {
       tableName,
       dbTableName,
@@ -131,21 +131,20 @@ export const ${pascalName}SelectSchema = createSelectSchema(${schema.tableName})
 
 export const ${pascalName}FormSchema = createInsertSchema(${schema.tableName}, {
 ${schema.fields
-  .filter(field => !field.isPrimaryKey && field.name !== 'createdAt' && field.name !== 'updatedAt')
-  .map(field => {
-    if (field.type === 'varchar' || field.type === 'text') {
-      return `  ${field.name}: (s) => s.min(1, '${formatName(field.name, 'pascal')} is required.')${
-        field.type === 'varchar' ? '.max(255, \'' + formatName(field.name, 'pascal') + ' must be at most 255 characters.\')' : ''
-      },`;
-    }
-    return `  ${field.name}: (s) => s,`;
-  })
-  .join('\n')}
+      .filter(field => !field.isPrimaryKey && field.name !== 'createdAt' && field.name !== 'updatedAt')
+      .map(field => {
+        if (field.type === 'varchar' || field.type === 'text') {
+          return `  ${field.name}: (s) => s.min(1, '${formatName(field.name, 'pascal')} is required.')${field.type === 'varchar' ? '.max(255, \'' + formatName(field.name, 'pascal') + ' must be at most 255 characters.\')' : ''
+            },`;
+        }
+        return `  ${field.name}: (s) => s,`;
+      })
+      .join('\n')}
 }).pick({
 ${schema.fields
-  .filter(field => !field.isPrimaryKey && field.name !== 'createdAt' && field.name !== 'updatedAt')
-  .map(field => `  ${field.name}: true,`)
-  .join('\n')}
+      .filter(field => !field.isPrimaryKey && field.name !== 'createdAt' && field.name !== 'updatedAt')
+      .map(field => `  ${field.name}: true,`)
+      .join('\n')}
 });
 
 export type ${pascalName} = z.infer<typeof ${pascalName}SelectSchema>;
@@ -325,7 +324,7 @@ export const ${camelName}UseCase = new UseCase<${pascalName}, ${pascalName}Paylo
 const generateService = async (name, outputDir) => {
   const pascalName = formatName(name, 'pascal');
   const camelName = formatName(name, 'camel');
-  
+
   const serviceContent = `import { createSearchParams } from '@/shared/domain/base.search-param';
 import { BaseServiceImpl } from '@/shared/domain/base.service';
 import { API_ENDPOINTS } from '@/shared/lib/config/api';
@@ -351,7 +350,7 @@ const generateHooks = async (name, outputDir) => {
   const upperName = formatName(name, 'snake').toUpperCase();
   const pluralName = formatName(name, 'plural');
   const pluralPascal = formatName(pluralName, 'pascal');
-  
+
   const hooksContent = `import { ${camelName}Service } from '../domain/${formatName(name, 'kebab')}.service';
 import { ${pascalName}, ${pascalName}Payload } from '../config/${formatName(name, 'kebab')}.type';
 import { Filter } from '@/shared/lib/types/filter';
@@ -421,7 +420,7 @@ export const use${pascalName}Mutations = () => {
 const generateFormComponent = async (name, schema, outputDir) => {
   const pascalName = formatName(name, 'pascal');
   const camelName = formatName(name, 'camel');
-  
+
   const formContent = `import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
@@ -480,7 +479,7 @@ export const ${pascalName}Form = ({ initialData = null, onSubmit, onSuccess }: $
 const generateRowActions = async (name, outputDir) => {
   const pascalName = formatName(name, 'pascal');
   const camelName = formatName(name, 'camel');
-  
+
   const rowActionsContent = `'use client';
 
 import { useState } from 'react';
@@ -547,10 +546,10 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
 
 // Generate Columns
 const generateColumns = async (name, schema, outputDir) => {
-    const pascalName = formatName(name, 'pascal');
-    const camelName = formatName(name, 'camel');
-    
-    const columnsContent = `'use client';
+  const pascalName = formatName(name, 'pascal');
+  const camelName = formatName(name, 'camel');
+
+  const columnsContent = `'use client';
   
   import { ColumnDef } from '@tanstack/react-table';
   
@@ -581,16 +580,16 @@ const generateColumns = async (name, schema, outputDir) => {
     },
   ];
   `;
-  
-    await writeFile(path.join(outputDir, 'components/organisms', 'columns.tsx'), columnsContent);
-  };
-  
-  // Generate Add Component
-  const generateAddComponent = async (name, outputDir) => {
-    const pascalName = formatName(name, 'pascal');
-    const camelName = formatName(name, 'camel');
-    
-    const addContent = `import { ${pascalName}Form } from '../molecules/${formatName(name, 'kebab')}-form';
+
+  await writeFile(path.join(outputDir, 'components/organisms', 'columns.tsx'), columnsContent);
+};
+
+// Generate Add Component
+const generateAddComponent = async (name, outputDir) => {
+  const pascalName = formatName(name, 'pascal');
+  const camelName = formatName(name, 'camel');
+
+  const addContent = `import { ${pascalName}Form } from '../molecules/${formatName(name, 'kebab')}-form';
   import { use${pascalName}Mutations } from '../../hooks/use-${formatName(name, 'kebab')}';
   import { ${camelName}Keys } from '../../config/${formatName(name, 'kebab')}.key';
   import { ${pascalName}Payload } from '../../config/${formatName(name, 'kebab')}.type';
@@ -615,16 +614,16 @@ const generateColumns = async (name, schema, outputDir) => {
       />
     );
   }`;
-  
-    await writeFile(path.join(outputDir, 'components/organisms', 'add.tsx'), addContent);
-  };
-  
-  // Generate Edit Component
-  const generateEditComponent = async (name, outputDir) => {
-    const pascalName = formatName(name, 'pascal');
-    const camelName = formatName(name, 'camel');
-    
-    const editContent = `'use client';
+
+  await writeFile(path.join(outputDir, 'components/organisms', 'add.tsx'), addContent);
+};
+
+// Generate Edit Component
+const generateEditComponent = async (name, outputDir) => {
+  const pascalName = formatName(name, 'pascal');
+  const camelName = formatName(name, 'camel');
+
+  const editContent = `'use client';
   
   import { EntityForm } from '@/shared/components/molecules/form/add-entity';
   import { ${pascalName}Payload } from '../../config/${formatName(name, 'kebab')}.type';
@@ -662,16 +661,16 @@ const generateColumns = async (name, schema, outputDir) => {
       />
     );
   }`;
-  
-    await writeFile(path.join(outputDir, 'components/organisms', 'edit.tsx'), editContent);
-  };
-  
-  // Generate Delete Component
-  const generateDeleteComponent = async (name, outputDir) => {
-    const pascalName = formatName(name, 'pascal');
-    const camelName = formatName(name, 'camel');
-    
-    const deleteContent = `'use client';
+
+  await writeFile(path.join(outputDir, 'components/organisms', 'edit.tsx'), editContent);
+};
+
+// Generate Delete Component
+const generateDeleteComponent = async (name, outputDir) => {
+  const pascalName = formatName(name, 'pascal');
+  const camelName = formatName(name, 'camel');
+
+  const deleteContent = `'use client';
   
   import { use${pascalName}Mutations } from '../../hooks/use-${formatName(name, 'kebab')}';
   import { EntityDelete } from '@/shared/components/molecules/table/entity-delete';
@@ -695,17 +694,17 @@ const generateColumns = async (name, schema, outputDir) => {
       />
     );
   }`;
-  
-    await writeFile(path.join(outputDir, 'components/organisms', 'delete.tsx'), deleteContent);
-  };
-  
-  // Generate Page Component
-  const generatePageComponent = async (name, outputDir) => {
-    const pascalName = formatName(name, 'pascal');
-    const pluralPascal = formatName(formatName(name, 'plural'), 'pascal');
-    const camelPlural = formatName(formatName(name, 'plural'), 'camel');
-    
-    const pageContent = `'use client';
+
+  await writeFile(path.join(outputDir, 'components/organisms', 'delete.tsx'), deleteContent);
+};
+
+// Generate Page Component
+const generatePageComponent = async (name, outputDir) => {
+  const pascalName = formatName(name, 'pascal');
+  const pluralPascal = formatName(formatName(name, 'plural'), 'pascal');
+  const camelPlural = formatName(formatName(name, 'plural'), 'camel');
+
+  const pageContent = `'use client';
   
   import { DataTable } from '@/shared/components/molecules/datatable/data-table';
   import { columns } from '@/features/${formatName(name, 'kebab')}/components/organisms/columns';
@@ -740,241 +739,391 @@ const generateColumns = async (name, schema, outputDir) => {
       </div>
     );
   }`;
-  
-    await writeFile(path.join(outputDir, 'pages', `page.tsx`), pageContent);
-  };
-  
-  // Generate API Routes
-  const generateApiRoutes = async (name, outputDir) => {
-    const pascalName = formatName(name, 'pascal');
-    const camelName = formatName(name, 'camel');
-    const camelPlural = formatName(formatName(name, 'plural'), 'camel');
-    
-    // Generate index route
-    const indexRouteContent = `import { headers } from 'next/headers';
-  import { NextRequest, NextResponse } from 'next/server';
-  
-  import { auth } from '@/auth';
-  import { createSearchParams } from '@/shared/domain/base.search-param';
-  import { create${pascalName}, get${formatName(formatName(name, 'plural'), 'pascal')} } from '@/features/${formatName(name, 'kebab')}/domain/use-cases';
-  
-  export async function GET(request: NextRequest) {
-     const searchParams = createSearchParams();
-     const filter = searchParams.load(request);
-    const data = await get${formatName(formatName(name, 'plural'), 'pascal')}(filter);
-  
-    return NextResponse.json(data);
+
+  await writeFile(path.join(outputDir, 'pages', `page.tsx`), pageContent);
+};
+
+// Generate API Routes
+const generateApiRoutes = async (name, outputDir) => {
+  const pascalName = formatName(name, 'pascal');
+  const camelName = formatName(name, 'camel');
+  const camelPlural = formatName(formatName(name, 'plural'), 'camel');
+
+  // Create API directories
+  const apiBaseDir = path.join(process.cwd(), 'app/api/v1', camelPlural);
+  const apiSlugDir = path.join(apiBaseDir, '[slug]');
+
+  await ensureDirectoryExists(apiBaseDir);
+  await ensureDirectoryExists(apiSlugDir);
+
+  // Generate index route
+  const indexRouteContent = `import { headers } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server';
+
+import { auth } from '@/auth';
+import { createSearchParams } from '@/shared/domain/base.search-param';
+import { create${pascalName}, get${formatName(formatName(name, 'plural'), 'pascal')} } from '@/features/${formatName(name, 'kebab')}/domain/use-cases';
+
+export async function GET(request: NextRequest) {
+   const searchParams = createSearchParams();
+   const filter = searchParams.load(request);
+  const data = await get${formatName(formatName(name, 'plural'), 'pascal')}(filter);
+
+  return NextResponse.json(data);
+}
+
+export async function POST(request: NextRequest) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  
-  export async function POST(request: NextRequest) {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-  
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-  
-    const body = await request.json();
-    const data = await create${pascalName}(body);
-  
-    return NextResponse.json(data);
-  }`;
-  
-    await writeFile(path.join(outputDir, 'api', 'route.ts'), indexRouteContent);
-  
-    // Generate slug route
-    const slugRouteContent = `import { headers } from 'next/headers';
-  import { NextRequest, NextResponse } from 'next/server';
-  
-  import { auth } from '@/auth';
-  import { delete${pascalName}, get${pascalName}, update${pascalName} } from '@/features/${formatName(name, 'kebab')}/domain/use-cases';
-  
-  export async function GET(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
-    const slug = (await params).slug;
-    const data = await get${pascalName}(slug);
-  
-    return NextResponse.json(data);
+
+  const body = await request.json();
+  const data = await create${pascalName}(body);
+
+  return NextResponse.json(data);
+}`;
+
+  await writeFile(path.join(apiBaseDir, 'route.ts'), indexRouteContent);
+
+  // Generate slug route
+  const slugRouteContent = `import { headers } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server';
+
+import { auth } from '@/auth';
+import { delete${pascalName}, get${pascalName}, update${pascalName} } from '@/features/${formatName(name, 'kebab')}/domain/use-cases';
+
+export async function GET(request: NextRequest, { params }: { params: { slug: string } }) {
+  const slug = params.slug;
+  const data = await get${pascalName}(slug);
+
+  return NextResponse.json(data);
+}
+
+export async function PUT(request: NextRequest, { params }: { params: { slug: string } }) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  
-  export async function PUT(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-  
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-  
-    const slug = (await params).slug;
-    const body = await request.json();
-    await update${pascalName}(slug, body);
-  
-    return NextResponse.json({ message: '${pascalName} updated successfully' });
+
+  const slug = params.slug;
+  const body = await request.json();
+  await update${pascalName}(slug, body);
+
+  return NextResponse.json({ message: '${pascalName} updated successfully' });
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { slug: string } },
+) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  
-  export async function DELETE(
-    request: NextRequest,
-    { params }: { params: Promise<{ slug: string }> },
-  ) {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-  
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-  
-    const slug = (await params).slug;
-    await delete${pascalName}(slug);
-  
-    return NextResponse.json({ message: '${pascalName} deleted successfully' });
-  }`;
-  
-    await writeFile(path.join(outputDir, 'api/[slug]', 'route.ts'), slugRouteContent);
-  };
-  
-  // Update API Endpoints
-  const updateApiEndpoints = async (name, apiConfigPath) => {
-    const pascalName = formatName(name, 'pascal');
-    const camelPlural = formatName(formatName(name, 'plural'), 'camel');
-    
-    try {
-      let apiConfigContent = await readFile(apiConfigPath, 'utf8');
-      
-      // Find the API_ENDPOINTS object
-      const endpointsRegex = /export const API_ENDPOINTS = \{([^}]*)\} as const;/s;
-      const match = apiConfigContent.match(endpointsRegex);
-      
-      if (match) {
-        const existingEndpoints = match[1];
-        
-        // Check if the endpoint already exists
-        if (!existingEndpoints.includes(`${camelPlural}: {`)) {
-          // Add the new endpoint
-          const newEndpoint = `
-    ${camelPlural}: {
-      base: '/${camelPlural}',
-      list: (qs: string) => \`/${camelPlural}\${qs}\`,
-      create: '/${camelPlural}',
-      detail: (slug: string) => \`/${camelPlural}/\${slug}\`,
-      update: (slug: string) => \`/${camelPlural}/\${slug}\`,
-      delete: (slug: string) => \`/${camelPlural}/\${slug}\`,
-    },`;
-          
-          // Insert the new endpoint before the closing bracket
-          const updatedContent = apiConfigContent.replace(
-            endpointsRegex,
-            `export const API_ENDPOINTS = {${existingEndpoints}${newEndpoint}\n} as const;`
-          );
-          
-          await writeFile(apiConfigPath, updatedContent);
-          console.log(chalk.green(`✅ Updated API endpoints with ${pascalName} routes`));
-        } else {
-          console.log(chalk.yellow(`⚠️ ${pascalName} endpoints already exist, skipping update`));
-        }
+
+  const slug = params.slug;
+  await delete${pascalName}(slug);
+
+  return NextResponse.json({ message: '${pascalName} deleted successfully' });
+}`;
+
+  await writeFile(path.join(apiSlugDir, 'route.ts'), slugRouteContent);
+
+  console.log(chalk.green(`✅ API routes generated in app/api/v1/${camelPlural}`));
+};
+
+// Update API Endpoints
+const updateApiEndpoints = async (name, apiConfigPath) => {
+  const pascalName = formatName(name, 'pascal');
+  const camelPlural = formatName(formatName(name, 'plural'), 'camel');
+
+  try {
+    let apiConfigContent = await readFile(apiConfigPath, 'utf8');
+
+    // Trouver l'objet API_ENDPOINTS avec une regex plus flexible
+    const endpointsRegex = /export\s+const\s+API_ENDPOINTS\s*=\s*\{([\s\S]*?)\}\s*as\s*const\s*;/;
+    const match = apiConfigContent.match(endpointsRegex);
+
+    if (match) {
+      const existingEndpoints = match[1];
+
+      // Vérifier si l'endpoint existe déjà
+      if (!existingEndpoints.includes(`,${camelPlural}: {`)) {
+        // Ajouter le nouvel endpoint
+        const newEndpoint = `
+  ${camelPlural}: {
+    base: '/${camelPlural}',
+    list: (qs: string) => \`/${camelPlural}\${qs}\`,
+    create: '/${camelPlural}',
+    detail: (slug: string) => \`/${camelPlural}/\${slug}\`,
+    update: (slug: string) => \`/${camelPlural}/\${slug}\`,
+    delete: (slug: string) => \`/${camelPlural}/\${slug}\`,
+  },`;
+
+        // Insérer le nouvel endpoint avant l'accolade fermante
+        const updatedContent = apiConfigContent.replace(
+          endpointsRegex,
+          `export const API_ENDPOINTS = {${existingEndpoints}${newEndpoint}\n} as const;`
+        );
+
+        await writeFile(apiConfigPath, updatedContent);
+        console.log(chalk.green(`✅ API endpoints mis à jour avec les routes ${pascalName}`));
       } else {
-        console.log(chalk.red('❌ Could not find API_ENDPOINTS in the config file'));
+        console.log(chalk.yellow(`⚠️ Les endpoints ${pascalName} existent déjà, mise à jour ignorée`));
       }
-    } catch (error) {
-      console.error(chalk.red(`Error updating API endpoints: ${error.message}`));
+    } else {
+      // Approche alternative si la regex ne fonctionne pas
+      console.log(chalk.yellow(`⚠️ Structure non reconnue dans le fichier API_ENDPOINTS, tentative d'approche alternative...`));
+
+      // Chercher la dernière accolade avant "as const"
+      const lastBraceIndex = apiConfigContent.lastIndexOf('}', apiConfigContent.indexOf('as const'));
+
+      if (lastBraceIndex !== -1) {
+        const newEndpoint = `
+            ${camelPlural}: {
+              base: '/${camelPlural}',
+              list: (qs: string) => \`/${camelPlural}\${qs}\`,
+              create: '/${camelPlural}',
+              detail: (slug: string) => \`/${camelPlural}/\${slug}\`,
+              update: (slug: string) => \`/${camelPlural}/\${slug}\`,
+              delete: (slug: string) => \`/${camelPlural}/\${slug}\`,
+            },`;
+
+        // Insérer avant la dernière accolade
+        const updatedContent =
+          apiConfigContent.substring(0, lastBraceIndex) +
+          newEndpoint +
+          apiConfigContent.substring(lastBraceIndex);
+
+        await writeFile(apiConfigPath, updatedContent);
+        console.log(chalk.green(`✅ API endpoints mis à jour avec approche alternative`));
+      } else {
+        console.log(chalk.red('❌ Impossible de trouver la structure API_ENDPOINTS dans le fichier de configuration'));
+      }
     }
-  };
-  
-  // Main function to run the generator
-  const main = async () => {
-    try {
-      console.log(chalk.cyan('==================================='));
-      console.log(chalk.cyan('🚀 CRUD Generator for Next.js with Drizzle'));
-      console.log(chalk.cyan('===================================\n'));
-      
-      const name = await askQuestion(chalk.yellow('Enter the entity name (singular, PascalCase): '));
-      if (!name) {
-        console.log(chalk.red('❌ Entity name is required'));
-        rl.close();
+  } catch (error) {
+    console.error(chalk.red(`Erreur lors de la mise à jour des API endpoints: ${error.message}`));
+  }
+};
+
+// Update navigation sidebar
+const updateSidebar = async (name) => {
+  const pascalName = formatName(name, 'pascal');
+  const camelName = formatName(name, 'camel');
+  const camelPlural = formatName(formatName(name, 'plural'), 'camel');
+
+  try {
+    // Path to the navigation constants file
+    const navConstantsPath = path.join(process.cwd(), 'shared/lib/constants/app.constant.ts');
+
+    if (fs.existsSync(navConstantsPath)) {
+      let navContent = await readFile(navConstantsPath, 'utf8');
+
+      // Check if the feature is already in the navigation
+      if (navContent.includes(`title: '${pascalName}'`)) {
+        console.log(chalk.yellow(`⚠️ ${pascalName} already exists in navigation, skipping update`));
         return;
       }
-      
-      const schemaPath = path.join(process.cwd(), 'drizzle/schema', `${formatName(name, 'kebab')}.ts`);
-     
-      
-      const schema = await parseSchema(schemaPath);
-      console.log(chalk.green(`✅ Parsed schema for ${schema.tableName}`));
-      
-      const featureDir = path.join(process.cwd(), 'features', formatName(name, 'kebab'));
-      
-      const dirs = [
-        path.join(featureDir, 'config'),
-        path.join(featureDir, 'domain'),
-        path.join(featureDir, 'domain/use-cases'),
-        path.join(featureDir, 'hooks'),
-        path.join(featureDir, 'components/molecules'),
-        path.join(featureDir, 'components/organisms'),
-        path.join(featureDir, 'pages'),
-        path.join(featureDir, 'api'),
-        path.join(featureDir, 'api/[slug]'),
-      ];
-      
-      for (const dir of dirs) {
-        await ensureDirectoryExists(dir);
-      }
-      
-      console.log(chalk.green(`✅ Created directory structure`));
-      
-      // Generate configuration files
-      await generateTypes(name, schema, featureDir);
-      await generateSchema(name, schema, featureDir);
-      await generateKeys(name, featureDir);
-      console.log(chalk.green(`✅ Generated config files`));
-      
-      // Generate domain files
-      await generateUseCases(name, schema, featureDir);
-      await generateService(name, featureDir);
-      console.log(chalk.green(`✅ Generated domain files`));
-      
-      // Generate hooks
-      await generateHooks(name, featureDir);
-      console.log(chalk.green(`✅ Generated hooks`));
-      
-      // Generate UI components
-      await generateFormComponent(name, schema, featureDir);
-      await generateRowActions(name, featureDir);
-      await generateColumns(name, schema, featureDir);
-      await generateAddComponent(name, featureDir);
-      await generateEditComponent(name, featureDir);
-      await generateDeleteComponent(name, featureDir);
-      console.log(chalk.green(`✅ Generated UI components`));
-      
-      // Generate page component
-      await generatePageComponent(name, featureDir);
-      console.log(chalk.green(`✅ Generated page component`));
-      
-      // Generate API routes
-      await generateApiRoutes(name, featureDir);
-      console.log(chalk.green(`✅ Generated API routes`));
-      
-      // Update API endpoints
-      const apiConfigPath = path.join(process.cwd(), 'shared/lib/config/api.ts');
-      if (fs.existsSync(apiConfigPath)) {
-        await updateApiEndpoints(name, apiConfigPath);
-      } else {
-        console.log(chalk.yellow(`⚠️ API config file not found at ${apiConfigPath}, skipping update`));
-      }
-      
-      console.log(chalk.green('\n✅ CRUD generator completed successfully!'));
-      console.log(chalk.cyan(`\nNext steps:`));
-      console.log(chalk.white(`1. Run migrations to update your database schema (if needed)`));
-      console.log(chalk.white(`2. Add the new feature to your navigation or sidebar`));
-      console.log(chalk.white(`3. Add the new page to your routing configuration`));
-      
-    } catch (error) {
-      console.error(chalk.red(`Error generating CRUD: ${error.message}`));
-      if (error.stack) {
-        console.error(chalk.gray(error.stack));
-      }
-    } finally {
-      rl.close();
-    }
-  };
 
-  main();
+      // Find the navItems array
+      const navItemsRegex = /export\s+const\s+navItems\s*:\s*NavItem\[\]\s*=\s*\[([\s\S]*?)\];/;
+      const match = navContent.match(navItemsRegex);
+
+      if (match) {
+        const existingNavItems = match[1];
+
+        // Create a new nav item
+        const newNavItem = `,
+  {
+    title: '${pascalName}',
+    url: '/d/master/${formatName(name, 'kebab')}',
+    icon: 'post',
+    shortcut: ['${camelName[0]}', '${camelName[0]}'],
+    isActive: false,
+    items: []
+  },`;
+
+        // Add the new nav item before the closing bracket
+        const updatedContent = navContent.replace(
+          navItemsRegex,
+          `export const navItems: NavItem[] = [${existingNavItems}${newNavItem}\n];`
+        );
+
+        await writeFile(navConstantsPath, updatedContent);
+        console.log(chalk.green(`✅ Added ${pascalName} to navigation sidebar`));
+      } else {
+        console.log(chalk.yellow(`⚠️ Could not find navItems array in ${navConstantsPath}`));
+      }
+    } else {
+      console.log(chalk.yellow(`⚠️ Navigation constants file not found at ${navConstantsPath}`));
+    }
+  } catch (error) {
+    console.error(chalk.red(`Error updating navigation sidebar: ${error.message}`));
+  }
+};
+
+// Generate page route for the admin panel
+const generateAdminPageRoute = async (name) => {
+  const pascalName = formatName(name, 'pascal');
+  const camelName = formatName(name, 'camel');
+
+  try {
+    // Path to create the admin page route
+    const adminPageDir = path.join(process.cwd(), 'app/(admin)/d/master', formatName(name, 'kebab'));
+    await ensureDirectoryExists(adminPageDir);
+
+    // Generate the page component
+    const pageContent = `'use client';
+
+import { DataTable } from '@/shared/components/molecules/datatable/data-table';
+import { columns } from '@/features/${formatName(name, 'kebab')}/components/organisms/columns';
+import { use${formatName(formatName(name, 'plural'), 'pascal')} } from '@/features/${formatName(name, 'kebab')}/hooks/use-${formatName(name, 'kebab')}';
+import { Add } from '@/features/${formatName(name, 'kebab')}/components/organisms/add';
+import { useTableParams } from '@/shared/hooks/use-table-params';
+
+export default function ${pascalName}Page() {
+  const { params, tableProps } = useTableParams();
+  const { data, meta, isLoading } = use${formatName(formatName(name, 'plural'), 'pascal')}(params);
+
+  return (
+    <div className="space-y-4">
+      <div className='flex items-center justify-between'>
+        <div className='flex flex-col'>
+          <h2 className="text-2xl font-bold tracking-tight">Manage ${formatName(formatName(name, 'plural'), 'pascal')}</h2>
+          <p className="text-muted-foreground">
+            You can create, edit, and delete ${formatName(name, 'plural')} here.
+          </p>
+        </div>
+        <Add />
+      </div>
+
+      <DataTable
+        columns={columns}
+        data={data}
+        meta={meta}
+        isLoading={isLoading}
+        isError={false}
+        {...tableProps}
+      />
+    </div>
+  );
+}`;
+
+    await writeFile(path.join(adminPageDir, 'page.tsx'), pageContent);
+    console.log(chalk.green(`✅ Generated admin page route at app/(admin)/d/master/${formatName(name, 'kebab')}/page.tsx`));
+
+  } catch (error) {
+    console.error(chalk.red(`Error generating admin page route: ${error.message}`));
+  }
+};
+
+// Main function to run the generator
+const main = async () => {
+  try {
+    console.log(chalk.cyan('==================================='));
+    console.log(chalk.cyan('🚀 CRUD Generator for Next.js with Drizzle'));
+    console.log(chalk.cyan('===================================\n'));
+
+    const name = await askQuestion(chalk.yellow('Enter the entity name (singular, PascalCase): '));
+    if (!name) {
+      console.log(chalk.red('❌ Entity name is required'));
+      rl.close();
+      return;
+    }
+
+    const schemaPath = path.join(process.cwd(), 'drizzle/schema', `${formatName(name, 'kebab')}.ts`);
+
+
+    const schema = await parseSchema(schemaPath);
+    console.log(chalk.green(`✅ Parsed schema for ${schema.tableName}`));
+
+    const featureDir = path.join(process.cwd(), 'features', formatName(name, 'kebab'));
+
+    const dirs = [
+      path.join(featureDir, 'config'),
+      path.join(featureDir, 'domain'),
+      path.join(featureDir, 'domain/use-cases'),
+      path.join(featureDir, 'hooks'),
+      path.join(featureDir, 'components/molecules'),
+      path.join(featureDir, 'components/organisms'),
+      path.join(featureDir, 'pages'),
+      path.join(featureDir, 'api'),
+      path.join(featureDir, 'api/[slug]'),
+    ];
+
+    for (const dir of dirs) {
+      await ensureDirectoryExists(dir);
+    }
+
+    console.log(chalk.green(`✅ Created directory structure`));
+
+    // Generate configuration files
+    await generateTypes(name, schema, featureDir);
+    await generateSchema(name, schema, featureDir);
+    await generateKeys(name, featureDir);
+    console.log(chalk.green(`✅ Generated config files`));
+
+    // Generate domain files
+    await generateUseCases(name, schema, featureDir);
+    await generateService(name, featureDir);
+    console.log(chalk.green(`✅ Generated domain files`));
+
+    // Generate hooks
+    await generateHooks(name, featureDir);
+    console.log(chalk.green(`✅ Generated hooks`));
+
+    // Generate UI components
+    await generateFormComponent(name, schema, featureDir);
+    await generateRowActions(name, featureDir);
+    await generateColumns(name, schema, featureDir);
+    await generateAddComponent(name, featureDir);
+    await generateEditComponent(name, featureDir);
+    await generateDeleteComponent(name, featureDir);
+    console.log(chalk.green(`✅ Generated UI components`));
+
+    // Generate page component
+    await generatePageComponent(name, featureDir);
+    console.log(chalk.green(`✅ Generated page component`));
+
+    // Generate API routes
+    await generateApiRoutes(name, featureDir);
+    console.log(chalk.green(`✅ Generated API routes`));
+
+    // Générer le routing administratif et mettre à jour la navigation
+    await generateAdminPageRoute(name);
+    await updateSidebar(name);
+    // Update API endpoints
+    const apiConfigPath = path.join(process.cwd(), 'shared/lib/config/api.ts');
+    if (fs.existsSync(apiConfigPath)) {
+      await updateApiEndpoints(name, apiConfigPath);
+    } else {
+      console.log(chalk.yellow(`⚠️ API config file not found at ${apiConfigPath}, skipping update`));
+    }
+
+    console.log(chalk.green('\n✅ CRUD generator completed successfully!'));
+    console.log(chalk.cyan(`\nNext steps:`));
+    console.log(chalk.white(`1. Run migrations to update your database schema (if needed)`));
+    console.log(chalk.white(`2. Add the new feature to your navigation or sidebar`));
+    console.log(chalk.white(`3. Add the new page to your routing configuration`));
+
+  } catch (error) {
+    console.error(chalk.red(`Error generating CRUD: ${error.message}`));
+    if (error.stack) {
+      console.error(chalk.gray(error.stack));
+    }
+  } finally {
+    rl.close();
+  }
+};
+
+main();
