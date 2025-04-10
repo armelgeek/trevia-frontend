@@ -42,12 +42,12 @@ import * as React from 'react';
 import { Icons } from '@/components/ui/icons';
 import { authClient } from '@/auth-client';
 import { Session } from 'better-auth';
-import { navItems } from '@/shared/lib/constants/app.constant';
+import { kAppName, navItems } from '@/shared/lib/constants/app.constant';
 
 export const company = {
-  name: 'Boilerplate',
+  name: kAppName,
   logo: GalleryVerticalEnd,
-  plan: 'Enterprise'
+  plan: kAppName
 };
 
 export default function AppSidebar({ session }: { session: Session }) {
