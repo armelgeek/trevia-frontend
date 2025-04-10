@@ -10,7 +10,15 @@
     "db:generate": "npx drizzle-kit generate",
     "db:migrate": "tsx ./drizzle/migrate.ts",
     "db:studio": "npx drizzle-kit studio",
-    "make:crud": "node ./generator.mjs"
+    "crud": "node ./generator.mjs generate",
+    "crud:schema": "node ./generator.mjs schema",
+    "crud:config": "node ./generator.mjs config",
+    "crud:domain": "node ./generator.mjs domain",
+    "crud:hooks": "node ./generator.mjs hooks",
+    "crud:components": "node ./generator.mjs components",
+    "crud:api": "node ./generator.mjs api",
+    "crud:page": "node ./generator.mjs page",
+    "crud:navigation": "node ./generator.mjs navigation"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.7.4",
@@ -56,6 +64,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
+    "commander": "^13.1.0",
     "date-fns": "^3.6.0",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.39.0",
