@@ -51,6 +51,7 @@
     "@tanstack/react-table": "^8.20.6",
     "@uploadthing/react": "^7.1.5",
     "better-auth": "^1.1.15",
+    "chalk": "^5.4.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
