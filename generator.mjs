@@ -7,6 +7,8 @@ import readline from 'readline';
 import chalk from 'chalk';
 import { execSync } from 'child_process';
 
+import { Command } from 'commander';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -978,12 +980,12 @@ const updateSidebar = async (name) => {
 const generateAdminPageRoute = async (name) => {
   const pascalName = formatName(name, 'pascal');
   const pluralPascal = formatName(formatName(name, 'plural'), 'pascal');
-  
+
   try {
     // Path to create the admin page route
     const adminPageDir = path.join(process.cwd(), 'app/(admin)/d/master', formatName(name, 'kebab'));
     await ensureDirectoryExists(adminPageDir);
-    
+
     // Generate the page component (client component)
     const pageContent = `'use client';
 
@@ -1022,7 +1024,7 @@ export default function ${pascalName}Page() {
 }`;
 
     await writeFile(path.join(adminPageDir, 'page.tsx'), pageContent);
-    
+
     // Generate metadata in a separate file as a server component
     const metadataContent = `import { Metadata } from 'next';
 
@@ -1032,7 +1034,7 @@ export const metadata: Metadata = {
 };`;
 
     await writeFile(path.join(adminPageDir, 'metadata.ts'), metadataContent);
-    
+
     // Generate a layout server component that imports the metadata
     const layoutContent = `import { Metadata } from 'next';
 
@@ -1050,13 +1052,166 @@ export default function ${pascalName}Layout({
 }`;
 
     await writeFile(path.join(adminPageDir, 'layout.tsx'), layoutContent);
-    
+
     console.log(chalk.green(`✅ Generated admin page route at app/(admin)/d/master/${formatName(name, 'kebab')}/page.tsx`));
     console.log(chalk.green(`✅ Generated layout with metadata at app/(admin)/d/master/${formatName(name, 'kebab')}/layout.tsx`));
-    
+
   } catch (error) {
     console.error(chalk.red(`Error generating admin page route: ${error.message}`));
   }
+};
+
+// Function to detect relationships in schema
+const detectRelationships = async (schemaPath, entityName) => {
+  try {
+    const schemaContent = await readFile(schemaPath, 'utf8');
+    const relationships = [];
+
+    // Pattern to detect foreign keys in Drizzle schema
+    const relationRegex = /(\w+):\s*\w+\(['"]\w+['"].*\)(?:.*?\.references\(\(\)\s*=>\s*(\w+)\.(\w+)\))/g;
+
+    let match;
+    while ((match = relationRegex.exec(schemaContent)) !== null) {
+      const fieldName = match[1];
+      const referencedTable = match[2];
+      const referencedField = match[3];
+
+      // Verify this is a foreign key and not a self-reference
+      if (referencedTable && referencedField && referencedTable !== entityName) {
+        relationships.push({
+          fieldName,
+          referencedTable,
+          referencedField,
+          relationshipType: 'manyToOne', // Default assumption
+        });
+      }
+    }
+
+    return relationships;
+  } catch (error) {
+    console.error(chalk.red(`Error detecting relationships: ${error.message}`));
+    return [];
+  }
+};
+// Generate Form Component with relationships
+const generateFormWithRelationships = async (name, schema, relationships, outputDir) => {
+  const pascalName = formatName(name, 'pascal');
+  const camelName = formatName(name, 'camel');
+
+  // Generate imports for relationship components
+  let relationImports = '';
+  let relationFields = '';
+
+  if (relationships.length > 0) {
+    relationImports = `import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';\n`;
+
+    for (const relation of relationships) {
+      const relatedEntityPascal = formatName(relation.referencedTable, 'pascal');
+      const relatedEntityCamel = formatName(relation.referencedTable, 'camel');
+
+      relationImports += `import { use${formatName(formatName(relation.referencedTable, 'plural'), 'pascal')} } from '@/features/${formatName(relation.referencedTable, 'kebab')}/hooks/use-${formatName(relation.referencedTable, 'kebab')}';\n`;
+
+      // Generate select field for the relationship
+      relationFields += `
+          {/* ${relatedEntityPascal} relationship */}
+          <FormField
+            control={form.control}
+            name="${relation.fieldName}"
+            render={({ field }) => (
+              <FormItem className="space-y-2">
+                <FormLabel>${formatName(relation.fieldName, 'pascal')}</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select ${formatName(relation.referencedTable, 'pascal')}" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {${relatedEntityCamel}Data?.map((item) => (
+                      <SelectItem key={item.id} value={item.id}>
+                        {item.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+      `;
+    }
+  }
+
+  // Add queries to fetch related data
+  let relatedDataFetching = '';
+  if (relationships.length > 0) {
+    for (const relation of relationships) {
+      const relatedEntityCamel = formatName(relation.referencedTable, 'camel');
+      const relatedEntityPluralPascal = formatName(formatName(relation.referencedTable, 'plural'), 'pascal');
+
+      relatedDataFetching += `
+  // Fetch ${relation.referencedTable} data for relationship dropdown
+  const { data: ${relatedEntityCamel}Data } = use${relatedEntityPluralPascal}({ page: 1, pageSize: 100 });
+      `;
+    }
+  }
+
+  // Form template with relationship fields
+  const formContent = `import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { ControlledTextInput } from '@/shared/components/molecules/form/ControlledTextInput';
+import { useFormHandler } from '@/shared/hooks/use-form-handler';${relationships.length > 0 ? '\n' + relationImports : ''}
+
+import { ${pascalName}, ${pascalName}Payload } from '../../config/${formatName(name, 'kebab')}.type';
+import { ${pascalName}FormSchema } from '../../config/${formatName(name, 'kebab')}.schema';
+
+interface ${pascalName}FormProps {
+  initialData: Partial<${pascalName}> | null;
+  onSubmit: (input: ${pascalName}Payload) => Promise<void>;
+  onSuccess?: () => void;
+}
+
+export const ${pascalName}Form = ({ initialData = null, onSubmit, onSuccess }: ${pascalName}FormProps) => {
+  const { form, handleSubmit, isSubmitting } = useFormHandler<${pascalName}Payload>({
+    schema: ${pascalName}FormSchema,
+    initialValues: initialData || {
+      name: ''${relationships.map(r => `,\n      ${r.fieldName}: ''`).join('')}
+    },
+    onSubmit,
+    onSuccess
+  });
+${relatedDataFetching}
+  return (
+    <Form {...form}>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-4">
+          <ControlledTextInput
+            name="name"
+            label="Name"
+            placeholder="${pascalName} Name"
+            control={form.control}
+          />
+${relationFields}
+          <Button type="submit" className="mt-4" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <Loader2 className="mr-2 size-4 animate-spin" />
+            ) : initialData ? (
+              'Update ${pascalName}'
+            ) : (
+              'Create ${pascalName}'
+            )}
+          </Button>
+        </div>
+      </form>
+    </Form>
+  );
+}`;
+
+  await writeFile(path.join(outputDir, 'components/molecules', `${formatName(name, 'kebab')}-form.tsx`), formContent);
 };
 // Main function to run the generator
 const main = async () => {
@@ -1077,6 +1232,14 @@ const main = async () => {
 
     const schema = await parseSchema(schemaPath);
     console.log(chalk.green(`✅ Parsed schema for ${schema.tableName}`));
+
+    const relationships = await detectRelationships(schemaPath, name);
+    if (relationships.length > 0) {
+      console.log(chalk.cyan(`\nDetected ${relationships.length} relationships:`));
+      relationships.forEach(rel => {
+        console.log(chalk.gray(`- ${rel.fieldName} -> ${rel.referencedTable}.${rel.referencedField}`));
+      });
+    }
 
     const featureDir = path.join(process.cwd(), 'features', formatName(name, 'kebab'));
 
@@ -1115,6 +1278,7 @@ const main = async () => {
 
     // Generate UI components
     await generateFormComponent(name, schema, featureDir);
+    await generateFormWithRelationships(name, schema, relationships, featureDir);
     await generateRowActions(name, featureDir);
     await generateColumns(name, schema, featureDir);
     await generateAddComponent(name, featureDir);
@@ -1157,4 +1321,312 @@ const main = async () => {
   }
 };
 
-main();
+
+// Fonction pour la génération complète (votre fonction main actuelle)
+const generateComplete = async (name) => {
+  try {
+    console.log(chalk.cyan('==================================='));
+    console.log(chalk.cyan('🚀 CRUD Generator for Next.js with Drizzle'));
+    console.log(chalk.cyan('===================================\n'));
+
+    if (!name) {
+      console.log(chalk.red('❌ Entity name is required'));
+      return;
+    }
+
+    const schemaPath = path.join(process.cwd(), 'drizzle/schema', `${formatName(name, 'kebab')}.ts`);
+
+    if (!fs.existsSync(schemaPath)) {
+      console.log(chalk.red(`❌ Schema file not found at ${schemaPath}`));
+      const createNew = await askQuestion(chalk.yellow('Do you want to create a new schema? (y/n): '));
+      if (createNew.toLowerCase() !== 'y') {
+        return;
+      }
+
+      await createSchema(name);
+    }
+
+    const schema = await parseSchema(schemaPath);
+    console.log(chalk.green(`✅ Parsed schema for ${schema.tableName}`));
+
+    // Détectez les relations
+    const relationships = await detectRelationships(schemaPath, name);
+    if (relationships.length > 0) {
+      console.log(chalk.cyan(`\nDetected ${relationships.length} relationships:`));
+      relationships.forEach(rel => {
+        console.log(chalk.gray(`- ${rel.fieldName} -> ${rel.referencedTable}.${rel.referencedField}`));
+      });
+    }
+
+    const featureDir = path.join(process.cwd(), 'features', formatName(name, 'kebab'));
+
+    const dirs = [
+      path.join(featureDir, 'config'),
+      path.join(featureDir, 'domain'),
+      path.join(featureDir, 'domain/use-cases'),
+      path.join(featureDir, 'hooks'),
+      path.join(featureDir, 'components/molecules'),
+      path.join(featureDir, 'components/organisms'),
+      path.join(featureDir, 'pages'),
+      path.join(featureDir, 'api'),
+      path.join(featureDir, 'api/[slug]'),
+    ];
+
+    for (const dir of dirs) {
+      await ensureDirectoryExists(dir);
+    }
+
+    console.log(chalk.green(`✅ Created directory structure`));
+
+    // Generate configuration files
+    await generateTypes(name, schema, featureDir);
+    await generateSchema(name, schema, featureDir);
+    await generateKeys(name, featureDir);
+    console.log(chalk.green(`✅ Generated config files`));
+
+    // Generate domain files
+    await generateUseCases(name, schema, featureDir);
+    await generateService(name, featureDir);
+    console.log(chalk.green(`✅ Generated domain files`));
+
+    // Generate hooks
+    await generateHooks(name, featureDir);
+    console.log(chalk.green(`✅ Generated hooks`));
+
+    // Generate UI components
+    await generateFormWithRelationships(name, schema, relationships, featureDir);
+    await generateRowActions(name, featureDir);
+    await generateColumns(name, schema, featureDir);
+    await generateAddComponent(name, featureDir);
+    await generateEditComponent(name, featureDir);
+    await generateDeleteComponent(name, featureDir);
+    console.log(chalk.green(`✅ Generated UI components`));
+
+    // Generate page component
+    await generatePageComponent(name, featureDir);
+    console.log(chalk.green(`✅ Generated page component`));
+
+    // Generate API routes
+    await generateApiRoutes(name, featureDir);
+    console.log(chalk.green(`✅ Generated API routes`));
+
+    // Générer le routing administratif et mettre à jour la navigation
+    await generateAdminPageRoute(name);
+    await updateSidebar(name);
+
+    // Update API endpoints
+    const apiConfigPath = path.join(process.cwd(), 'shared/lib/config/api.ts');
+    if (fs.existsSync(apiConfigPath)) {
+      await updateApiEndpoints(name, apiConfigPath);
+    } else {
+      console.log(chalk.yellow(`⚠️ API config file not found at ${apiConfigPath}, skipping update`));
+    }
+
+    console.log(chalk.green('\n✅ CRUD generator completed successfully!'));
+    console.log(chalk.cyan(`\nNext steps:`));
+    console.log(chalk.white(`1. Run migrations to update your database schema (if needed)`));
+
+  } catch (error) {
+    console.error(chalk.red(`Error generating CRUD: ${error.message}`));
+    if (error.stack) {
+      console.error(chalk.gray(error.stack));
+    }
+  }
+};
+
+// Fonction pour créer uniquement le schéma
+const createSchema = async (name) => {
+  // Implémentez ici la création du schéma si nécessaire
+  console.log(chalk.yellow('Schema creation not implemented yet!'));
+};
+
+// Fonction pour générer uniquement les fichiers de configuration
+const generateConfigOnly = async (name) => {
+  try {
+    const schemaPath = path.join(process.cwd(), 'drizzle/schema', `${formatName(name, 'kebab')}.ts`);
+    if (!fs.existsSync(schemaPath)) {
+      console.log(chalk.red(`❌ Schema file not found at ${schemaPath}`));
+      return;
+    }
+
+    const schema = await parseSchema(schemaPath);
+    const featureDir = path.join(process.cwd(), 'features', formatName(name, 'kebab'));
+
+    await ensureDirectoryExists(path.join(featureDir, 'config'));
+    await generateTypes(name, schema, featureDir);
+    await generateSchema(name, schema, featureDir);
+    await generateKeys(name, featureDir);
+    console.log(chalk.green(`✅ Generated config files for ${name}`));
+  } catch (error) {
+    console.error(chalk.red(`Error generating config: ${error.message}`));
+  }
+};
+
+// Fonction pour générer uniquement le domaine
+const generateDomainOnly = async (name) => {
+  try {
+    const schemaPath = path.join(process.cwd(), 'drizzle/schema', `${formatName(name, 'kebab')}.ts`);
+    if (!fs.existsSync(schemaPath)) {
+      console.log(chalk.red(`❌ Schema file not found at ${schemaPath}`));
+      return;
+    }
+
+    const schema = await parseSchema(schemaPath);
+    const relationships = await detectRelationships(schemaPath, name);
+    const featureDir = path.join(process.cwd(), 'features', formatName(name, 'kebab'));
+
+    await ensureDirectoryExists(path.join(featureDir, 'domain/use-cases'));
+    await generateUseCases(name, schema, featureDir);
+    await generateService(name, featureDir);
+    console.log(chalk.green(`✅ Generated domain files for ${name}`));
+  } catch (error) {
+    console.error(chalk.red(`Error generating domain: ${error.message}`));
+  }
+};
+
+// Fonction pour générer uniquement les hooks
+const generateHooksOnly = async (name) => {
+  try {
+    const featureDir = path.join(process.cwd(), 'features', formatName(name, 'kebab'));
+
+    await ensureDirectoryExists(path.join(featureDir, 'hooks'));
+    await generateHooks(name, featureDir);
+    console.log(chalk.green(`✅ Generated hooks for ${name}`));
+  } catch (error) {
+    console.error(chalk.red(`Error generating hooks: ${error.message}`));
+  }
+};
+
+// Fonction pour générer uniquement les composants
+const generateComponentsOnly = async (name) => {
+  try {
+    const schemaPath = path.join(process.cwd(), 'drizzle/schema', `${formatName(name, 'kebab')}.ts`);
+    if (!fs.existsSync(schemaPath)) {
+      console.log(chalk.red(`❌ Schema file not found at ${schemaPath}`));
+      return;
+    }
+
+    const schema = await parseSchema(schemaPath);
+    const relationships = await detectRelationships(schemaPath, name);
+    const featureDir = path.join(process.cwd(), 'features', formatName(name, 'kebab'));
+
+    await ensureDirectoryExists(path.join(featureDir, 'components/molecules'));
+    await ensureDirectoryExists(path.join(featureDir, 'components/organisms'));
+
+    await generateFormWithRelationships(name, schema, relationships, featureDir);
+    await generateRowActions(name, featureDir);
+    await generateColumns(name, schema, featureDir);
+    await generateAddComponent(name, featureDir);
+    await generateEditComponent(name, featureDir);
+    await generateDeleteComponent(name, featureDir);
+    console.log(chalk.green(`✅ Generated components for ${name}`));
+  } catch (error) {
+    console.error(chalk.red(`Error generating components: ${error.message}`));
+  }
+};
+
+// Fonction pour générer uniquement les routes API
+const generateApiOnly = async (name) => {
+  try {
+    await generateApiRoutes(name);
+    console.log(chalk.green(`✅ Generated API routes for ${name}`));
+  } catch (error) {
+    console.error(chalk.red(`Error generating API routes: ${error.message}`));
+  }
+};
+
+// Fonction pour générer uniquement la page admin
+const generatePageOnly = async (name) => {
+  try {
+    await generateAdminPageRoute(name);
+    console.log(chalk.green(`✅ Generated admin page for ${name}`));
+  } catch (error) {
+    console.error(chalk.red(`Error generating admin page: ${error.message}`));
+  }
+};
+
+const program = new Command();
+program
+  .name('crud-generator')
+  .description('CRUD Generator for Next.js with Drizzle')
+  .version('1.0.0');
+
+// Fonction principale pour la génération complète
+program
+  .command('generate <name>')
+  .description('Generate a complete CRUD feature')
+  .action(async (name) => {
+    await generateComplete(name);
+  });
+
+// Commande pour créer uniquement le schéma Drizzle
+program
+  .command('schema <name>')
+  .description('Create or update a Drizzle schema')
+  .action(async (name) => {
+    console.log(chalk.cyan(`Creating schema for ${name}...`));
+    await createSchema(name);
+  });
+
+// Commande pour générer les types et configurations
+program
+  .command('config <name>')
+  .description('Generate types and configuration files')
+  .action(async (name) => {
+    await generateConfigOnly(name);
+  });
+
+// Commande pour générer la couche domaine
+program
+  .command('domain <name>')
+  .description('Generate domain layer (use cases and services)')
+  .action(async (name) => {
+    await generateDomainOnly(name);
+  });
+
+// Commande pour générer les hooks React
+program
+  .command('hooks <name>')
+  .description('Generate React hooks for data fetching')
+  .action(async (name) => {
+    await generateHooksOnly(name);
+  });
+
+// Commande pour générer les composants UI
+program
+  .command('components <name>')
+  .description('Generate UI components')
+  .action(async (name) => {
+    await generateComponentsOnly(name);
+  });
+
+// Commande pour générer les routes API
+program
+  .command('api <name>')
+  .description('Generate API routes')
+  .action(async (name) => {
+    await generateApiOnly(name);
+  });
+
+// Commande pour générer la page admin
+program
+  .command('page <name>')
+  .description('Generate admin page route')
+  .action(async (name) => {
+    await generatePageOnly(name);
+  });
+
+// Commande pour mettre à jour la navigation
+program
+  .command('navigation <name>')
+  .description('Update navigation sidebar')
+  .action(async (name) => {
+    await updateSidebar(name);
+  });
+
+
+  program.parse();
+
+if (!process.argv.slice(2).length) {
+  program.outputHelp();
+}
