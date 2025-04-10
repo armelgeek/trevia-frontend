@@ -2,7 +2,6 @@
 
 import { Table } from '@tanstack/react-table';
 
-import { DataTableViewOptions } from '@/shared/components/molecules/datatable/data-table-view-options';
 import { DebouncedInput } from '@/components/ui/debounced-input';
 
 interface DataTableToolbarProps<TData> {
