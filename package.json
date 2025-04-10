@@ -10,6 +10,7 @@
     "db:generate": "npx drizzle-kit generate",
     "db:migrate": "tsx ./drizzle/migrate.ts",
     "db:studio": "npx drizzle-kit studio",
+    "db:push": "npx drizzle-kit push",
     "crud": "node ./generator.mjs generate",
     "crud:schema": "node ./generator.mjs schema",
     "crud:config": "node ./generator.mjs config",
