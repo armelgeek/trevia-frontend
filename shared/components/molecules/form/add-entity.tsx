@@ -2,41 +2,25 @@
 
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Plus, Pencil } from 'lucide-react';
+import { Plus, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
-interface EntityFormProps<T> {
-  /**
-   * The title of the entity (e.g., "Category", "Product", etc.)
-   */
+interface ModalFormProps<T> {
+
   title: string;
-  /**
-   * Optional description shown in the sheet header
-   */
+  customTitle?: string;
   description?: string;
-  /**
-   * Initial data for the form
-   */
   initialData: T | null;
-  /**
-   * Function to handle the form submission
-   */
   onSubmit: (data: T) => Promise<void>;
-  /**
-   * Loading state for the form submission
-   */
   isSubmitting?: boolean;
-  /**
-   * The form component to render
-   */
   Form: React.ComponentType<{
     initialData: T | null;
     onSubmit: (data: T) => Promise<void>;
@@ -60,8 +44,8 @@ export function EntityForm<T>({
   mode = 'add',
   buttonLabel,
   buttonVariant = 'default',
-  className = "max-w w-full md:max-w-[500px]"
-}: EntityFormProps<T>) {
+  className = "max-w-md"
+}: ModalFormProps<T>) {
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -79,35 +63,38 @@ export function EntityForm<T>({
   const actionText = isEditMode ? 'Edit' : 'Add';
 
   return (
-    <Sheet
+    <Dialog
       open={isOpen}
       onOpenChange={(open) => setIsOpen(open)}
     >
-      <SheetTrigger asChild>
-        <Button variant={buttonVariant}>
-          {isEditMode ? (
-            <Pencil
-              className="-ms-1 me-2"
-              size={16}
-              strokeWidth={2}
-              aria-hidden="true"
-            />
-          ) : (
+      <DialogTrigger asChild>
+        {!isEditMode ? (
+          <Button variant={buttonVariant}>
             <Plus
-              className="-ms-1 me-2"
+              className="mr-2"
               size={16}
               strokeWidth={2}
               aria-hidden="true"
             />
-          )}
-          {buttonLabel || `${actionText} ${title}`}
-        </Button>
-      </SheetTrigger>
-      <SheetContent className={className}>
-        <SheetHeader>
-          <SheetTitle>{actionText} {title}</SheetTitle>
-          <SheetDescription>{description}</SheetDescription>
-        </SheetHeader>
+            {buttonLabel || `${actionText} ${title}`}
+          </Button>
+        ) : (
+          <div className='flex flex-row gap-2 items-center ml-2 cursor-pointer'> 
+            <Edit
+              size={14}
+              strokeWidth={2}
+              className="mr-2 text-sm"
+              aria-hidden="true"
+            />
+            {buttonLabel || actionText}
+          </div>
+        )}
+      </DialogTrigger>
+      <DialogContent className={className}>
+        <DialogHeader>
+          <DialogTitle>{actionText} {title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+        </DialogHeader>
 
         <div className="grid gap-4 py-4">
           <Form
@@ -116,7 +103,7 @@ export function EntityForm<T>({
             isSubmitting={isSubmitting}
           />
         </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -120,13 +120,15 @@ const parseSchema = async (schemaPath) => {
   }
 };
 
+
+
 // Generate Types
 const generateTypes = async (name, schema, outputDir) => {
   const pascalName = formatName(name, 'pascal');
   const typesContent = `import { z } from 'zod';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { ${schema.tableName} } from '@/drizzle/schema/${formatName(name, 'kebab')}';
-
+import { PaginatedResponse } from '@/shared/lib/types/pagination';
 export const ${pascalName}SelectSchema = createSelectSchema(${schema.tableName});
 
 export const ${pascalName}FormSchema = createInsertSchema(${schema.tableName}, {
@@ -858,9 +860,9 @@ const updateApiEndpoints = async (name, apiConfigPath) => {
       const existingEndpoints = match[1];
 
       // Vérifier si l'endpoint existe déjà
-      if (!existingEndpoints.includes(`,${camelPlural}: {`)) {
+      if (!existingEndpoints.includes(`${camelPlural}: {`)) {
         // Ajouter le nouvel endpoint
-        const newEndpoint = `
+        const newEndpoint = `,
   ${camelPlural}: {
     base: '/${camelPlural}',
     list: (qs: string) => \`/${camelPlural}\${qs}\`,
@@ -972,34 +974,34 @@ const updateSidebar = async (name) => {
   }
 };
 
-// Generate page route for the admin panel
+// Generate page route for the admin panel with proper metadata
 const generateAdminPageRoute = async (name) => {
   const pascalName = formatName(name, 'pascal');
-  const camelName = formatName(name, 'camel');
-
+  const pluralPascal = formatName(formatName(name, 'plural'), 'pascal');
+  
   try {
     // Path to create the admin page route
     const adminPageDir = path.join(process.cwd(), 'app/(admin)/d/master', formatName(name, 'kebab'));
     await ensureDirectoryExists(adminPageDir);
-
-    // Generate the page component
+    
+    // Generate the page component (client component)
     const pageContent = `'use client';
 
 import { DataTable } from '@/shared/components/molecules/datatable/data-table';
 import { columns } from '@/features/${formatName(name, 'kebab')}/components/organisms/columns';
-import { use${formatName(formatName(name, 'plural'), 'pascal')} } from '@/features/${formatName(name, 'kebab')}/hooks/use-${formatName(name, 'kebab')}';
+import { use${pluralPascal} } from '@/features/${formatName(name, 'kebab')}/hooks/use-${formatName(name, 'kebab')}';
 import { Add } from '@/features/${formatName(name, 'kebab')}/components/organisms/add';
 import { useTableParams } from '@/shared/hooks/use-table-params';
 
 export default function ${pascalName}Page() {
   const { params, tableProps } = useTableParams();
-  const { data, meta, isLoading } = use${formatName(formatName(name, 'plural'), 'pascal')}(params);
+  const { data, meta, isLoading } = use${pluralPascal}(params);
 
   return (
     <div className="space-y-4">
       <div className='flex items-center justify-between'>
         <div className='flex flex-col'>
-          <h2 className="text-2xl font-bold tracking-tight">Manage ${formatName(formatName(name, 'plural'), 'pascal')}</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Manage ${pluralPascal}</h2>
           <p className="text-muted-foreground">
             You can create, edit, and delete ${formatName(name, 'plural')} here.
           </p>
@@ -1020,13 +1022,42 @@ export default function ${pascalName}Page() {
 }`;
 
     await writeFile(path.join(adminPageDir, 'page.tsx'), pageContent);
-    console.log(chalk.green(`✅ Generated admin page route at app/(admin)/d/master/${formatName(name, 'kebab')}/page.tsx`));
+    
+    // Generate metadata in a separate file as a server component
+    const metadataContent = `import { Metadata } from 'next';
 
+export const metadata: Metadata = {
+  title: '${pluralPascal} | Admin Dashboard',
+  description: 'Manage ${pluralPascal} - Create, view, update and delete ${formatName(name, 'plural')}',
+};`;
+
+    await writeFile(path.join(adminPageDir, 'metadata.ts'), metadataContent);
+    
+    // Generate a layout server component that imports the metadata
+    const layoutContent = `import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: '${pluralPascal} | Admin Dashboard',
+  description: 'Manage ${pluralPascal} - Create, view, update and delete ${formatName(name, 'plural')}',
+};
+
+export default function ${pascalName}Layout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <>{children}</>;
+}`;
+
+    await writeFile(path.join(adminPageDir, 'layout.tsx'), layoutContent);
+    
+    console.log(chalk.green(`✅ Generated admin page route at app/(admin)/d/master/${formatName(name, 'kebab')}/page.tsx`));
+    console.log(chalk.green(`✅ Generated layout with metadata at app/(admin)/d/master/${formatName(name, 'kebab')}/layout.tsx`));
+    
   } catch (error) {
     console.error(chalk.red(`Error generating admin page route: ${error.message}`));
   }
 };
-
 // Main function to run the generator
 const main = async () => {
   try {
