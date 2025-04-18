@@ -5,7 +5,7 @@ import { Controller, Control } from 'react-hook-form';
 import * as Select from '@radix-ui/react-select';
 import { Check, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 import { Option } from './form-select';
 
 interface FormAsyncSelectProps {

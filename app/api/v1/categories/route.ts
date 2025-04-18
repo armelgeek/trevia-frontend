@@ -13,6 +13,48 @@ export async function GET(request: NextRequest) {
   return NextResponse.json(data);
 }
 
+/**
+ * @swagger
+ * /api/agent/create:
+ *   post:
+ *     summary: Creates a Langbase Pipe (Support Agent)
+ *     description: Creates a new Langbase Pipe (agent) with a name derived from the user ID.
+ *     tags:
+ *       - Agents
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 description: The unique ID of the user for whom to create the agent/pipe. This will be used as the pipe name.
+ *                 example: "e1f23b9b-d89a-4aa7-8a44-bcecaadca679"
+ *     responses:
+ *       201:
+ *         description: Pipe (Agent) created successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Pipe 'e1f23b9b-d89a-4aa7-8a44-bcecaadca679' created successfully.
+ *                 pipe:
+ *                   type: object # Adjust based on actual Langbase response structure
+ *       400:
+ *         description: Bad Request (e.g., missing userId).
+ *       409:
+ *         description: Pipe with the specified name (userId) already exists.
+ *       500:
+ *         description: Internal Server Error or Langbase API error.
+ */
+
 export async function POST(request: NextRequest) {
   const session = await auth.api.getSession({
     headers: await headers(),

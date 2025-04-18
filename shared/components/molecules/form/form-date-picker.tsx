@@ -5,14 +5,14 @@ import { format } from 'date-fns';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
 import { Control, Controller } from 'react-hook-form';
-import { Button } from '@/shared/components/ui/button';
-import { Calendar } from '@/shared/components/ui/calendar';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/shared/components/ui/popover';
-import { cn } from '@/lib/utils';
+} from '@/components/ui/popover';
+import { cn } from '@/shared/lib/utils';
 
 interface FormDatePickerProps {
   name: string;
