@@ -1,5 +1,9 @@
 # Copilot Instructions: Générer une Simple Admin Page
 
+> **Avant de générer une page ou un composant pour une nouvelle fonctionnalité admin, vérifie dans `components/ui/` si un design ou composant correspondant existe déjà pour illustrer ou structurer la fonctionnalité.  
+> Si un composant adapté existe, utilise-le ou référence-le dans la page ou le formulaire généré.  
+> Si aucun composant n’existe, utilise le composant générique prévu (`SimpleAdminPage` ou autre selon le contexte) et signale qu’aucun design spécifique n’a été trouvé dans `components/ui/`.**
+
 Pour toute nouvelle entité admin, effectue les étapes suivantes :
 
 1. **Schéma et type**
