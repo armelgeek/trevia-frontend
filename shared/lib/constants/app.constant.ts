@@ -43,7 +43,7 @@ export type SidebarNavItem = NavItemWithChildren;
 export const navItems: NavItem[] = [
   {
     title: 'Dashboard',
-    url: '/d',
+    url: '/admin/dashboard',
     icon: 'dashboard',
     isActive: false,
     shortcut: ['d', 'd'],

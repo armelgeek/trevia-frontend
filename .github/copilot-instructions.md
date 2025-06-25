@@ -1,14 +1,28 @@
+````instructions
 # Copilot Instructions: Générer une Simple Admin Page
 
 > **Avant de générer une page ou un composant pour une nouvelle fonctionnalité admin, vérifie dans `components/ui/` si un design ou composant correspondant existe déjà pour illustrer ou structurer la fonctionnalité.  
 > Si un composant adapté existe, utilise-le ou référence-le dans la page ou le formulaire généré.  
 > Si aucun composant n’existe, utilise le composant générique prévu (`SimpleAdminPage` ou autre selon le contexte) et signale qu’aucun design spécifique n’a été trouvé dans `components/ui/`.**
 
-Pour toute nouvelle entité admin, effectue les étapes suivantes :
+**Tous les endpoints d’API doivent être ajoutés dans `shared/config/api.ts` sous la clé appropriée (`API_ENDPOINTS`).**
+
+**Tous les composants générés doivent commencer par la directive `"use client"` pour être explicitement des composants client React.**
+
+**Jamais d'appel direct à `fetch` ou à une API dans un composant React.**
+- Utilise toujours l’architecture du projet : crée un service (`features/[entity]/[entity].service.ts`) qui hérite de `BaseService` (l'implémentation des appels API est dans `lib/base-service.ts`), puis un hook (`features/[entity]/hooks/use-[entity].ts`) qui encapsule l’appel API avec React Query (`useQuery` ou `useMutation`).
+- Les composants ne doivent consommer que les hooks personnalisés, jamais `fetch` ou `axios` directement.
+- Respecte la séparation : service = accès API (via `BaseService`), hook = gestion de la donnée/caching, composant = affichage.
+
+**Après chaque génération de fichier, vérifie automatiquement s’il y a des erreurs de compilation ou de typage dans les fichiers générés. Si des erreurs sont détectées, corrige-les avant de considérer la tâche comme terminée.**
+
+**Ne génère pas de commentaires dans le code, sauf si c'est strictement nécessaire pour la compréhension d'un algorithme complexe.**
+
+Pour toute nouvelle entité admin, effectue les étapes suivantes :
 
 1. **Schéma et type**
    - Crée le fichier `features/[entity]/[entity].schema.ts`
-   - Exporte un schéma Zod et le type TypeScript correspondant :
+   - Exporte un schéma Zod et le type TypeScript correspondant :
 
 ```ts
 import { z } from 'zod';
@@ -23,7 +37,7 @@ export type [Entity] = z.infer<typeof [Entity]Schema>;
 
 2. **Données mock et service mock**
    - Crée le fichier `features/[entity]/[entity].mock.ts`
-   - Exporte un tableau de données mock et un service mock :
+   - Exporte un tableau de données mock et un service mock :
 
 ```ts
 import { [Entity] } from './[entity].schema';
@@ -33,11 +47,39 @@ export const mock[Entity]s: [Entity][] = [ /* ... */ ];
 export const [entity]Service = createMockService(mock[Entity]s);
 ```
 
-3. **Configuration admin**
-   - Crée le fichier `features/[entity]/[entity].admin-config.ts`
-   - Selon le type de service utilisé, choisis l’exemple adapté :
+3. **Service API réel**
+   - Crée le fichier `features/[entity]/[entity].service.ts` :
 
-**a) Avec mock :**
+```ts
+import { BaseService } from '@/lib/base-service';
+import { API_ENDPOINTS } from '@/lib/api-endpoints';
+
+export const [entity]Service = new BaseService<[Entity]>(
+  http.private,
+  API_ENDPOINTS.[entity]
+);
+```
+
+4. **Hook de query**
+   - Crée le fichier `features/[entity]/hooks/use-[entity].ts` :
+
+```ts
+import { useQuery } from '@tanstack/react-query';
+import { [entity]Service } from '../[entity].service';
+
+export function use[Entity]() {
+  return useQuery({
+    queryKey: ['[entity]s'],
+    queryFn: () => [entity]Service.list(),
+  });
+}
+```
+
+5. **Configuration admin**
+   - Crée le fichier `features/[entity]/[entity].admin-config.ts`
+   - Selon le type de service utilisé, choisis l’exemple adapté :
+
+**a) Avec mock :**
 
 ```ts
 import { createAdminEntity } from '@/lib/admin-generator';
@@ -58,7 +100,7 @@ export const [Entity]AdminConfig = createAdminEntity('[Nom]', [Entity]Schema, {
 });
 ```
 
-**b) Avec API réelle :**
+**b) Avec API réelle :**
 
 ```ts
 import { createAdminEntity } from '@/lib/admin-generator';
@@ -79,14 +121,9 @@ export const [Entity]AdminConfig = createAdminEntity('[Nom]', [Entity]Schema, {
 });
 ```
 
-> **Remarque :**
-> - Utilise l’import du mock (`./[entity].mock`) pour un développement rapide ou des tests sans backend.
-> - Utilise l’import du service réel (`./[entity].service`) pour brancher l’admin sur une vraie API.
-> - Les méthodes à fournir dans `services` sont : pour le mock (`fetchItems`, `createItem`, etc.), pour l’API réelle (`list`, `create`, etc.).
-
-4. **Page d’admin**
+6. **Page d’admin**
    - Crée le fichier `app/(admin)/admin/[entity]/page.tsx`
-   - Utilise :
+   - Utilise :
 
 ```tsx
 import { [Entity]Schema } from '@/features/[entity]/[entity].schema';
@@ -103,12 +140,22 @@ export default function [Entity]AdminPage() {
 }
 ```
 
-5. **Vérifie que le composant `SimpleAdminPage` est bien utilisé**  
+7. **Vérifie que le composant `SimpleAdminPage` est bien utilisé**  
    - Import depuis `@/components/ui/simple-admin-page`.
 
-> Remplace `[entity]`, `[Entity]`, `[Nom]` par le nom de ton entité (ex : `category`, `Category`, `Catégorie`).
+> Remplace `[entity]`, `[Entity]`, `[Nom]` par le nom de ton entité (ex : `category`, `Category`, `Catégorie`).
 
-Cette structure garantit une admin page modulaire, claire et réutilisable.
+**Jamais :**
+- d’appel direct à `fetch` ou `axios` dans un composant React
+- d’appel API dans un composant sans passer par un hook custom et un service
+- d’implémentation d’appel API ailleurs que dans un service héritant de `BaseService`
+
+**Toujours :**
+- Service = accès API (via `BaseService`)
+- Hook = gestion de la donnée/caching (React Query)
+- Composant = affichage, consomme le hook
+
+Cette structure garantit une admin page modulaire, claire, réutilisable et maintenable.
 
 ---
 
@@ -464,7 +511,7 @@ Quand tu développes une nouvelle fonctionnalité :
 Si tu utilises une vraie API (et non un mock) pour l’admin :
 
 1. **Service API réel**
-   - Crée le fichier `features/[entity]/[entity].service.ts` :
+   - Crée le fichier `features/[entity]/[entity].service.ts` :
 
 ```ts
 import { BaseService } from '@/lib/base-service';
@@ -505,3 +552,4 @@ export const [Entity]AdminConfig = createAdminEntity('[Nom]', [Entity]Schema, {
 > Les méthodes à fournir dans `services` sont : `list`, `create`, `update`, `delete` (ou leurs équivalents selon ton service).
 
 ---
+````

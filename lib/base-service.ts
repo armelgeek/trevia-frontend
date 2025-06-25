@@ -25,8 +25,8 @@ export class BaseService {
   private baseUrl: string;
   private defaultHeaders: Record<string, string>;
 
-  constructor(baseUrl: string = '/api/v1', defaultHeaders: Record<string, string> = {}) {
-    this.baseUrl = baseUrl.replace(/\/$/, ''); // Supprimer le slash final
+  constructor(baseUrl?: string, defaultHeaders: Record<string, string> = {}) {
+    this.baseUrl = baseUrl ?? process.env.NEXT_PUBLIC_API_URL ?? '';
     this.defaultHeaders = {
       'Content-Type': 'application/json',
       ...defaultHeaders,
@@ -44,6 +44,7 @@ export class BaseService {
     
     const config: RequestInit = {
       ...options,
+      credentials: 'include',
       headers: {
         ...this.defaultHeaders,
         ...options.headers,
