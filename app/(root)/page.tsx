@@ -1,7 +1,8 @@
-import Heading from '@/shared/components/atoms/heading';
+import { Section } from '@/components/ui/section';
 import Hero from '@/shared/components/atoms/hero';
-import NewsLetter from '@/shared/components/atoms/newsletter';
 import type { Metadata } from 'next';
+import { DestinationCard } from '../(ui)/ui/components/ui-destination-card';
+import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -9,14 +10,89 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
+  const destinations = [
+    {
+      from: "Paris",
+      to: "Lyon",
+      duration: "4h30",
+      price: 35,
+      isPopular: true,
+    },
+    {
+      from: "Lyon",
+      to: "Marseille",
+      duration: "3h15",
+      price: 28,
+      isPopular: false,
+    },
+    {
+      from: "Paris",
+      to: "Bordeaux",
+      duration: "5h45",
+      price: 42,
+      isPopular: true,
+    },
+    {
+      from: "Lille",
+      to: "Paris",
+      duration: "2h30",
+      price: 25,
+      isPopular: false,
+    },
+    {
+      from: "Toulouse",
+      to: "Montpellier",
+      duration: "2h15",
+      price: 22,
+      isPopular: false,
+    },
+    {
+      from: "Paris",
+      to: "Nice",
+      duration: "8h30",
+      price: 65,
+      isPopular: true,
+      isDirect: false,
+    }
+  ];
   return (
     <>
-      <Hero/>
-      <Heading text1={'TEXT 1'} text2={'TEXT 2'} className='my-8 text-center'>
-         lorem ipsum dolor sit amet consectetur adipisicing elit. Dicta cum fugiat distinctio corporis
-      </Heading>
+      <Hero />
+      <Section
+        title="NOS SERVICES"
+        subtitle="Découvrez notre gamme complète de services de transport adaptés à tous vos besoins."
+        backgroundVariant="white"
+      />
 
-      <NewsLetter/>
+      <Section
+        title="NOS DESTINATIONS POPULAIRES"
+        subtitle="Découvrez nos principales destinations avec des départs fréquents."
+        spacing='sm'
+        backgroundVariant="white"
+      />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {destinations.map((dest, index) => (
+            <DestinationCard
+              key={index}
+              from={dest.from}
+              to={dest.to}
+              duration={dest.duration}
+              price={dest.price}
+              isPopular={dest.isPopular}
+              isDirect={dest.isDirect}
+            />
+          ))}
+        </div>
+          <div className='flex flex-row justify-center py-8'>
+            <Button>Afficher tous les destination {">>"}</Button>
+          </div>
+
+      <Section
+        title="CE QUE NOS CLIENTS DISENT"
+        subtitle="Plus de 10 000 voyageurs nous font confiance chaque mois. 
+            Découvrez leurs expériences avec Cosmic Transport."
+        backgroundVariant="white"
+      />
     </>
   );
 }

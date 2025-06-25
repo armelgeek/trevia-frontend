@@ -13,7 +13,7 @@ export default async function Page() {
 
                 <CardContent className="space-y-4">
                     <p className="text-sm text-gray-600 mb-4">
-                        Update your password to keep your account secure. Choose a strong, unique password that you don't use for other accounts.
+                        {`Update your password to keep your account secure. Choose a strong, unique password that you don't use for other accounts.`}
                     </p>
                     <ChangePassword />
                 </CardContent>

@@ -1,4 +1,4 @@
-import { authClient } from "@/auth-client";
+import { authClient } from "@/shared/lib/config/auth-client";
 import { useState } from "react";
 import { toast } from 'sonner';
 import { ForgotPasswordPayload } from "../config/forgot-password.type";

@@ -1,38 +1,45 @@
-import { UserAvatar } from "../../atoms/user-avatar";
-import { AppLogo } from "../../atoms/app-logo";
-import AppNav from "./app-nav";
-import { auth } from '@/auth';
-import { headers } from 'next/headers';
-import ThemeToggle from "@/components/ui/theme-toggle";
+"use client";
+
+import { Navigation, NavLink } from "@/components/ui/navigation";
+import { Button } from "@/components/ui/button";
+import { UserNav } from "./user-nav";
+import { useAuth } from "@/shared/providers/auth-provider";
 import Link from "next/link";
 
-const AppClientMenu = async () => {
-    const session = await auth.api.getSession({ headers: await headers() });
+const AppClientMenu = () => {
+  const { session, isLoading } = useAuth();
+
+  const ctaButton = () => {
+    if (isLoading) {
+      return <div className="h-8 w-8 bg-gray-200 rounded-full animate-pulse" />;
+    }
+
+    if (session?.user) {
+      return <UserNav />;
+    }
 
     return (
-        <header className="flex items-center justify-between py-3 font-medium">
-            <div className="flex gap-1 sm:gap-2 md:gap-3 items-center">
-                <AppLogo />
-            </div>
-            <AppNav />
-            <div className="flex items-center gap-1 sm:gap-2">
-                {session ? (
-                    <UserAvatar
-                        isAnonymous={session.user.isAnonymous ?? false}
-                        user={{
-                            name: session.user.name,
-                            email: session.user.email,
-                            avatar: session.user.image,
-                        }}
-                    />
-                ) : (
-                    <Link href="/login" passHref>
-                        Sign in
-                    </Link>
-                )}
-                <ThemeToggle />
-            </div>
-        </header>
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" asChild>
+          <Link href="/login">Se connecter</Link>
+        </Button>
+        <Button variant="default" asChild>
+          <Link href="/contact">Réserver maintenant</Link>
+        </Button>
+      </div>
     );
+  };
+
+  return (
+    <Navigation 
+      className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]"
+      ctaButton={ctaButton()}
+    >
+      <NavLink href="/" active>Accueil</NavLink>
+      <NavLink href="#destinations">Destinations</NavLink>
+      <NavLink href="#horaires">Horaires</NavLink>
+    </Navigation>
+  );
 };
+
 export default AppClientMenu;

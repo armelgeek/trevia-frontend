@@ -1,25 +1,34 @@
+import { HeroSection } from "@/components/ui/hero-section";
+
+const hero = {
+  id: "hero-white",
+  title: "VOYAGEZ EN TOUTE SÉRÉNITÉ",
+  subtitle: "Des transports confortables et fiables pour tous vos déplacements. Réservez en ligne en quelques clics !",
+  primaryAction: {
+    text: "Réserver maintenant",
+    href: "#"
+  },
+  secondaryAction: {
+    text: "Nos services",
+    href: "#services"
+  },
+  backgroundVariant: "white" as const,
+  image: (
+    <div className="w-full h-64 bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg flex items-center justify-center">
+      <i className="fas fa-bus text-6xl text-primary"></i>
+    </div>
+  )
+};
 const Hero = () => {
   return (
-    <div className="flex flex-col sm:flex-row border h-96 pt-5 border-gray-400 ">
-      <div className="w-full sm:w-1/2 flex items-center justify-center py-10 sm:py-0">
-        <div className="text-[#414141]">
-          <p className="w-8 md:w-11 h-[2px] bg-[#414141]"></p>
-          <div className="flex items-center gap-2 ">
-            <p className="font-medium text-sm md:text-base uppercase">Call action text</p>
-          </div>
-          <h1 className="prata-regular text-3xl sm:py-3 lg:text-5xl leading-relaxed ">
-            {' '}
-            <span className="text-[#414141]">Call to action</span>{' '}
-          </h1>
-          <div className="flex items-center gap-2">
-            <p className="font-semibold text-sm md:text-base uppercase">Call action action</p>
-            <p className="w-8 md:w-11 h-[1px] bg-[#414141]"></p>
-          </div>
-        </div>
-      </div>
-
-      <div className="w-full sm:w-1/2"></div>
-    </div>
+    <HeroSection
+      title={hero.title}
+      subtitle={hero.subtitle}
+      primaryAction={hero.primaryAction}
+      secondaryAction={hero.secondaryAction}
+      backgroundVariant={hero.backgroundVariant}
+      image={hero.image}
+    />
   );
 };
 

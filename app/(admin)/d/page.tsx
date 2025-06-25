@@ -7,14 +7,18 @@ import {
   ShoppingCart,
   CreditCard,
   TrendingUp,
-  Clock,
-  CheckCircle,
   AlertCircle,
-  Info
+  Info,
+  Package,
+  Settings,
+  ArrowRight
 } from 'lucide-react';
 import { StatsCard } from '@/shared/components/molecules/dashboard/stats-card';
 import { ChartCard } from '@/shared/components/molecules/dashboard/chart-card';
 import { ActivityList, Activity } from '@/shared/components/molecules/dashboard/activity-list';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 // Exemple de données - À remplacer par de vraies données de votre API
 const salesData = [
@@ -81,92 +85,68 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-3xl font-bold">Tableau de bord</h1>
-        <p className="text-gray-500 mt-2">
-          Bienvenue dans votre espace d'administration
-        </p>
-      </div>
-
-      {/* Statistiques */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatsCard
-          title="Utilisateurs"
-          value={stats?.totalUsers}
-          icon={Users}
-          trend={{ value: 12, isPositive: true }}
-          description="Total des utilisateurs inscrits"
-        />
-        <StatsCard
-          title="Commandes"
-          value={stats?.totalOrders}
-          icon={ShoppingCart}
-          trend={{ value: 8, isPositive: true }}
-          description="Commandes ce mois"
-        />
-        <StatsCard
-          title="Revenu"
-          value={`${stats?.revenue.toLocaleString()}€`}
-          icon={CreditCard}
-          trend={{ value: 23.4, isPositive: true }}
-          description="Revenu ce mois"
-        />
-        <StatsCard
-          title="Croissance"
-          value={`${stats?.growth}%`}
-          icon={TrendingUp}
-          trend={{ value: stats?.growth || 0, isPositive: true }}
-          description="Croissance mensuelle"
-        />
-      </div>
-
-      {/* Graphiques */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ChartCard
-          title="Ventes mensuelles"
-          subtitle="Évolution des ventes sur les 6 derniers mois"
-          data={salesData}
-          type="area"
-          dataKey="value"
-          color="#3b82f6"
-        />
-        <ChartCard
-          title="Commandes par catégorie"
-          subtitle="Répartition des commandes"
-          data={[
-            { name: 'Électronique', value: 400 },
-            { name: 'Vêtements', value: 300 },
-            { name: 'Alimentation', value: 300 },
-            { name: 'Autres', value: 200 },
-          ]}
-          type="bar"
-          dataKey="value"
-          color="#10b981"
-        />
-      </div>
-
-      {/* Activités récentes */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <ChartCard
-            title="Tendances horaires"
-            subtitle="Activité des dernières 24 heures"
-            data={[
-              { name: '00h', value: 100 },
-              { name: '04h', value: 50 },
-              { name: '08h', value: 200 },
-              { name: '12h', value: 300 },
-              { name: '16h', value: 250 },
-              { name: '20h', value: 150 },
-            ]}
-            type="line"
-            dataKey="value"
-            color="#8b5cf6"
-          />
-        </div>
-        <ActivityList activities={recentActivities} />
-      </div>
+    <div>
+     
+      <Card>
+        <CardHeader>
+          <CardTitle>Actions Rapides</CardTitle>
+          <CardDescription>
+            Accès direct aux fonctionnalités principales
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-3">
+            <Button variant="outline" className="h-auto p-4 justify-start" asChild>
+              <Link href="/admin/categories">
+                <div className="flex items-center gap-3 w-full">
+                  <div className="p-2 rounded-lg bg-blue-500 text-white">
+                    <Package className="h-4 w-4" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-medium">Gérer les Catégories</p>
+                    <p className="text-xs text-muted-foreground">
+                      Créer et modifier les catégories
+                    </p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto" />
+                </div>
+              </Link>
+            </Button>
+            <Button variant="outline" className="h-auto p-4 justify-start" asChild>
+              <Link href="/admin/users">
+                <div className="flex items-center gap-3 w-full">
+                  <div className="p-2 rounded-lg bg-green-500 text-white">
+                    <Users className="h-4 w-4" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-medium">Utilisateurs</p>
+                    <p className="text-xs text-muted-foreground">
+                      Gérer les comptes utilisateurs
+                    </p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto" />
+                </div>
+              </Link>
+            </Button>
+            <Button variant="outline" className="h-auto p-4 justify-start" asChild>
+              <Link href="/admin/settings">
+                <div className="flex items-center gap-3 w-full">
+                  <div className="p-2 rounded-lg bg-purple-500 text-white">
+                    <Settings className="h-4 w-4" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-medium">Paramètres</p>
+                    <p className="text-xs text-muted-foreground">
+                      Configuration système
+                    </p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto" />
+                </div>
+              </Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -2,23 +2,26 @@ import React from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { Provider } from '@/shared/providers';
 import NextTopLoader from 'nextjs-toploader';
+import { Space_Grotesk } from 'next/font/google';
 import "@uploadthing/react/styles.css";
 import '@/shared/styles/globals.css';
-import {  Outfit } from 'next/font/google';
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-space-grotesk',
+  weight: ['300', '400', '500', '600', '700'],
+});
+
 interface RootLayoutProps {
   readonly children: React.ReactNode;
 }
-const outfit = Outfit({
-  subsets: ['latin'],
-  weight: ['400', '700', '900'],
-  display: 'swap'
-});
 
 export default async function RootLayout({ children }: RootLayoutProps) {
   
   return (
-    <html lang="en" className={`${outfit.className}`} suppressHydrationWarning>
-      <body>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${spaceGrotesk.variable} font-space-grotesk`}>
         <NextTopLoader showSpinner={true} />
         <Provider>
               {children}

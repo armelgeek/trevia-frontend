@@ -9,32 +9,42 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertTriangle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
-import { authClient } from '@/auth-client';
+import { authClient } from '@/shared/lib/config/auth-client';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useRouter } from 'next/navigation';
 
 type Props = { className?: string };
 
 export function DeleteAccount({ className }: Props) {
   const [_isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
 
   const { control, handleSubmit, reset, formState } = useForm({
     defaultValues: { password: "", verify: "" },
   });
 
   const handleAccountDelete = async ({ password }: { password: string }) => {
-    const response = await authClient.deleteUser({ password });
-    if (response.data?.success) {
-      toast.success(response.data?.message);
-    } else {
-      toast.error(response.data?.message);
+    try {
+      const response = await authClient.deleteUser({ password });
+      if (response.data?.success) {
+        toast.success("Votre compte a été supprimé avec succès");
+        reset();
+        setIsOpen(false);
+        // Redirection vers la page d'accueil après suppression
+        router.push('/');
+      } else {
+        toast.error(response.error?.message || "Erreur lors de la suppression du compte");
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Une erreur inattendue s'est produite";
+      toast.error(errorMessage);
     }
-    reset();
-    setIsOpen(false);
   };
 
   return (
@@ -47,17 +57,32 @@ export function DeleteAccount({ className }: Props) {
     >
       <DialogTrigger asChild>
         <Button variant="destructive" size="sm" className={className}>
-          Delete Account
+          <Trash2 className="mr-2 h-4 w-4" />
+          Supprimer le compte
         </Button>
       </DialogTrigger>
-      <DialogContent className="p-8">
-        <DialogHeader className="gap-2">
-          <DialogTitle className="text-left">Delete Account</DialogTitle>
-          <DialogDescription>
-            Deleting your account will permanently remove all your data. Are you
-            sure you wish to proceed?
-          </DialogDescription>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader className="space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-destructive/10 rounded-full">
+              <AlertTriangle className="h-6 w-6 text-destructive" />
+            </div>
+            <div>
+              <DialogTitle className="text-xl">Supprimer le compte</DialogTitle>
+              <DialogDescription className="text-sm text-muted-foreground">
+                Cette action est irréversible
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
+
+        <Alert className="border-destructive/20 bg-destructive/5">
+          <AlertTriangle className="h-4 w-4 text-destructive" />
+          <AlertDescription className="text-sm">
+            <strong>Attention :</strong> La suppression de votre compte entraînera la perte définitive de toutes vos données, 
+            y compris votre profil, vos préférences et votre historique. Cette action ne peut pas être annulée.
+          </AlertDescription>
+        </Alert>
 
         <form
           className="space-y-5"
@@ -68,24 +93,28 @@ export function DeleteAccount({ className }: Props) {
             name="verify"
             rules={{
               validate: (value) =>
-                value === "delete my account"
+                value === "supprimer mon compte"
                   ? undefined
-                  : "You need to verify your account deletion.",
+                  : "Vous devez confirmer la suppression en tapant exactement 'supprimer mon compte'.",
             }}
             control={control}
             render={({ field, fieldState }) => (
-              <div className="grid gap-1.5">
-                <Label htmlFor="__verify">
-                  To verify, type <i>delete my account</i> below:
+              <div className="grid gap-2">
+                <Label htmlFor="__verify" className="text-sm font-medium">
+                  Pour confirmer, tapez <span className="font-mono bg-muted px-1 rounded text-destructive">supprimer mon compte</span> ci-dessous :
                 </Label>
                 <Input
                   id="__verify"
-                  placeholder="Type `delete my account`"
+                  placeholder="Tapez 'supprimer mon compte'"
+                  className="border-destructive/30 focus:border-destructive"
                   {...field}
                 />
-                <p className="text-xs text-destructive">
-                  {fieldState.error?.message}
-                </p>
+                {fieldState.error && (
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <AlertTriangle className="h-3 w-3" />
+                    {fieldState.error.message}
+                  </p>
+                )}
               </div>
             )}
           />
@@ -95,36 +124,61 @@ export function DeleteAccount({ className }: Props) {
             rules={{
               required: {
                 value: true,
-                message: `Please enter your password to confirm account deletion`,
+                message: "Veuillez entrer votre mot de passe pour confirmer la suppression",
               },
             }}
             control={control}
             render={({ field, fieldState }) => (
-              <div className="grid gap-1.5">
-                <Label htmlFor="__password">Your password</Label>
+              <div className="grid gap-2">
+                <Label htmlFor="__password" className="text-sm font-medium">
+                  Votre mot de passe
+                </Label>
                 <Input
                   id="__password"
-                  placeholder="Enter your password"
+                  placeholder="Entrez votre mot de passe"
                   type="password"
+                  className="border-destructive/30 focus:border-destructive"
                   {...field}
                 />
-                <p className="text-xs text-destructive">
-                  {fieldState.error?.message}
-                </p>
+                {fieldState.error && (
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <AlertTriangle className="h-3 w-3" />
+                    {fieldState.error.message}
+                  </p>
+                )}
               </div>
             )}
           />
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={formState.isSubmitting}
-          >
-            {formState.isSubmitting ? (
-              <Loader2 className="animate-spin" />
-            ) : null}
-            Delete Account
-          </Button>
+          <div className="flex gap-3 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => setIsOpen(false)}
+              disabled={formState.isSubmitting}
+            >
+              Annuler
+            </Button>
+            <Button
+              type="submit"
+              variant="destructive"
+              className="flex-1"
+              disabled={formState.isSubmitting}
+            >
+              {formState.isSubmitting ? (
+                <>
+                  <Loader2 className="animate-spin mr-2 h-4 w-4" />
+                  Suppression...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Supprimer définitivement
+                </>
+              )}
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

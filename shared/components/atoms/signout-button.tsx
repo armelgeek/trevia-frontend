@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import { authClient } from '@/auth-client';
+import { authClient } from '@/shared/lib/config/auth-client';
 import { useRouter } from 'next/navigation';
 import { LogOut } from 'lucide-react';
 const SignOutButton = ({active}: {active: boolean}) => {

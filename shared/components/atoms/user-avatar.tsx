@@ -29,7 +29,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { authClient } from '@/auth-client';
+import { authClient } from '@/shared/lib/config/auth-client';
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/components/ui/button';
 

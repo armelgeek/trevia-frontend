@@ -1,10 +1,8 @@
-# Next.js Drizzle CRUD Generator
+# 🚀 Système d'Administration Automatique - Trevia Frontend
 
-An automated CLI tool that generates complete CRUD (Create, Read, Update, Delete) feature scaffolding for Next.js applications using Drizzle ORM.
+## Vue d'ensemble
 
-## Overview
-
-This CRUD generator automatically creates all the necessary files for a complete feature module, following best practices and a clean architecture approach. It's designed to work with Next.js applications that use:
+Ce projet intègre un **système d'administration automatique révolutionnaire** qui génère des interfaces CRUD complètes à partir de schémas Zod enrichis. Plus besoin de coder manuellement vos backoffices !
 
 - TypeScript
 - Drizzle ORM

@@ -24,7 +24,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { authClient } from '@/auth-client';
+import { authClient } from '@/shared/lib/config/auth-client';
 import { updatePasswordSchema } from "../../config/update-password.schema";
 import { UpdatePasswordPayload } from "../../config/update-password.type";
 export function ChangePassword() {

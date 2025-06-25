@@ -3,11 +3,10 @@
 import { useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Button, LoadingButton } from '@/components/ui/button';
 import {
-  Form,
   FormControl,
   FormField,
   FormItem,

@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { LoginPayload } from '../config/auth.type';
-import { authClient } from '@/auth-client';
+import { authClient } from '@/shared/lib/config/auth-client';
+import { forceAuthStateRefresh } from './useAuth';
+
 const useLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -19,7 +21,11 @@ const useLogin = () => {
           onRequest: () => {
             setIsLoading(true);
           },
-          onSuccess: () => {
+          onSuccess: async () => {
+            console.log('🎉 Login successful, refreshing auth state...');
+            // Force la mise à jour de l'état d'authentification
+            await forceAuthStateRefresh();
+            console.log('✅ Auth state refreshed, redirecting...');
             router.push('/');
           },
           onError: () => {

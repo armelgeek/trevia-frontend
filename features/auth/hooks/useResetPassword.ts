@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { authClient } from '@/auth-client';
+import { authClient } from '@/shared/lib/config/auth-client';
 import { ResetPasswordPayload } from '@/features/auth/config/reset-password.type';
 import { toast } from 'sonner';
 const useResetPassword = (token: string | null) => {

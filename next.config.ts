@@ -31,6 +31,10 @@ const nextConfig: NextConfig = {
         pathname: '/creativekitabikin/**',
         search: '',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com'
+      }
     ],
   },
 };

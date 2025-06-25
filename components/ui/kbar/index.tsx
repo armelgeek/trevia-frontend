@@ -13,6 +13,7 @@ import { navItems } from '@/shared/lib/constants/app.constant';
 export default function KBar({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const navigateTo = (url: string) => {
     router.push(url);
   };
@@ -50,7 +51,7 @@ export default function KBar({ children }: { children: React.ReactNode }) {
         // Return only valid actions (ignoring null base actions for containers)
         return baseAction ? [baseAction, ...childActions] : childActions;
       }),
-    []
+    [navigateTo]
   );
 
   return (

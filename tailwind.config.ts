@@ -13,9 +13,27 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-inter)', ...defaultTheme.fontFamily.sans],
+        sans: ['var(--font-space-grotesk)', ...defaultTheme.fontFamily.sans],
         serif: [...defaultTheme.fontFamily.serif],
         mono: [...defaultTheme.fontFamily.mono],
+        'saira': ['var(--font-saira-condensed)', 'sans-serif'],
+        'space-grotesk': ['var(--font-space-grotesk)', 'sans-serif'],
+      },
+      
+      fontSize: {
+        'xs': ['0.7rem', '0.95rem'],
+        'sm': ['0.8rem', '1.1rem'],
+        'base': ['0.9rem', '1.4rem'],
+        'lg': ['1rem', '1.5rem'],
+        'xl': ['1.1rem', '1.6rem'],
+        '2xl': ['1.25rem', '1.8rem'],
+        '3xl': ['1.5rem', '2rem'],
+        '4xl': ['1.875rem', '2.5rem'],
+        '5xl': ['2.25rem', '2.75rem'],
+        '6xl': ['3rem', '3.5rem'],
+        '7xl': ['3.75rem', '4rem'],
+        '8xl': ['4.5rem', '5rem'],
+        '9xl': ['6rem', '6.5rem'],
       },
       
       borderRadius: {
@@ -75,6 +93,13 @@ export default {
           ring: 'hsl(var(--sidebar-ring))',
         },
       },
+      animation: {
+        'accordion-down': 'accordion-down 0.2s ease-out',
+        'accordion-up': 'accordion-up 0.2s ease-out',
+        'fade-in': 'fadeIn 0.5s ease-in-out',
+        'slide-in': 'slideIn 0.3s ease-out',
+        'scale-in': 'scaleIn 0.2s ease-out',
+      },
       keyframes: {
         'accordion-down': {
           from: {
@@ -92,22 +117,18 @@ export default {
             height: '0',
           },
         },
-        'scale-up-center': {
-          '0%': { transform: 'scale(0.5)' },
-          '100%': { transform: 'scale(1)' },
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
         },
-        'scale-down-center': {
-          '0%': { transform: 'scale(1)' },
-          '100%': { transform: 'scale(0.5)' },
+        slideIn: {
+          '0%': { transform: 'translateY(-10px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
         },
-      },
-      animation: {
-        'scale-up-center':
-          'scale-up-center 0.4s cubic-bezier(0.390, 0.575, 0.565, 1.000) both',
-        'scale-down-center':
-          'scale-down-center 0.4s cubic-bezier(0.250, 0.460, 0.450, 0.940) both',
-        'accordion-down': 'accordion-down 0.2s ease-out',
-        'accordion-up': 'accordion-up 0.2s ease-out',
+        scaleIn: {
+          '0%': { transform: 'scale(0.95)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
       },
     },
   },

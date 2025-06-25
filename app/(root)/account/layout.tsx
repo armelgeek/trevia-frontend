@@ -1,28 +1,27 @@
 import { Metadata } from "next";
-import { headers } from "next/headers";
 import { ReactNode } from "react";
-import { auth } from '@/auth';
-import AppProfile from "@/shared/components/molecules/layout/app-profile";
+import AppProfileClient from "@/shared/components/molecules/layout/app-profile-client";
+import { Footer } from "@/components/ui/footer";
 import { kAppName } from "@/shared/lib/constants/app.constant";
 
 type Props = { children: ReactNode };
 
-export async function generateMetadata(): Promise<Metadata> {
-  const session = await auth.api.getSession({ headers: await headers() });
-  const pageTitle = session?.user.name ?? "Account";
+export const metadata: Metadata = {
+  title: {
+    template: `%s - Account - ${kAppName}`,
+    default: `Account - ${kAppName}`,
+  },
+};
 
-  return {
-    title: {
-      template: `%s - ${pageTitle} - ${kAppName}`,
-      default: `${pageTitle} - ${kAppName}`,
-    },
-  };
-}
-
-export default async function Layout({ children }: Props) {
+export default function Layout({ children }: Props) {
   return (
-    <AppProfile>
-      {children}
-    </AppProfile>
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-1">
+        <AppProfileClient>
+          {children}
+        </AppProfileClient>
+      </div>
+      <Footer variant="minimal" showNewsletter={false} showStats={false} />
+    </div>
   );
 }

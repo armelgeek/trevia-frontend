@@ -8,7 +8,7 @@ export interface UseCaseOperations<T, P, R> {
   update?: (id: string, data: P) => Promise<R>;
   delete?: (id: string) => Promise<R>;
   list?: (filter: Filter) => Promise<{ data: T[]; meta: unknown }>;
-  [key: string]: ((...args: any[]) => Promise<unknown>) | undefined;
+  [key: string]: ((...args: never[]) => Promise<unknown>) | undefined;
 }
 
 
@@ -113,6 +113,6 @@ export class UseCase<T, P, R> {
 
   async execute<A extends unknown[], O>(operation: string, ...args: A): Promise<O> {
     this.checkOperation(operation);
-    return (this.operations[operation] as (...args: A) => Promise<O>)(...args);
+    return (this.operations[operation] as unknown as (...args: A) => Promise<O>)(...args);
   }
 }

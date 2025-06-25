@@ -1,9 +1,9 @@
 import { Icons } from "@/components/ui/icons";
 
-const kAppName = "Boilerplate";
-const kAppAbbr = "B";
-const kAppTagline = "Empowering developers one snippet at a time";
-const kAppDescription = `Boilerplate is the ultimate platform for developers to share, discover, and collaborate on code snippets. Explore snippets by programming language or framework, connect with other developers, and elevate your coding projects with ease.`;
+const kAppName = "Trevia Admin";
+const kAppAbbr = "TA";
+const kAppTagline = "Système d'administration ultra-simplifié";
+const kAppDescription = `Trevia Admin est une plateforme d'administration moderne qui permet de gérer facilement vos contenus, utilisateurs et paramètres avec des interfaces CRUD générées automatiquement.`;
 
 export interface NavItem {
   title: string;
@@ -50,10 +50,10 @@ export const navItems: NavItem[] = [
     items: []
   },
   {
-    title: 'Category',
-    url: '/d/master/category',
-    icon: 'post',
-    shortcut: ['p', 'p'],
+    title: 'Catégories',
+    url: '/admin/categories',
+    icon: 'page',
+    shortcut: ['c', 'c'],
     isActive: false,
     items: []
   }

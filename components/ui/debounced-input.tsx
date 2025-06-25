@@ -23,7 +23,7 @@ const DebouncedInput = React.forwardRef<
     }, debounce);
 
     return () => clearTimeout(timeout);
-  }, [value]);
+  }, [debounce, onChange, value]);
 
   return (
     <Input

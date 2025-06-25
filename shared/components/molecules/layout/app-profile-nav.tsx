@@ -2,12 +2,6 @@
 import React from 'react';
 import {
   User,
-  Shield,
-  Bell,
-  Briefcase,
-  CreditCard,
-  ShoppingBag,
-  Heart,
   Trash,
   LogOut,
   Key
