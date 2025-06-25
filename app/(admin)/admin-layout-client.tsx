@@ -89,7 +89,9 @@ export default function AdminLayoutClient({ children, defaultOpen = true }: Admi
           </div>
         </header>
         <div className='flex flex-1 flex-col gap-4 p-4 pt-4'>
-          {children}
+          <div className="space-y-6 px-3">
+            {children}
+          </div>
         </div>
       </SidebarInset>
     </SidebarProvider>
