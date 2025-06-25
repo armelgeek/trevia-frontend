@@ -5,67 +5,99 @@ Pour toute nouvelle entité admin, effectue les étapes suivantes :
 1. **Schéma et type**
    - Crée le fichier `features/[entity]/[entity].schema.ts`
    - Exporte un schéma Zod et le type TypeScript correspondant :
-     ```ts
-     import { z } from 'zod';
-     import { createField } from '@/lib/admin-generator';
 
-     export const [Entity]Schema = z.object({
-       // ...fields...
-     });
+```ts
+import { z } from 'zod';
+import { createField } from '@/lib/admin-generator';
 
-     export type [Entity] = z.infer<typeof [Entity]Schema>;
-     ```
+export const [Entity]Schema = z.object({
+  // ...fields...
+});
+
+export type [Entity] = z.infer<typeof [Entity]Schema>;
+```
 
 2. **Données mock et service mock**
    - Crée le fichier `features/[entity]/[entity].mock.ts`
    - Exporte un tableau de données mock et un service mock :
-     ```ts
-     import { [Entity] } from './[entity].schema';
-     import { createMockService } from '@/lib/admin-generator';
 
-     export const mock[Entity]s: [Entity][] = [ /* ... */ ];
-     export const [entity]Service = createMockService(mock[Entity]s);
-     ```
+```ts
+import { [Entity] } from './[entity].schema';
+import { createMockService } from '@/lib/admin-generator';
+
+export const mock[Entity]s: [Entity][] = [ /* ... */ ];
+export const [entity]Service = createMockService(mock[Entity]s);
+```
 
 3. **Configuration admin**
    - Crée le fichier `features/[entity]/[entity].admin-config.ts`
-   - Exporte la config admin avec :
-     ```ts
-     import { createAdminEntity } from '@/lib/admin-generator';
-     import { [Entity]Schema } from './[entity].schema';
-     import { [entity]Service } from './[entity].mock';
+   - Selon le type de service utilisé, choisis l’exemple adapté :
 
-     export const [Entity]AdminConfig = createAdminEntity('[Nom]', [Entity]Schema, {
-       description: 'Gérez vos ...',
-       icon: '🏷️',
-       actions: { create: true, read: true, update: true, delete: true, bulk: false, export: false },
-       services: {
-         fetchItems: [entity]Service.fetchItems,
-         createItem: [entity]Service.createItem,
-         updateItem: [entity]Service.updateItem,
-         deleteItem: [entity]Service.deleteItem,
-       },
-       queryKey: ['[entity]s'],
-     });
-     ```
+**a) Avec mock :**
+
+```ts
+import { createAdminEntity } from '@/lib/admin-generator';
+import { [Entity]Schema } from './[entity].schema';
+import { [entity]Service } from './[entity].mock';
+
+export const [Entity]AdminConfig = createAdminEntity('[Nom]', [Entity]Schema, {
+  description: 'Gérez vos ...',
+  icon: '🏷️',
+  actions: { create: true, read: true, update: true, delete: true, bulk: false, export: false },
+  services: {
+    fetchItems: [entity]Service.fetchItems,
+    createItem: [entity]Service.createItem,
+    updateItem: [entity]Service.updateItem,
+    deleteItem: [entity]Service.deleteItem,
+  },
+  queryKey: ['[entity]s'],
+});
+```
+
+**b) Avec API réelle :**
+
+```ts
+import { createAdminEntity } from '@/lib/admin-generator';
+import { [Entity]Schema } from './[entity].schema';
+import { [entity]Service } from './[entity].service';
+
+export const [Entity]AdminConfig = createAdminEntity('[Nom]', [Entity]Schema, {
+  description: 'Gérez vos ...',
+  icon: '🏷️',
+  actions: { create: true, read: true, update: true, delete: true, bulk: false, export: false },
+  services: {
+    fetchItems: [entity]Service.list,
+    createItem: [entity]Service.create,
+    updateItem: [entity]Service.update,
+    deleteItem: [entity]Service.delete,
+  },
+  queryKey: ['[entity]s'],
+});
+```
+
+> **Remarque :**
+> - Utilise l’import du mock (`./[entity].mock`) pour un développement rapide ou des tests sans backend.
+> - Utilise l’import du service réel (`./[entity].service`) pour brancher l’admin sur une vraie API.
+> - Les méthodes à fournir dans `services` sont : pour le mock (`fetchItems`, `createItem`, etc.), pour l’API réelle (`list`, `create`, etc.).
 
 4. **Page d’admin**
    - Crée le fichier `app/(admin)/admin/[entity]/page.tsx`
    - Utilise :
-     ```tsx
-     import { [Entity]Schema } from '@/features/[entity]/[entity].schema';
-     import { [Entity]AdminConfig } from '@/features/[entity]/[entity].admin-config';
-     import { SimpleAdminPage } from '@/components/ui/simple-admin-page';
 
-     export default function [Entity]AdminPage() {
-       return (
-         <SimpleAdminPage
-           config={[Entity]AdminConfig}
-           schema={[Entity]Schema}
-         />
-       );
-     }
-     ```
+```tsx
+import { [Entity]Schema } from '@/features/[entity]/[entity].schema';
+import { [Entity]AdminConfig } from '@/features/[entity]/[entity].admin-config';
+import { SimpleAdminPage } from '@/components/ui/simple-admin-page';
+
+export default function [Entity]AdminPage() {
+  return (
+    <SimpleAdminPage
+      config={[Entity]AdminConfig}
+      schema={[Entity]Schema}
+    />
+  );
+}
+```
 
 5. **Vérifie que le composant `SimpleAdminPage` est bien utilisé**  
    - Import depuis `@/components/ui/simple-admin-page`.
@@ -73,3 +105,399 @@ Pour toute nouvelle entité admin, effectue les étapes suivantes :
 > Remplace `[entity]`, `[Entity]`, `[Nom]` par le nom de ton entité (ex : `category`, `Category`, `Catégorie`).
 
 Cette structure garantit une admin page modulaire, claire et réutilisable.
+
+---
+
+## 🏗️ Architecture du Projet
+
+### Structure des Dossiers (extrait réel du projet)
+
+```
+/ (racine)
+├── app/
+│   ├── (admin)/
+│   │   └── admin/
+│   │       └── categories/
+│   │           └── page.tsx
+│   ├── (root)/
+│   └── (ui)/
+├── components/
+│   ├── debug/
+│   ├── navigation/
+│   └── ui/
+├── features/
+│   ├── auth/
+│   │   ├── components/
+│   │   ├── config/
+│   │   ├── hooks/
+│   │   ├── providers/
+│   └── category/
+│       ├── category.admin-config.ts
+│       ├── category.mock.ts
+│       └── category.schema.ts
+├── hooks/
+├── lib/
+├── public/
+├── scripts/
+├── shared/
+│   ├── components/
+│   ├── domain/
+│   ├── hooks/
+│   ├── layout/
+│   ├── lib/
+│   ├── providers/
+│   └── styles/
+```
+
+> Cette structure réelle doit être respectée pour toute nouvelle fonctionnalité ou page d’admin.
+
+---
+
+### 1. Structure d'une Fonctionnalité (adaptée à ce projet)
+
+Chaque fonctionnalité doit être organisée dans `features/[nom-fonctionnalite]/` :
+
+```ts
+// features/category/category.schema.ts
+import { z } from 'zod';
+
+export const categorySchema = z.object({
+  name: z.string().min(1, 'category.errors.name.required'),
+  description: z.string().optional(),
+});
+
+// features/category/category.types.ts
+export type Category = z.infer<typeof categorySchema>;
+
+// features/category/category.config.ts
+export const categoryKeys = createQueryKeys({
+  entity: 'category'
+});
+
+// features/category/index.ts
+export { useCategory } from './hooks/use-category';
+export { useCategoryActions } from './hooks/use-category-actions';
+export type { Category } from './category.types';
+```
+
+### 2. Hooks Personnalisés
+
+#### Hook de Query (Lecture)
+```ts
+// features/category/hooks/use-category.ts
+export const useCategory = () => {
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
+    queryKey: categoryKeys.lists(),
+    queryFn: () => categoryService.list({ page: 1, limit: 10 }),
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true
+  });
+
+  const invalidate = () => {
+    return queryClient.invalidateQueries({
+      queryKey: categoryKeys.lists(),
+      refetchType: 'all'
+    });
+  };
+
+  return { ...query, invalidate };
+};
+```
+
+#### Hook d'Actions (Mutations)
+```ts
+// features/category/hooks/use-category-actions.ts
+export const useCategoryActions = () => {
+  const mutations = useMutations<Category>({
+    service: categoryService,
+    queryKeys: categoryKeys,
+    successMessages: {
+      create: t('admin.category.create.success')
+    }
+  });
+
+  return {
+    create: mutations.create,
+    update: mutations.modify,
+    isUpdating: mutations.isModifing,
+    invalidate: mutations.invalidate
+  };
+};
+```
+
+### 3. Services API
+
+#### Configuration des Endpoints
+```ts
+// lib/api-endpoints.ts
+export const API_ENDPOINTS = {
+  category: {
+    base: `${prefix}/v1/category`,
+    create: `${prefix}/v1/category`,
+    list: (qs: string) => `${prefix}/v1/category?${qs}`,
+    detail: (id: string) => `${prefix}/v1/category/${id}`,
+    update: (id: string) => `${prefix}/v1/category/${id}`,
+    delete: (id: string) => `${prefix}/v1/category/${id}`
+  }
+} as const;
+```
+
+#### Service HTTP
+```ts
+// features/category/category.service.ts
+import { BaseService } from '@/lib/base-service';
+import { API_ENDPOINTS } from '@/lib/api-endpoints';
+
+export const categoryService = new BaseService<Category>(
+  http.private,
+  API_ENDPOINTS.category
+);
+```
+
+> Adapte les chemins et noms de fichiers/types à la convention de ce projet (dossier `features/`, services dans `lib/` ou `features/[feature]/`, hooks dans `features/[feature]/hooks/`, etc.).
+
+### 4. Composants & Formulaires
+
+#### Structure d'un Composant
+```ts
+// Suivre cet ordre dans les composants :
+export function CategoryForm({ onSubmit }: { onSubmit: (data: Category) => void }) {
+  // 1. État local
+  const [loading, setLoading] = useState(false);
+  
+  // 2. Hooks personnalisés
+  const { t } = useTranslation();
+  const { data, isLoading } = useCategory();
+  
+  // 3. Effets
+  useEffect(() => {
+    // logique d'effet
+  }, []);
+
+  // 4. Gestionnaires d'événements
+  const handleSubmit = (data: Category) => {
+    onSubmit(data);
+  };
+
+  // 5. JSX
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* Contenu du formulaire */}
+    </form>
+  );
+}
+```
+
+#### Formulaires avec React Hook Form + Zod
+```ts
+const { control, handleSubmit, reset } = useForm<Category>({
+  defaultValues: {
+    name: '',
+    description: ''
+  },
+  resolver: zodResolver(categorySchema),
+  mode: 'onChange'
+});
+
+const onSubmit = async (data: Category) => {
+  await create(data);
+  reset();
+};
+
+// Utiliser les composants contrôlés
+<ControlledTextInput
+  name="name"
+  control={control}
+  placeholder={t('admin.category.form.placeholders.name')}
+/>
+```
+
+### 5. Gestion d'État
+
+#### État Local avec Zustand
+```ts
+// features/category/category.store.ts
+interface CategoryState {
+  currentCategory: Category | null;
+  setCurrentCategory: (category: Category) => void;
+  clearCurrentCategory: () => void;
+}
+
+export const useCategoryStore = create<CategoryState>((set) => ({
+  currentCategory: null,
+  setCurrentCategory: (category) => set({ currentCategory: category }),
+  clearCurrentCategory: () => set({ currentCategory: null })
+}));
+```
+
+#### Mutations avec Invalidation Automatique
+```ts
+// lib/react-query/mutation.ts
+export function useMutations<T extends HasId, P>(config: MutationConfig<T, P>) {
+  const handleSuccess = (type: 'create' | 'update' | 'delete', data: T) => {
+    // Invalidation automatique des queries
+    queryClient.invalidateQueries({ queryKey: queryKeys.lists() });
+    // ...autre logique métier...
+  };
+}
+```
+
+---
+
+## 📝 Bonnes Pratiques
+
+### 1. Conventions de Nommage
+- **Fichiers** : kebab-case (`user-avatar.tsx`)
+- **Composants** : PascalCase (`UserAvatar`)
+- **Hooks** : camelCase avec préfixe `use` (`useCategory`)
+- **Types** : PascalCase (`CategoryPayload`)
+- **Variables** : camelCase (`isLoading`)
+
+### 2. Structure des Fichiers
+- Un composant par fichier
+- Export par défaut pour les composants principaux
+- Export nommé pour les utilitaires
+
+### 3. Commentaires dans le Code
+- **Éviter les commentaires** dans le code de production
+- Le code doit être auto-documenté avec des noms explicites
+- Privilégier des noms de variables et fonctions clairs
+- Les seuls commentaires acceptés :
+  - JSDoc pour les fonctions publiques/exportées
+  - Commentaires temporaires pendant le développement (à supprimer avant commit)
+  - Commentaires explicatifs pour des algorithmes complexes (rare)
+
+```ts
+// ❌ Éviter
+const d = new Date(); // Date actuelle
+const u = users.filter(u => u.active); // Filtrer les utilisateurs actifs
+
+// ✅ Préférer
+const currentDate = new Date();
+const activeUsers = users.filter(user => user.isActive);
+```
+
+### 4. Gestion des Erreurs
+```ts
+// Dans les hooks
+const { mutate: createCategory, isPending, error } = useMutation({
+  mutationFn: categoryService.create,
+  onSuccess: () => {
+    toast.success(t('success.message'));
+  },
+  onError: (error) => {
+    toast.error(`Erreur: ${error.message}`);
+  }
+});
+```
+
+### 5. Performance
+- Utilisez `useMemo` pour les calculs coûteux
+- Utilisez `useCallback` pour les fonctions passées en props
+- Préférez la pagination pour les listes importantes
+
+### 6. Accessibilité
+- Toujours inclure `aria-label` sur les éléments interactifs
+- Utiliser les rôles ARIA appropriés
+- Gérer le focus keyboard
+
+## 🚀 Checklist pour Nouvelle Fonctionnalité
+
+### Avant de Commencer
+- [ ] Créer le dossier `features/[feature]/`
+- [ ] Définir les schémas Zod dans `category.schema.ts`
+- [ ] Créer les types TypeScript dans `category.types.ts`
+- [ ] Configurer les query keys dans `category.config.ts`
+
+### Développement
+- [ ] Créer le service API
+- [ ] Implémenter les hooks (query + mutations)
+- [ ] Développer les composants UI
+- [ ] Configurer la navigation/routing
+
+### Tests & Finalisation
+- [ ] Tester les formulaires (validation, soumission)
+- [ ] Vérifier la gestion d'erreur
+- [ ] Valider l'accessibilité
+- [ ] Optimiser les performances
+- [ ] Documenter les APIs publiques
+
+## 📚 Ressources
+
+- [Documentation React Query](https://tanstack.com/query/latest)
+- [Documentation Zod](https://zod.dev/)
+- [Documentation Tailwind CSS](https://tailwindcss.com/)
+- [Documentation Radix UI](https://www.radix-ui.com/)
+- [Guide Atomic Design](https://bradfrost.com/blog/post/atomic-web-design/)
+
+## 🤖 Instructions pour l'IA
+
+Quand tu développes une nouvelle fonctionnalité :
+
+1. **Analyse** d'abord la structure existante similaire
+2. **Suis** l'architecture modulaire décrite
+3. **Utilise** les patterns établis (hooks, services, composants)
+4. **Respecte** les conventions de nommage
+5. **Pense** à l'invalidation des caches React Query
+6. **Gère** les états de chargement et d'erreur
+7. **Assure-toi** de l'accessibilité des composants
+
+**Exemple de workflow** :
+1. Créer les types et schémas
+2. Implémenter le service API
+3. Créer les hooks (query + actions)
+4. Développer les composants UI
+5. Intégrer dans les pages
+6. Tester et optimiser
+
+---
+
+### 🔗 Utilisation d’une vraie API pour l’admin
+
+Si tu utilises une vraie API (et non un mock) pour l’admin :
+
+1. **Service API réel**
+   - Crée le fichier `features/[entity]/[entity].service.ts` :
+
+```ts
+import { BaseService } from '@/lib/base-service';
+import { API_ENDPOINTS } from '@/lib/api-endpoints';
+
+export const [entity]Service = new BaseService<[Entity]>(
+  http.private,
+  API_ENDPOINTS.[entity]
+);
+```
+
+2. **Configuration admin**
+   - Dans `features/[entity]/[entity].admin-config.ts`, importe le vrai service :
+
+```ts
+import { createAdminEntity } from '@/lib/admin-generator';
+import { [Entity]Schema } from './[entity].schema';
+import { [entity]Service } from './[entity].service';
+
+export const [Entity]AdminConfig = createAdminEntity('[Nom]', [Entity]Schema, {
+  description: 'Gérez vos ...',
+  icon: '🏷️',
+  actions: { create: true, read: true, update: true, delete: true, bulk: false, export: false },
+  services: {
+    fetchItems: [entity]Service.list,
+    createItem: [entity]Service.create,
+    updateItem: [entity]Service.update,
+    deleteItem: [entity]Service.delete,
+  },
+  queryKey: ['[entity]s'],
+});
+```
+
+3. **Page d’admin**
+   - Rien ne change, tu utilises toujours le composant `SimpleAdminPage` avec la config ci-dessus.
+
+> Remplace `[entity]`, `[Entity]`, `[Nom]` par le nom de ton entité (ex : `category`, `Category`, `Catégorie`).
+> Les méthodes à fournir dans `services` sont : `list`, `create`, `update`, `delete` (ou leurs équivalents selon ton service).
+
+---
