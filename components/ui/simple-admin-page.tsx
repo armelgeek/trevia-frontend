@@ -9,9 +9,9 @@ import { DataTable } from '@/shared/components/molecules/datatable/data-table';
 import { DynamicForm } from '@/components/ui/dynamic-form';
 import { generateTableColumns } from '@/components/ui/dynamic-table';
 import { useAdminEntity } from '@/hooks/use-admin-entity';
-import { cn } from '@/shared/lib/utils';
 import { Plus } from 'lucide-react';
 import type { AdminConfigWithServices } from '@/lib/admin-generator';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 
 interface SimpleAdminPageProps<T extends Record<string, unknown>> {
   config: AdminConfigWithServices<T>;
@@ -22,7 +22,6 @@ interface SimpleAdminPageProps<T extends Record<string, unknown>> {
 export function SimpleAdminPage<T extends Record<string, unknown>>({
   config,
   schema,
-  className,
 }: SimpleAdminPageProps<T>) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<T | null>(null);
@@ -106,105 +105,109 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
   );
 
   return (
-    <div className={cn('space-y-6', className)}>
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">{config.title}</h2>
+    <>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-4 justify-between">
+            <CardTitle className='text-red-500 text-lg'>{config.title}</CardTitle>
+            {config.actions?.create && (
+              <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Créer
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Créer {config.title}</DialogTitle>
+                    <DialogDescription>
+                      Remplissez les informations pour créer un nouveau {config.title.toLowerCase()}.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DynamicForm
+                    config={config}
+                    schema={schema}
+                    onSubmit={(data: Record<string, unknown>) => handleCreate(data as T)}
+                    isSubmitting={isCreating}
+                  />
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
           {config.description && (
-            <p className="text-muted-foreground">{config.description}</p>
+            <CardDescription>
+              {config.description}
+            </CardDescription>
           )}
-        </div>
-        
-        {config.actions?.create && (
-          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Créer
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Créer {config.title}</DialogTitle>
-                <DialogDescription>
-                  Remplissez les informations pour créer un nouveau {config.title.toLowerCase()}.
-                </DialogDescription>
-              </DialogHeader>
-              <DynamicForm
-                config={config}
-                schema={schema}
-                onSubmit={(data: Record<string, unknown>) => handleCreate(data as T)}
-                isSubmitting={isCreating}
-              />
-            </DialogContent>
-          </Dialog>
-        )}
-      </div>
+        </CardHeader>
+        <CardContent>
+          
+          {/* Data Table */}
+          <DataTable
+            columns={columns}
+            data={items}
+            meta={meta || { total: items.length, totalPages: 1 }}
+            isLoading={isLoading}
+            isError={!!error}
+            search=""
+            sortBy=""
+            sortDir="asc"
+            page={1}
+            pageSize={10}
+            onSearchChange={() => {}}
+            onSortByChange={() => {}}
+            onSortDirChange={() => {}}
+            onPageChange={() => {}}
+            onPageSizeChange={() => {}}
+          />
 
-      {/* Data Table */}
-      <DataTable
-        columns={columns}
-        data={items}
-        meta={meta || { total: items.length, totalPages: 1 }}
-        isLoading={isLoading}
-        isError={!!error}
-        search=""
-        sortBy=""
-        sortDir="asc"
-        page={1}
-        pageSize={10}
-        onSearchChange={() => {}}
-        onSortByChange={() => {}}
-        onSortDirChange={() => {}}
-        onPageChange={() => {}}
-        onPageSizeChange={() => {}}
-      />
+          {/* Edit Dialog */}
+          {editingItem && (
+            <Dialog open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Modifier {config.title}</DialogTitle>
+                  <DialogDescription>
+                    Modifiez les informations de ce {config.title.toLowerCase()}.
+                  </DialogDescription>
+                </DialogHeader>
+                <DynamicForm
+                  config={config}
+                  schema={schema}
+                  initialData={editingItem}
+                  onSubmit={(data: Record<string, unknown>) => handleUpdate(data as T)}
+                  isSubmitting={isUpdating}
+                />
+              </DialogContent>
+            </Dialog>
+          )}
 
-      {/* Edit Dialog */}
-      {editingItem && (
-        <Dialog open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Modifier {config.title}</DialogTitle>
-              <DialogDescription>
-                Modifiez les informations de ce {config.title.toLowerCase()}.
-              </DialogDescription>
-            </DialogHeader>
-            <DynamicForm
-              config={config}
-              schema={schema}
-              initialData={editingItem}
-              onSubmit={(data: Record<string, unknown>) => handleUpdate(data as T)}
-              isSubmitting={isUpdating}
-            />
-          </DialogContent>
-        </Dialog>
-      )}
-
-      {/* Delete Confirmation */}
-      {deletingItem && (
-        <AlertDialog open={!!deletingItem} onOpenChange={() => setDeletingItem(null)}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-              <AlertDialogDescription>
-                Êtes-vous sûr de vouloir supprimer ce {config.title.toLowerCase()} ? 
-                Cette action est irréversible.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Annuler</AlertDialogCancel>
-              <AlertDialogAction 
-                onClick={handleDelete}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                Supprimer
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
-    </div>
+          {/* Delete Confirmation */}
+          {deletingItem && (
+            <AlertDialog open={!!deletingItem} onOpenChange={() => setDeletingItem(null)}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Êtes-vous sûr de vouloir supprimer ce {config.title.toLowerCase()} ? 
+                    Cette action est irréversible.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={handleDelete}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Supprimer
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+          </CardContent>
+      </Card>
+    </>
   );
 }
