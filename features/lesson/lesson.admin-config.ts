@@ -9,21 +9,25 @@ export const LessonAdminConfig: AdminConfigWithParent<Lesson> = createAdminEntit
   parent: { key: 'moduleId', routeParam: 'moduleId' },
   actions: { create: true, read: true, update: true, delete: true },
   services: {
-    fetchItems: async () => {
-      const result = await LessonAdminAdapter.fetchItems({ parentId: '' });
-      return {
-        data: result.data.map((l: Lesson) => ({
-          ...l,
-          order: 0,
-          description: l.description ?? '',
-        })),
-        meta: { total: result.data.length, totalPages: 1 },
-      };
+    fetchItems: async (filters?: Record<string, unknown>) => {
+      const moduleId = filters?.moduleId || filters?.parentId || '';
+      return LessonAdminAdapter.fetchItems({ parentId: moduleId as string });
     },
-    createItem: (data) => LessonAdminAdapter.createItem({ ...data, parentId: '' }),
-    updateItem: (id, data) => LessonAdminAdapter.updateItem(id, { ...data, parentId: '' }),
-    deleteItem: (id) => LessonAdminAdapter.deleteItem(id, { parentId: '' }),
+    createItem: async (data: Record<string, unknown>, filters?: Record<string, unknown>) => {
+      const moduleId = filters?.moduleId || filters?.parentId || '';
+      return LessonAdminAdapter.createItem({
+        ...data, parentId: moduleId as string,
+        title: ''
+      });
+    },
+    updateItem: async (id: string, data: Record<string, unknown>, filters?: Record<string, unknown>) => {
+      const moduleId = filters?.moduleId || filters?.parentId || '';
+      return LessonAdminAdapter.updateItem(id, { ...data, parentId: moduleId as string });
+    },
+    deleteItem: async (id: string) => {
+      return LessonAdminAdapter.deleteItem(id);
+    },
   },
   queryKey: ['lessons'],
 });
-// Le parentId sera injecté dynamiquement par le wrapper dans useAdminEntity
+// Le parentId/moduleId est injecté dynamiquement par le wrapper dans useAdminEntity

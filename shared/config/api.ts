@@ -6,5 +6,13 @@ export const API_ENDPOINTS = {
     detail: (id: string) => `/api/trips/${id}`,
     update: (id: string) => `/api/trips/${id}`,
     delete: (id: string) => `/api/trips/${id}`
+  },
+  lesson: {
+    base: '/api/lessons',
+    create: '/api/lessons',
+    list: (qs: string = '') => `/api/lessons${qs ? `?${qs}` : ''}`,
+    detail: (id: string) => `/api/lessons/${id}`,
+    update: (id: string) => `/api/lessons/${id}`,
+    delete: (id: string) => `/api/lessons/${id}`
   }
 };

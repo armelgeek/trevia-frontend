@@ -8,6 +8,7 @@ import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/shared/lib/utils';
 import type { FieldConfig } from '@/lib/admin-generator';
+import { API_URL } from '@/shared/lib/config/api';
 
 // Type pour les éléments de relation
 interface RelationItem {
@@ -28,7 +29,9 @@ interface RelationFieldProps {
 // Service générique pour charger les données de relation
 async function fetchRelationData(entity: string) {
   try {
-    const response = await fetch(`/api/v1/${entity}`);
+    const response = await fetch(`${API_URL}/api/${entity}`, {
+      credentials: 'include',
+    });
     if (!response.ok) {
       throw new Error(`Failed to fetch ${entity}`);
     }

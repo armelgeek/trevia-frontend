@@ -1,50 +1,19 @@
-// Données fictives en mémoire
-type Lesson = {
-  id: string;
-  title: string;
-  content: string;
-  moduleId: string;
-};
+import { BaseService } from '@/lib/base-service';
+import { API_ENDPOINTS } from '@/shared/config/api';
+import type { Lesson } from './lesson.schema';
 
-const mockLessons: Record<string, Lesson[]> = {
-  'module-1': [
-    { id: 'lesson-1', title: 'Intro', content: 'Bienvenue', moduleId: 'module-1' },
-    { id: 'lesson-2', title: 'Chapitre 1', content: 'Contenu 1', moduleId: 'module-1' },
-  ],
-  'module-2': [
-    { id: 'lesson-3', title: 'Début', content: 'Début module 2', moduleId: 'module-2' },
-  ],
-};
+const base = API_ENDPOINTS.lesson.base;
+const service = new BaseService(base);
 
-export class LessonService {
-  static list(moduleId: string) {
-    return Promise.resolve({ data: mockLessons[moduleId] || [] });
-  }
-  static create(moduleId: string, data: Omit<Lesson, 'id'>) {
-    const newLesson: Lesson = { ...data, id: `lesson-${Math.random().toString(36).slice(2, 8)}`, moduleId };
-    if (!mockLessons[moduleId]) mockLessons[moduleId] = [];
-    mockLessons[moduleId].push(newLesson);
-    return Promise.resolve({ data: newLesson });
-  }
-  static update(moduleId: string, lessonId: string, data: Partial<Lesson>) {
-    const lessons = mockLessons[moduleId] || [];
-    const idx = lessons.findIndex(l => l.id === lessonId);
-    if (idx !== -1) {
-      lessons[idx] = { ...lessons[idx], ...data };
-      return Promise.resolve({ data: lessons[idx] });
-    }
-    return Promise.reject(new Error('Not found'));
-  }
-  static delete(moduleId: string, lessonId: string) {
-    const lessons = mockLessons[moduleId] || [];
-    const idx = lessons.findIndex(l => l.id === lessonId);
-    if (idx !== -1) {
-      lessons.splice(idx, 1);
-      return Promise.resolve({});
-    }
-    return Promise.reject(new Error('Not found'));
-  }
-}
+export const lessonService = {
+  // Liste toutes les lessons d'un module (filtrage par moduleId)
+  listByModule: (moduleId: string) => service.get<Lesson[]>('', { moduleId }),
+  // CRUD génériques
+  get: (id: string) => service.get<Lesson>(`/${id}`),
+  create: (data: Partial<Lesson>) => service.post<Lesson>('', data),
+  update: (id: string, data: Partial<Lesson>) => service.put<Lesson>(`/${id}`, data),
+  delete: (id: string) => service.delete<Lesson>(`/${id}`),
+};
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -53,21 +22,21 @@ export function useModuleLessons(moduleId: string) {
 
   const query = useQuery({
     queryKey: ['lessons', moduleId],
-    queryFn: () => LessonService.list(moduleId),
+    queryFn: () => lessonService.listByModule(moduleId),
   });
 
   const create = useMutation({
-    mutationFn: (data: Omit<Lesson, 'id'>) => LessonService.create(moduleId, data),
+    mutationFn: (data: Omit<Lesson, 'id'>) => lessonService.create(data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['lessons', moduleId] }),
   });
 
   const update = useMutation({
-    mutationFn: ({ lessonId, data }: { lessonId: string; data: Partial<Lesson> }) => LessonService.update(moduleId, lessonId, data),
+    mutationFn: ({ lessonId, data }: { lessonId: string; data: Partial<Lesson> }) => lessonService.update(lessonId, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['lessons', moduleId] }),
   });
 
   const remove = useMutation({
-    mutationFn: (lessonId: string) => LessonService.delete(moduleId, lessonId),
+    mutationFn: (lessonId: string) => lessonService.delete(lessonId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['lessons', moduleId] }),
   });
 

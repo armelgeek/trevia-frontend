@@ -158,7 +158,7 @@ function wrapParentService<T extends Record<string, unknown>>(service: CrudServi
   return {
     fetchItems: () => {
       if (parentId && service.fetchItems.length > 0) {
-        return service.fetchItems({ parentId });
+        return service.fetchItems();
       }
       return service.fetchItems();
     },
@@ -193,7 +193,7 @@ export function useSimpleAdminEntity<T extends Record<string, unknown>>(
   return useAdminEntity<T>({
     config,
     queryKey: [kebabName],
-    apiEndpoint: `/api/v1/${kebabName}s`,
+    apiEndpoint: `/api/${kebabName}s`,
   });
 }
 

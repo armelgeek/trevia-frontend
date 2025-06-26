@@ -1,3 +1,4 @@
+````instructions
 ``instructions
 
 # Copilot Instructions: Générer une Simple Admin Page
@@ -572,3 +573,60 @@ Les hooks et services doivent toujours consommer la propriété `data` du retour
 - Pour la lecture (list), utiliser `response.data`.
 - Pour la création, modification, suppression, utiliser la propriété `data` du retour si présente.
 - Adapter les hooks et composants pour ne jamais supposer un tableau brut, mais toujours un objet avec une clé `data`.
+
+---
+
+# Copilot Instructions: Gestion des relations parent/enfant (module/lesson) avec API réelle
+
+## Pattern recommandé
+
+- Pour une relation parent/enfant (ex: module/lesson), l’ID du parent (ex: moduleId) est transmis via l’URL et injecté dans les hooks/services, jamais via un champ dropdown dans le formulaire enfant.
+- Le champ de relation (ex: moduleId) doit être présent dans le schéma Zod, mais masqué dans le formulaire (`showInForm: false`).
+- Lors de la création/mise à jour, le parentId est injecté côté service/hook, pas par l’utilisateur.
+- Le service enfant doit exposer une méthode `listByParent` (ex: `listByModule(moduleId)`), qui filtre côté API (`/api/lessons?moduleId=...`).
+- Le composant admin enfant doit passer le filtre parentId/moduleId à la page via la prop `filters`.
+- La config admin doit propager ce filtre jusqu’au service/hook, sans modifier la signature standard des méthodes CRUD.
+
+## Exemple de service enfant
+```ts
+export const lessonService = {
+  listByModule: (moduleId: string) => service.get<Lesson[]>('', { moduleId }),
+  create: (data: Partial<Lesson>) => service.post<Lesson>('', data),
+  // ...
+};
+```
+
+## Exemple de hook enfant
+```ts
+export function useModuleLessons(moduleId: string) {
+  const query = useQuery({
+    queryKey: ['lessons', moduleId],
+    queryFn: () => lessonService.listByModule(moduleId),
+  });
+  // ...
+}
+```
+
+## Exemple de config admin enfant
+```ts
+services: {
+  fetchItems: async (filters) => {
+    const moduleId = filters?.moduleId || filters?.parentId || '';
+    return LessonAdminAdapter.fetchItems({ parentId: moduleId });
+  },
+  createItem: async (data, filters) => {
+    const moduleId = filters?.moduleId || filters?.parentId || '';
+    return LessonAdminAdapter.createItem({ ...data, parentId: moduleId });
+  },
+  // ...
+}
+```
+
+## À ne jamais faire
+- Ne jamais afficher un dropdown de sélection du parent dans le formulaire enfant si la navigation est parent/enfant.
+- Ne jamais faire d’appel direct à fetch/axios dans un composant React.
+
+---
+
+# (Le reste des instructions Copilot existantes suit ici)
+````
