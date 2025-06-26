@@ -18,10 +18,12 @@ interface UseAdminEntityOptions<T extends Record<string, unknown>> {
     fetch?: (error: Error) => void;
   };
   customServices?: CrudService<T>;
+  filters?: Record<string, string | number | undefined>;
+  parentId?: string;
 }
 
 interface AdminEntityService<T> {
-  fetchItems: () => Promise<{ data: T[]; meta?: { total: number; totalPages: number } }>;
+  fetchItems: (filters?: Record<string, unknown>) => Promise<{ data: T[]; meta?: { total: number; totalPages: number } }>;
   createItem: (data: T) => Promise<T>;
   updateItem: (id: string, data: Partial<T>) => Promise<T>;
   deleteItem: (id: string) => Promise<void>;
@@ -29,8 +31,12 @@ interface AdminEntityService<T> {
 
 function createAdminService<T>(endpoint: string): AdminEntityService<T> {
   return {
-    async fetchItems() {
-      const response = await fetch(endpoint);
+    async fetchItems(filters?: Record<string, unknown>) {
+      const response = await fetch(endpoint, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(filters),
+      });
       if (!response.ok) {
         throw new Error(`Failed to fetch ${endpoint}`);
       }
@@ -76,12 +82,13 @@ export function useAdminEntity<T extends Record<string, unknown>>(
   options: UseAdminEntityOptions<T>
 ) {
   const queryClient = useQueryClient();
-  
-  const service = options.customServices || createAdminService<T>(options.apiEndpoint || '');
+  const service = options.customServices
+    ? wrapParentService(options.customServices, options.parentId)
+    : createAdminService<T>(options.apiEndpoint || '');
 
   const query = useQuery({
-    queryKey: options.queryKey,
-    queryFn: service.fetchItems,
+    queryKey: [...options.queryKey, options.filters || {}],
+    queryFn: () => service.fetchItems(options.filters),
   });
 
   const createMutation = useMutation({
@@ -144,6 +151,36 @@ export function useAdminEntity<T extends Record<string, unknown>>(
 
     refetch: query.refetch,
     invalidate: () => queryClient.invalidateQueries({ queryKey: options.queryKey }),
+  };
+}
+
+function wrapParentService<T extends Record<string, unknown>>(service: CrudService<T>, parentId?: string): CrudService<T> {
+  return {
+    fetchItems: () => {
+      if (parentId && service.fetchItems.length > 0) {
+        return service.fetchItems({ parentId });
+      }
+      return service.fetchItems();
+    },
+    createItem: (data: T) => {
+      if (parentId && service.createItem.length > 0) {
+        return service.createItem({ ...data, parentId });
+      }
+      return service.createItem(data);
+    },
+    updateItem: (id: string, data: Partial<T>) => {
+      if (parentId && service.updateItem.length > 1) {
+        return service.updateItem(id, { ...data, parentId });
+      }
+      return service.updateItem(id, data);
+    },
+    deleteItem: (id: string) => {
+      if (parentId && service.deleteItem.length > 1) {
+        // On ignore le second argument si la méthode n'en attend qu'un
+        return (service.deleteItem as (id: string, params?: { parentId?: string }) => Promise<void>)(id, { parentId });
+      }
+      return service.deleteItem(id);
+    },
   };
 }
 

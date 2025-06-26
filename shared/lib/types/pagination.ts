@@ -6,8 +6,8 @@ export interface Pagination {
 }
 
 export interface PaginatedResponse<T> {
+  total: number;
   data: T[];
-  meta: {
-    pagination: Pagination;
-  };
+  page: number
+  limit: number
 }

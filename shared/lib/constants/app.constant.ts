@@ -56,6 +56,22 @@ export const navItems: NavItem[] = [
     shortcut: ['c', 'c'],
     isActive: false,
     items: []
+  },
+  {
+    title: 'Réservations',
+    url: '/admin/booking',
+    icon: 'page',
+    shortcut: ['r', 'r'],
+    isActive: false,
+    items: []
+  },
+  {
+    title: 'Voyages',
+    url: '/admin/trip',
+    icon: 'post',
+    shortcut: ['v', 'v'],
+    isActive: false,
+    items: []
   }
 ];
 

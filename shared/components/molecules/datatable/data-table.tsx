@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -9,6 +10,7 @@ import {
   getFacetedRowModel,
   SortDirection,
   useReactTable,
+  Row, // Ajout de Row
 } from '@tanstack/react-table';
 
 import { DataTablePagination } from '@/shared/components/molecules/datatable/data-table-pagination';
@@ -44,6 +46,7 @@ interface DataTableProps<TData, TValue> {
   onFilterChange?: (filters: ColumnFiltersState) => void;
   isLoading: boolean;
   isError: boolean;
+  renderRowActions?: (row: Row<TData>) => React.ReactNode; // Ajout de la prop
 }
 
 export function DataTable<TData, TValue>({
@@ -63,6 +66,7 @@ export function DataTable<TData, TValue>({
   onPageSizeChange,
   onFilterChange,
   isLoading,
+  renderRowActions, // Ajout ici
 }: DataTableProps<TData, TValue>) {
   const sort: ColumnSort[] = sortBy && sortDir ? [{ id: sortBy, desc: sortDir === 'desc' }] : [];
 
@@ -71,7 +75,6 @@ export function DataTable<TData, TValue>({
     columns,
     state: {
       globalFilter: search ?? '',
-      sorting: sort ?? [],
       columnFilters: filter ?? [],
       pagination: {
         pageIndex: (page ?? 1) - 1,
@@ -99,8 +102,10 @@ export function DataTable<TData, TValue>({
       onFilterChange?.(value);
     },
     onPaginationChange: (updater) => {
+      const safePage = page ?? 1;
+      const safePageSize = pageSize ?? 10;
       const value =
-        typeof updater === 'function' ? updater({ pageIndex: page - 1, pageSize }) : updater;
+        typeof updater === 'function' ? updater({ pageIndex: safePage - 1, pageSize: safePageSize }) : updater;
       onPageChange(value.pageIndex + 1);
       onPageSizeChange(value.pageSize);
     },
@@ -116,18 +121,24 @@ export function DataTable<TData, TValue>({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
+                  // On insère la colonne d'action enfant juste avant la colonne Actions (si présente)
+                  const isBeforeActions = renderRowActions && header.id === 'actions';
                   return (
-                    <TableHead
-                      key={header.id}
-                      colSpan={header.colSpan}
-                      style={{ width: header.getSize() }}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
+                    <React.Fragment key={header.id}>
+                      {isBeforeActions && <TableHead> </TableHead>}
+                      <TableHead
+                        colSpan={header.colSpan}
+                        style={{ width: header.getSize(),  textTransform: 'uppercase' }}
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableHead>
+                    </React.Fragment>
                   );
                 })}
+                {/* Si pas de colonne Actions, on ajoute la colonne enfant à la fin */}
+                {renderRowActions && !table.getHeaderGroups()[0].headers.some(h => h.id === 'actions') && <TableHead> </TableHead>}
               </TableRow>
             ))}
           </TableHeader>
@@ -135,7 +146,7 @@ export function DataTable<TData, TValue>({
             {isLoading ? (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={columns.length + (renderRowActions ? 1 : 0)}
                   className="h-24 text-center"
                 >
                   Loading...
@@ -144,25 +155,35 @@ export function DataTable<TData, TValue>({
             ) : data.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={columns.length + (renderRowActions ? 1 : 0)}
                   className="h-24 text-center"
                 >
                   No result.
                 </TableCell>
               </TableRow>
             ) : (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              table.getRowModel().rows.map((row) => {
+                // On insère la cellule d'action enfant juste avant la cellule Actions (si présente)
+                const cells = row.getVisibleCells();
+                const actionsIdx = cells.findIndex(cell => cell.column.id === 'actions');
+                return (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && 'selected'}
+                  >
+                    {cells.map((cell, idx) => (
+                      <React.Fragment key={cell.id}>
+                        {renderRowActions && idx === actionsIdx && <TableCell>{renderRowActions(row)}</TableCell>}
+                        <TableCell>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      </React.Fragment>
+                    ))}
+                    {/* Si pas de colonne Actions, on ajoute la colonne enfant à la fin */}
+                    {renderRowActions && actionsIdx === -1 && <TableCell>{renderRowActions(row)}</TableCell>}
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>

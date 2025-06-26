@@ -4,6 +4,6 @@ import { dashboardService } from '../dashboard.service';
 export function useDashboard() {
   return useQuery({
     queryKey: ['dashboard'],
-    queryFn: () => dashboardService.get('admin/dashboard'),
+    queryFn: () => dashboardService.get(''),
   });
 }

@@ -1,9 +1,10 @@
-````instructions
+``instructions
+
 # Copilot Instructions: Générer une Simple Admin Page
 
 > **Avant de générer une page ou un composant pour une nouvelle fonctionnalité admin, vérifie dans `components/ui/` si un design ou composant correspondant existe déjà pour illustrer ou structurer la fonctionnalité.  
 > Si un composant adapté existe, utilise-le ou référence-le dans la page ou le formulaire généré.  
-> Si aucun composant n’existe, utilise le composant générique prévu (`SimpleAdminPage` ou autre selon le contexte) et signale qu’aucun design spécifique n’a été trouvé dans `components/ui/`.**
+> Si aucun composant n’existe, utilise le composant générique prévu (`SimpleAdminPage` ou autre selon le contexte) et signale qu’aucun design spécifique n'a été trouvé dans `components/ui/`.**
 
 **Tous les endpoints d’API doivent être ajoutés dans `shared/config/api.ts` sous la clé appropriée (`API_ENDPOINTS`).**
 
@@ -44,8 +45,7 @@ import { [Entity] } from './[entity].schema';
 import { createMockService } from '@/lib/admin-generator';
 
 export const mock[Entity]s: [Entity][] = [ /* ... */ ];
-export const [entity]Service = createMockService(mock[Entity]s);
-```
+export const [entity]Service = createMockService(mock[Entity
 
 3. **Service API réel**
    - Crée le fichier `features/[entity]/[entity].service.ts` :
@@ -142,6 +142,11 @@ export default function [Entity]AdminPage() {
 
 7. **Vérifie que le composant `SimpleAdminPage` est bien utilisé**  
    - Import depuis `@/components/ui/simple-admin-page`.
+
+**À chaque fois qu’une nouvelle fonctionnalité admin est générée, ajoute automatiquement une entrée correspondante dans le menu sidebar admin.**
+- La liste des menus sidebar se trouve dans `shared/lib/constants/app.constant.ts`.
+- L’intitulé, l’icône et le chemin doivent être cohérents avec la nouvelle entité.
+- Cette étape est obligatoire pour toute nouvelle page ou module admin.
 
 > Remplace `[entity]`, `[Entity]`, `[Nom]` par le nom de ton entité (ex : `category`, `Category`, `Catégorie`).
 
@@ -552,4 +557,18 @@ export const [Entity]AdminConfig = createAdminEntity('[Nom]', [Entity]Schema, {
 > Les méthodes à fournir dans `services` sont : `list`, `create`, `update`, `delete` (ou leurs équivalents selon ton service).
 
 ---
-````
+
+**Tous les retours d’API sont normalisés sous la forme :
+
+{
+  "data": [...],
+  "page": 1,
+  "limit": 20,
+  "total": 130
+}
+
+Les hooks et services doivent toujours consommer la propriété `data` du retour API pour lister les entités, et non le retour brut.**
+
+- Pour la lecture (list), utiliser `response.data`.
+- Pour la création, modification, suppression, utiliser la propriété `data` du retour si présente.
+- Adapter les hooks et composants pour ne jamais supposer un tableau brut, mais toujours un objet avec une clé `data`.

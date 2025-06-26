@@ -26,7 +26,14 @@ export class BaseService {
   private defaultHeaders: Record<string, string>;
 
   constructor(baseUrl?: string, defaultHeaders: Record<string, string> = {}) {
-    this.baseUrl = baseUrl ?? process.env.NEXT_PUBLIC_API_URL ?? '';
+    // Si baseUrl commence par /, on considère que c'est un chemin relatif à l'API (NEXT_PUBLIC_API_URL)
+    if (baseUrl && baseUrl.startsWith('/')) {
+      this.baseUrl = `${process.env.NEXT_PUBLIC_API_URL}${baseUrl}`;
+    } else if (baseUrl) {
+      this.baseUrl = baseUrl;
+    } else {
+      this.baseUrl = process.env.NEXT_PUBLIC_API_URL!;
+    }
     this.defaultHeaders = {
       'Content-Type': 'application/json',
       ...defaultHeaders,
@@ -115,13 +122,16 @@ export class BaseService {
    */
   async get<T>(endpoint: string, params?: Record<string, string>): Promise<ApiResponse<T>> {
     let url = endpoint;
-    
     if (params) {
       const searchParams = new URLSearchParams(params);
       url += `?${searchParams.toString()}`;
     }
-
-    return this.request<T>(url, { method: 'GET' });
+    const response = await this.request<T>(url, { method: 'GET' });
+    // Toujours retourner un objet avec la clé data (jamais un tableau brut)
+    if (!('data' in response)) {
+      return { data: response as unknown as T };
+    }
+    return response;
   }
 
   /**

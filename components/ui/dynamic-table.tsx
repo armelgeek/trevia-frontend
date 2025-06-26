@@ -17,18 +17,32 @@ export function generateTableColumns<T extends Record<string, unknown>>(
 ): ColumnDef<T>[] {
   const columns: ColumnDef<T>[] = [];
 
-  console.log('[generateTableColumns] Config fields:', config.fields);
+  //console.log('[generateTableColumns] Config fields:', config.fields);
 
   config.fields
     .filter(field => field.display?.showInTable !== false)
     .sort((a, b) => (a.display?.order || 0) - (b.display?.order || 0))
     .forEach(field => {
-      console.log(`[generateTableColumns] Adding column for field: ${field.key}, type: ${field.type}`);
+     // console.log(`[generateTableColumns] Adding column for field: ${field.key}, type: ${field.type}`);
       columns.push({
         accessorKey: field.key,
         header: field.label,
         cell: ({ row }) => {
-          const value = row.getValue(field.key);
+          let value = row.getValue(field.key);
+          // Fallback : si la valeur n'est pas trouvée, on tente de la récupérer dans row.original via dot notation (clé simple ou imbriquée)
+          if ((value === undefined || value === null) && row.original && typeof row.original === 'object') {
+            const keys = field.key.split('.');
+            let nested: unknown = row.original;
+            for (const k of keys) {
+              if (nested && typeof nested === 'object' && k in nested) {
+                nested = (nested as Record<string, unknown>)[k];
+              } else {
+                nested = undefined;
+                break;
+              }
+            }
+            value = nested;
+          }
           return renderCellValue(value, field);
         },
       });
@@ -76,8 +90,7 @@ export function generateTableColumns<T extends Record<string, unknown>>(
 }
 
 function renderCellValue(value: unknown, field: FieldConfig): React.ReactNode {
-  console.log(`[renderCellValue] Field: ${field.key}, Type: ${field.type}, Value:`, value, typeof value);
-  
+ 
   if (value === null || value === undefined) {
     return <span className="text-muted-foreground">-</span>;
   }
@@ -91,7 +104,7 @@ function renderCellValue(value: unknown, field: FieldConfig): React.ReactNode {
       );
 
     case 'date':
-      console.log(`[renderCellValue] Processing date field ${field.key}:`, value);
+     // console.log(`[renderCellValue] Processing date field ${field.key}:`, value);
       try {
         // Gestion des différents types de valeurs de date
         let date: Date;
@@ -100,18 +113,18 @@ function renderCellValue(value: unknown, field: FieldConfig): React.ReactNode {
         } else if (typeof value === 'string' || typeof value === 'number') {
           date = new Date(value);
         } else {
-          console.error(`[renderCellValue] Invalid date type for ${field.key}:`, typeof value, value);
+         // console.error(`[renderCellValue] Invalid date type for ${field.key}:`, typeof value, value);
           return <span className="text-muted-foreground">Date invalide</span>;
         }
         
         // Vérifier si la date est valide
         if (isNaN(date.getTime())) {
-          console.error(`[renderCellValue] Invalid date value for ${field.key}:`, date);
+         // console.error(`[renderCellValue] Invalid date value for ${field.key}:`, date);
           return <span className="text-muted-foreground">Date invalide</span>;
         }
         
         const formattedDate = format(date, 'dd/MM/yyyy');
-        console.log(`[renderCellValue] Formatted date for ${field.key}:`, formattedDate);
+        //console.log(`[renderCellValue] Formatted date for ${field.key}:`, formattedDate);
         return formattedDate;
       } catch (error) {
         console.error('Error formatting date:', error, value);

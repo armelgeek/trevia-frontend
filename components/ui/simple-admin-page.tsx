@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useParams } from 'next/navigation';
 import { ZodType } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
@@ -9,6 +10,7 @@ import { DataTable } from '@/shared/components/molecules/datatable/data-table';
 import { DynamicForm } from '@/components/ui/dynamic-form';
 import { generateTableColumns } from '@/components/ui/dynamic-table';
 import { useAdminEntity } from '@/hooks/use-admin-entity';
+import Link from 'next/link';
 import { Plus } from 'lucide-react';
 import type { AdminConfigWithServices } from '@/lib/admin-generator';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -17,15 +19,33 @@ interface SimpleAdminPageProps<T extends Record<string, unknown>> {
   config: AdminConfigWithServices<T>;
   schema: ZodType<T>;
   className?: string;
+  renderFilters?: () => React.ReactNode;
+  filters?: Record<string, string | number | undefined>;
 }
 
 export function SimpleAdminPage<T extends Record<string, unknown>>({
   config,
   schema,
+  renderFilters,
+  filters,
 }: SimpleAdminPageProps<T>) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<T | null>(null);
   const [deletingItem, setDeletingItem] = useState<T | null>(null);
+
+  // ---
+  // PATTERN RELATION PARENT/ENFANT (admin nested):
+  // Ici, l'ID du parent (ex: moduleId) est récupéré via l'URL (params) et injecté dans le hook et la config.
+  // Le champ de relation (ex: moduleId) N'EST PAS affiché comme dropdown dans le formulaire enfant (lesson),
+  // il est automatiquement renseigné côté service/hook lors de la création/mise à jour.
+  // Cela évite toute sélection manuelle et garantit la cohérence parent/enfant.
+  // ---
+  const params = useParams();
+  let parentId: string | undefined = undefined;
+  if ('parent' in config && config.parent && typeof config.parent === 'object' && 'routeParam' in config.parent) {
+    const paramValue = params?.[config.parent.routeParam as string];
+    parentId = Array.isArray(paramValue) ? paramValue[0] : paramValue;
+  }
 
   // Vérification que les services sont configurés
   if (!config.services) {
@@ -57,7 +77,9 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
       delete: () => setDeletingItem(null),
     },
     // Services personnalisés
-    customServices: config.services
+    customServices: config.services,
+    filters,
+    parentId, // Ajouté pour injection dans le hook
   });
 
   // Handlers pour les actions CRUD
@@ -104,6 +126,29 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
     config.actions?.delete ? setDeletingItem : undefined
   );
 
+  // Ajout du bouton "Gérer l'enfant" si la config admin déclare un enfant
+  const childConfig = (config as { child?: { route: string; label?: string } }).child;
+  const hasChild = !!(childConfig && typeof childConfig.route === 'string');
+
+  // Fonction pour rendre l'action enfant (lien stylisé bleu)
+  const renderChildAction = hasChild && childConfig
+    ? (row: { original: Record<string, unknown> }) => {
+        const id = row.original.id as string;
+        const route = childConfig.route.replace(':parentId', id);
+        return (
+          <Link
+            href={`/admin/${route}`}
+            aria-label={childConfig.label || 'Gérer'}
+            className="text-sky-500 hover:underline font-medium whitespace-nowrap px-2 py-1"
+            style={{ display: 'inline-block' }}
+          >
+            <span className="text-xl align-middle mr-1">+</span>
+            <span className="align-middle">{childConfig.label || 'Ajouter un autre leçon'}</span>
+          </Link>
+        );
+      }
+    : undefined;
+
   return (
     <>
       <Card>
@@ -142,7 +187,7 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
           )}
         </CardHeader>
         <CardContent>
-          
+          {renderFilters && renderFilters()}
           {/* Data Table */}
           <DataTable
             columns={columns}
@@ -160,6 +205,8 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
             onSortDirChange={() => {}}
             onPageChange={() => {}}
             onPageSizeChange={() => {}}
+            // Place l'action enfant AVANT la colonne Actions
+            renderRowActions={renderChildAction}
           />
 
           {/* Edit Dialog */}

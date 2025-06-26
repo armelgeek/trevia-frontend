@@ -72,6 +72,81 @@ interface ZodMetadata {
   options?: string[] | { value: string; label: string }[];
 }
 
+// Fonction utilitaire pour accéder dynamiquement aux propriétés
+export function getNestedProperty<T = unknown>(obj: Record<string, unknown>, path: string): T | undefined {
+  return path.split('.').reduce<Record<string, unknown> | undefined>((current, key) => {
+    if (current && typeof current === 'object' && key in current) {
+      const next = (current as Record<string, unknown>)[key];
+      return typeof next === 'object' && next !== null
+        ? (next as Record<string, unknown>)
+        : next as Record<string, unknown> | undefined;
+    }
+    return undefined;
+  }, obj) as T | undefined;
+}
+
+// Fonction pour définir une propriété dynamiquement
+export function setNestedProperty(obj: Record<string, unknown>, path: string, value: unknown): void {
+  const keys = path.split('.');
+  const lastKey = keys.pop();
+  
+  if (!lastKey) return;
+  
+  const target = keys.reduce((current, key) => {
+    if (!current[key] || typeof current[key] !== 'object') {
+      current[key] = {};
+    }
+    return current[key] as Record<string, unknown>;
+  }, obj);
+  
+  target[lastKey] = value;
+}
+
+// Fonction pour vérifier si une propriété existe
+export function hasNestedProperty(obj: Record<string, unknown>, path: string): boolean {
+  return getNestedProperty(obj, path) !== undefined;
+}
+
+// Interface pour l'accès dynamique
+export interface DynamicFieldAccess {
+  getValue: <T = unknown>(obj: Record<string, unknown>, field: string) => T | undefined;
+  setValue: (obj: Record<string, unknown>, field: string, value: unknown) => void;
+  hasValue: (obj: Record<string, unknown>, field: string) => boolean;
+}
+
+// Implémentation pour l'accès dynamique
+export function createDynamicAccessor(): DynamicFieldAccess {
+  return {
+    getValue: <T = unknown>(obj: Record<string, unknown>, field: string): T | undefined => {
+      // Support pour les chemins simples et imbriqués
+      if (field.includes('.')) {
+        return getNestedProperty<T>(obj, field);
+      }
+      return obj[field] as T | undefined;
+    },
+    
+    setValue: (obj: Record<string, unknown>, field: string, value: unknown): void => {
+      if (field.includes('.')) {
+        setNestedProperty(obj, field, value);
+      } else {
+        obj[field] = value;
+      }
+    },
+
+    hasValue: (obj: Record<string, unknown>, field: string): boolean => {
+      if (field.includes('.')) {
+        return hasNestedProperty(obj, field);
+      }
+      return field in obj;
+    }
+  };
+}
+
+// Extension de AdminConfig avec l'accessor dynamique
+export interface AdminConfigWithAccessor extends AdminConfig {
+  accessor: DynamicFieldAccess;
+}
+
 export function withMeta<T extends ZodSchema>(schema: T, metadata: ZodMetadata): T & { _metadata: ZodMetadata } {
   return Object.assign(schema, { _metadata: metadata });
 }
@@ -122,8 +197,9 @@ export const createField = {
     withMeta(z.string(), { type: 'file', ...metadata }),
 };
 
-export function generateAdminConfig(schema: ZodObject<z.ZodRawShape>, title: string): AdminConfig {
+export function generateAdminConfig(schema: ZodObject<z.ZodRawShape>, title: string): AdminConfigWithAccessor {
   const fields: FieldConfig[] = [];
+  const accessor = createDynamicAccessor();
   
   const shape = schema.shape;
   
@@ -174,10 +250,16 @@ export function generateAdminConfig(schema: ZodObject<z.ZodRawShape>, title: str
     // Auto-détection du type si pas de métadonnées
     if (!metadata.type) {
       if (actualField instanceof z.ZodString) {
-        if (key.includes('email')) field.type = 'email';
-        else if (key.includes('url') || key.includes('website')) field.type = 'url';
-        else if (key.includes('description') || key.includes('comment') || key.includes('content')) field.type = 'textarea';
-        else if (key.includes('image') || key.includes('photo') || key.includes('avatar')) field.type = 'image';
+        if (key.toLowerCase().includes('email')) field.type = 'email';
+        else if (key.toLowerCase().includes('url') || key.toLowerCase().includes('website')) field.type = 'url';
+        else if (key.toLowerCase().includes('description') || key.toLowerCase().includes('comment') || key.toLowerCase().includes('content')) field.type = 'textarea';
+        else if (key.toLowerCase().includes('image') || key.toLowerCase().includes('photo') || key.toLowerCase().includes('avatar')) field.type = 'image';
+        else if (key.toLowerCase().includes('date') || key.toLowerCase().includes('time') || key === 'createdAt' || key === 'updatedAt') field.type = 'date';
+        else if (key.toLowerCase().includes('status') || key.toLowerCase().includes('type') || key.toLowerCase().includes('state')) {
+          field.type = 'select';
+          // Si options dans metadata, on les prend, sinon on laisse undefined
+          if (metadata.options) field.options = metadata.options;
+        }
         else field.type = 'text';
       } else if (actualField instanceof z.ZodNumber) {
         field.type = 'number';
@@ -196,12 +278,32 @@ export function generateAdminConfig(schema: ZodObject<z.ZodRawShape>, title: str
       field.options = metadata.options;
     }
 
+    // Spécial: le champ 'id' n'est jamais affiché dans le formulaire par défaut, mais oui dans le tableau et le détail
+    if (key === 'id') {
+      field.display = {
+        ...field.display,
+        showInForm: false,
+        showInTable: false,
+        showInDetail: true,
+      };
+    }
+    // Spécial: masquer updatedAt par défaut dans le tableau et le formulaire
+    if (key === 'updatedAt') {
+      field.display = {
+        ...field.display,
+        showInForm: false,
+        showInTable: false,
+        showInDetail: true,
+      };
+    }
+
     fields.push(field);
   });
 
   return {
     title,
     fields,
+    accessor, // Ajout de l'accessor dynamique
     actions: {
       create: true,
       read: true,
@@ -220,6 +322,100 @@ export function generateAdminConfig(schema: ZodObject<z.ZodRawShape>, title: str
         layout: 'simple',
       },
     },
+  };
+}
+
+// Fonction pour créer des colonnes React Table dynamiquement
+export function createDynamicColumns(fields: FieldConfig[], accessor: DynamicFieldAccess) {
+  return fields
+    .filter(field => field.display?.showInTable !== false)
+    .map(field => ({
+      accessorKey: field.key,
+      header: field.label,
+      cell: ({ row }: { row: { original: Record<string, unknown> } }) => {
+        const value = accessor.getValue(row.original, field.key);
+        
+        // Formatage selon le type de champ
+        switch (field.type) {
+          case 'date':
+            if (!value) return '';
+            const date = new Date(value as string);
+            return isNaN(date.getTime()) ? value : date.toLocaleDateString('fr-FR');
+          
+          case 'boolean':
+            return value ? '✓' : '✗';
+          
+          case 'email':
+            return value ? String(value) : '';
+          
+          case 'url':
+            return value ? String(value) : '';
+          
+          case 'select':
+            if (field.options && Array.isArray(field.options)) {
+              const option = field.options.find(opt => 
+                typeof opt === 'string' ? opt === value : opt.value === value
+              );
+              return typeof option === 'string' ? option : option?.label || String(value || '');
+            }
+            return String(value || '');
+          
+          case 'relation':
+            // Pour les relations, vous pourriez avoir besoin de données supplémentaires
+            return String(value || '');
+          
+          case 'number':
+            return value !== undefined && value !== null ? String(value) : '';
+          
+          default:
+            return String(value || '');
+        }
+      }
+    }));
+}
+
+// Fonction utilitaire pour créer des accesseurs de formulaire dynamiques
+export function createFormAccessors<T extends Record<string, unknown>>(
+  data: T,
+  fields: FieldConfig[]
+) {
+  const accessor = createDynamicAccessor();
+  
+  return {
+    // Obtenir la valeur d'un champ
+    getFieldValue: (fieldKey: string) => {
+      return accessor.getValue(data, fieldKey);
+    },
+    
+    // Définir la valeur d'un champ
+    setFieldValue: (fieldKey: string, value: unknown) => {
+      accessor.setValue(data, fieldKey, value);
+    },
+    
+    // Obtenir toutes les valeurs des champs visibles dans le formulaire
+    getFormValues: () => {
+      const values: Record<string, unknown> = {};
+      fields
+        .filter(field => field.display?.showInForm !== false)
+        .forEach(field => {
+          values[field.key] = accessor.getValue(data, field.key);
+        });
+      return values;
+    },
+    
+    // Valider les champs requis
+    validateRequired: () => {
+      const errors: string[] = [];
+      fields
+        .filter(field => field.required && field.display?.showInForm !== false)
+        .forEach(field => {
+          const value = accessor.getValue(data, field.key);
+          if (value === undefined || value === null || value === '') {
+            errors.push(`${field.label} est requis`);
+          }
+        });
+      return errors;
+    }
   };
 }
 
@@ -250,10 +446,9 @@ export function useZodValidation<T>(schema: ZodSchema<T>) {
 export function createAdminEntity<T extends z.ZodRawShape>(
   name: string,
   schema: ZodObject<T>,
-  config?: Partial<AdminConfigWithServices<z.infer<ZodObject<T>>>>
-): AdminConfigWithServices<z.infer<ZodObject<T>>> {
+  config?: Partial<AdminConfigWithChild<z.infer<ZodObject<T>>>>
+): AdminConfigWithChild<z.infer<ZodObject<T>>> {
   const baseConfig = generateAdminConfig(schema, name);
-  
   return {
     ...baseConfig,
     ...config,
@@ -262,6 +457,8 @@ export function createAdminEntity<T extends z.ZodRawShape>(
     ui: { ...baseConfig.ui, ...config?.ui },
     services: config?.services,
     queryKey: config?.queryKey || [name.toLowerCase()],
+    parent: config?.parent,
+    child: config?.child,
   };
 }
 
@@ -294,9 +491,25 @@ export interface CrudService<T extends Record<string, unknown>> {
   deleteItem: (id: string) => Promise<void>;
 }
 
-export interface AdminConfigWithServices<T extends Record<string, unknown>> extends AdminConfig {
+export interface AdminConfigWithServices<T extends Record<string, unknown>> extends AdminConfigWithAccessor {
   services?: CrudService<T>;
   queryKey?: string[];
+}
+
+export interface AdminConfigWithParent<T extends Record<string, unknown>> extends AdminConfigWithServices<T> {
+  parent?: {
+    key: string;
+    routeParam: string;
+    parentEntity?: string;
+    parentLabel?: string;
+  };
+}
+
+export interface AdminConfigWithChild<T extends Record<string, unknown>> extends AdminConfigWithParent<T> {
+  child?: {
+    route: string;
+    label?: string;
+  };
 }
 
 export function createMockService<T extends Record<string, unknown>>(
@@ -367,14 +580,17 @@ export class AdminCrudService<T extends Record<string, unknown>> extends BaseSer
     return params.toString();
   }
 
- async fetchItems(): Promise<{ data: T[]; meta?: { total: number; totalPages: number } }> {
+ async fetchItems(filters?: Record<string, string | number | undefined>): Promise<{ data: T[]; meta?: { total: number; totalPages: number; page?: number; limit?: number } }> {
     try {
-      const response = await this.list({});
+      // Ajout des filtres en query params
+      const response = await this.list(filters || {});
       return {
         data: response.data,
         meta: {
-          total: response.meta.pagination.total,
-          totalPages: response.meta.pagination.pageCount,
+          total: response.total,
+          totalPages: response.limit ? Math.ceil(response.total / response.limit) : 1,
+          page: response.page,
+          limit: response.limit
         },
       };
     } catch (error) {
@@ -419,7 +635,7 @@ export function createApiService<T extends Record<string, unknown>>(
   const service = new AdminCrudService<T>(baseUrl);
   
   return {
-    fetchItems: () => service.fetchItems(),
+    fetchItems: (filters?: Record<string, string | number | undefined>) => service.fetchItems(filters),
     createItem: (data: T) => service.createItem(data),
     updateItem: (id: string, data: Partial<T>) => service.updateItem(id, data),
     deleteItem: (id: string) => service.deleteItem(id),
