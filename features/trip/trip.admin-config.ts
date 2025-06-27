@@ -31,12 +31,12 @@ export const TripAdminConfig = createAdminEntity('Voyage', tripSchema, {
   }),
   children: [
     {
-      route: 'seats',
+      route: '/:trip/seats',
       label: 'Voir les places',
       icon: '🪑',
     },
     {
-      route: '/:parentId/schedule',
+      route: '/:trip/schedule',
       label: 'Ajouter un schedule',
       icon: '📅',
     },
