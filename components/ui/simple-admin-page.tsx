@@ -1,15 +1,14 @@
 'use client';
+import { useQueryState, parseAsInteger, parseAsStringEnum } from 'nuqs';
 
 import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
-import { ZodType } from 'zod';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { DataTable } from '@/shared/components/molecules/datatable/data-table';
 import { DynamicForm } from '@/components/ui/dynamic-form';
 import { createDynamicColumns } from '@/lib/admin-generator';
 import { useAdminEntity } from '@/hooks/use-admin-entity';
-import Link from 'next/link';
 import { Plus, EllipsisVertical } from 'lucide-react';
 import type { AdminConfigWithServices } from '@/lib/admin-generator';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -27,12 +26,15 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
+import { ColumnDef, Row } from '@tanstack/react-table';
+import { ZodType } from 'zod';
+
 type ChildConfig = {
-    route: string;
-    label?: string;
-    icon?: React.ReactNode;
-    [key: string]: unknown;
-  };
+  route: string;
+  label?: string;
+  icon?: React.ReactNode;
+  [key: string]: unknown;
+};
 
 interface SimpleAdminPageProps<T extends Record<string, unknown>> {
   config: AdminConfigWithServices<T>;
@@ -45,7 +47,6 @@ interface SimpleAdminPageProps<T extends Record<string, unknown>> {
 // Ajout d'un type pour la propriété optionnelle parseData (legacy)
 interface AdminConfigWithLegacyParse<T extends Record<string, unknown>> extends AdminConfigWithServices<T> {
   parseData?: (item: Record<string, unknown>) => T;
-  children?: ChildConfig[];
 }
 
 // Type pour une bulk action personnalisée
@@ -58,8 +59,16 @@ interface BulkAction {
 }
 
 // Extension de la config admin pour bulkActions personnalisées
-interface AdminConfigWithBulkActions<T> extends AdminConfigWithLegacyParse<T> {
+interface AdminConfigWithBulkActions<T extends Record<string, unknown>> extends AdminConfigWithLegacyParse<T> {
   bulkActions?: BulkAction[];
+}
+
+interface SimpleAdminPageProps<T extends Record<string, unknown>> {
+  config: AdminConfigWithServices<T>;
+  schema: ZodType<T>;
+  className?: string;
+  renderFilters?: () => React.ReactNode;
+  filters?: Record<string, string | number | undefined>;
 }
 
 export function SimpleAdminPage<T extends Record<string, unknown>>({
@@ -72,6 +81,16 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
   const [editingItem, setEditingItem] = useState<T | null>(null);
   const [deletingItem, setDeletingItem] = useState<T | null>(null);
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
+
+
+  const [search, setSearch] = useQueryState('search', { defaultValue: '' });
+  const [sortBy, setSortBy] = useQueryState('sortBy', { defaultValue: '' });
+  const [sortDir, setSortDir] = useQueryState('sortDir',
+    parseAsStringEnum(['asc', 'desc']).withDefault('asc')
+  );
+  const [page, setPage] = useQueryState('page', parseAsInteger.withDefault(1));
+  const [pageSize, setPageSize] = useQueryState('pageSize', parseAsInteger.withDefault(10));
+
 
   const params = useParams();
   let parentId: string | undefined = undefined;
@@ -89,9 +108,9 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
   }
 
   const pickFields = (data: Record<string, unknown>, fields: (string | number)[]) =>
-  Object.fromEntries(fields.map((key: string | number) => [key, data[key]]));
+    Object.fromEntries(fields.map((key: string | number) => [key, data[key]]));
 
-  
+
   const {
     data: items,
     meta,
@@ -104,7 +123,7 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
     isUpdating
   } = useAdminEntity({
     config,
-    customServices: config.services, 
+    customServices: config.services,
     queryKey: config.queryKey,
     onSuccess: {
       create: () => setIsCreateOpen(false),
@@ -141,15 +160,33 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
   };
 
   const handleDelete = async () => {
-   if (!deletingItem) return;
+    if (!deletingItem) return;
     const id = (deletingItem as Record<string, unknown>).id as string;
     await deleteItem(id);
   };
 
-  let columns = createDynamicColumns(
+  // --- Fix: Handlers for DataTable search/sort to accept null ---
+  const handleSearchChange = (v: string | null) => setSearch(v ?? '');
+  const handleSortByChange = (v: string | null) => setSortBy(v ?? '');
+  const handleSortDirChange = (v: 'asc' | 'desc' | null) => setSortDir(v ?? 'asc');
+
+  // Widen the type to allow React.ReactNode for cell rendering
+  type TableColumn = {
+    accessorKey: string;
+    header: string;
+    cell?: ({ row }: { row: Row<T> }) => React.ReactNode;
+    meta?: { className?: (...args: unknown[]) => string };
+    size?: number;
+    minSize?: number;
+    maxSize?: number;
+    enableSorting?: boolean;
+    enableResizing?: boolean;
+  };
+
+  let columns: TableColumn[] = createDynamicColumns(
     config.fields,
     config.accessor
-  );
+  ) as TableColumn[];
 
   const selectedRows = Object.keys(rowSelection).filter((id) => rowSelection[id]);
 
@@ -169,19 +206,19 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
   if (hasBulkActions) {
     columns = [
       {
-        id: 'select',
-        header: () => <span className="sr-only">Sélectionner</span>,
-        cell: ({ row }: { row: { original: Record<string, unknown>; getIsSelected: () => boolean; toggleSelected: (value?: boolean) => void } }) => (
+        accessorKey: '__select__',
+        header: '',
+        cell: ({ row }: { row: Row<T> }) => (
           <input
             type="checkbox"
             aria-label="Sélectionner la ligne"
-            checked={row.getIsSelected()}
-            onChange={() => row.toggleSelected()}
+            checked={row.getIsSelected?.()}
+            onChange={() => row.toggleSelected?.()}
             className="accent-red-500 w-4 h-4 cursor-pointer"
           />
         ),
         meta: {
-          className: 'text-center',
+          className: () => 'text-center',
         },
         size: 32,
         minSize: 32,
@@ -198,9 +235,9 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
     columns = [
       ...columns,
       {
-        id: 'actions',
+        accessorKey: '__actions__',
         header: 'Actions',
-        cell: ({ row }: { row: { original: Record<string, unknown> } }) => (
+        cell: ({ row }: { row: Row<T> }) => (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button size="icon" variant="ghost" aria-label="Actions">
@@ -215,7 +252,8 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
                   const parseFn = config.parseEditItem || configTyped.parseData;
                   if (parseFn) {
                     try {
-                      parsed = parseFn(row.original);
+                      const result = parseFn(row.original);
+                      parsed = { ...row.original, ...result } as T;
                     } catch (e) {
                       console.error('parseEditItem/parseData error:', e, row.original);
                       return;
@@ -223,7 +261,7 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
                   } else {
                     parsed = row.original as T;
                   }
-                  setEditingItem(parsed);
+                  setEditingItem(parsed!);
                 }}>
                   Modifier
                 </DropdownMenuItem>
@@ -233,12 +271,11 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
                   Supprimer
                 </DropdownMenuItem>
               )}
-              {/* Ajoutez ici d'autres DropdownMenuItem pour de futures actions personnalisées */}
             </DropdownMenuContent>
           </DropdownMenu>
         ),
         meta: {
-          className: 'text-center',
+          className: () => 'text-center',
         },
       },
     ];
@@ -251,33 +288,48 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
 
   const hasChildren = childrenArray.length > 0;
   const renderChildrenActions = hasChildren
-    ? (row: { original: Record<string, unknown> }) => {
-        const paramRegex = /:([a-zA-Z0-9_]+)/g;
-        return (
-          <div className="flex flex-wrap gap-1">
-            {childrenArray.map((child: ChildConfig) => {
-              let route = child.route;
-              route = route.replace(paramRegex, (_: string, param: string) => {
-                const value = row.original[param] || params?.[param] || row.original.id;
-                return value || param;
-              });
-              const href = route.startsWith('/') ? `/admin${route}` : `/admin/${route}`;
-              return (
-                <Link
-                  key={child.route}
-                  href={href}
-                  aria-label={child.label || 'Gérer'}
-                  className="text-red-500 hover:underline font-medium whitespace-nowrap px-1 py-0.5 text-xs flex items-center rounded border border-red-100 bg-red-50 hover:bg-red-100 transition"
-                  style={{ display: 'inline-block', minWidth: 0 }}
-                >
-                  {child.icon && <span className="text-base align-middle mr-1">{child.icon}</span>}
-                  <span className="align-middle truncate max-w-[80px]">{child.label || 'Action'}</span>
-                </Link>
-              );
-            })}
-          </div>
-        );
-      }
+    ? (row: Row<T>) => {
+      if (!row || !row.original) return null;
+      const paramRegex = /:([a-zA-Z0-9_]+)/g;
+      return React.createElement(
+        'div',
+        {
+          className: 'flex flex-wrap gap-1',
+          'aria-label': 'Actions enfants',
+        },
+        ...childrenArray.map((child: ChildConfig) => {
+          let route = child.route;
+          route = route.replace(paramRegex, (_: string, param: string) => {
+            const value = row.original ? (row.original as Record<string, unknown>)[param] : undefined;
+            return value ? String(value) : param;
+          });
+          const href = route.startsWith('/') ? `/admin${route}` : `/admin/${route}`;
+          return React.createElement(
+            'a',
+            {
+              key: child.route,
+              href,
+              className:
+                'text-red-500 hover:underline font-medium whitespace-nowrap px-1 py-0.5 text-xs flex items-center rounded border border-red-100 bg-red-50 hover:bg-red-100 transition',
+              style: { display: 'inline-block', minWidth: 0 },
+              'aria-label': child.label || 'Gérer',
+              tabIndex: 0,
+            },
+            child.icon &&
+            React.createElement(
+              'span',
+              { className: 'text-base align-middle mr-1' },
+              child.icon
+            ),
+            React.createElement(
+              'span',
+              { className: 'align-middle truncate max-w-[80px]' },
+              child.label || 'Action'
+            )
+          );
+        })
+      );
+    }
     : undefined;
 
   const showRowActions = !!(config.actions?.update || config.actions?.delete || hasChildren);
@@ -285,9 +337,10 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
 
   const configWithBulk = config as AdminConfigWithBulkActions<T>;
 
-  const selectedIds = items
-    .filter((item: T) => rowSelection[(item as Record<string, unknown>).id as string])
-    .map((item: T) => String((item as Record<string, unknown>).id));
+  const itemsTyped = items as T[];
+  const selectedIds = itemsTyped
+    .filter((item) => rowSelection[(item as Record<string, unknown>).id as string])
+    .map((item) => String((item as Record<string, unknown>).id));
 
   const renderBulkActionsBar = hasBulkActions && selectedIds.length > 0 ? (
     <div className="flex items-center gap-4 bg-red-50 border border-red-200 rounded px-4 py-2 mb-2 animate-in fade-in slide-in-from-top-2">
@@ -361,27 +414,26 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
           {renderFilters && renderFilters()}
           {renderBulkActionsBar}
           <DataTable
-            columns={columns as typeof columns}
-            data={items}
-            meta={meta || { total: items.length, totalPages: 1 }}
+            columns={columns as ColumnDef<T, unknown>[]}
+            data={itemsTyped}
+            meta={meta || { total: itemsTyped.length, totalPages: 1 }}
             isLoading={isLoading}
             isError={!!error}
-            search=""
-            sortBy=""
-            sortDir="asc"
+            search={search}
+            sortBy={sortBy}
+            sortDir={sortDir}
+            onSearchChange={handleSearchChange}
+            onSortByChange={handleSortByChange}
+            onSortDirChange={handleSortDirChange}
+            page={page}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
             onRowSelectionChange={handleRowSelectionChange}
             rowSelection={rowSelection}
-            page={1}
-            pageSize={10}
-            onSearchChange={() => {}}
-            onSortByChange={() => {}}
-            onSortDirChange={() => {}}
-            onPageChange={() => {}}
-            onPageSizeChange={() => {}}
             renderRowActions={showRowActions ? renderChildrenActions : undefined}
           />
 
-          {/* Edit Sheet */}
           {editingItem && (
             <Sheet open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
               <SheetContent className="w-full max-w-full sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl">
@@ -410,7 +462,7 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
                 <AlertDialogHeader>
                   <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Êtes-vous sûr de vouloir supprimer ce {config.title.toLowerCase()} ? 
+                    Êtes-vous sûr de vouloir supprimer ce {config.title.toLowerCase()} ?
                     Cette action est irréversible.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
@@ -426,7 +478,7 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
               </AlertDialogContent>
             </AlertDialog>
           )}
-          </CardContent>
+        </CardContent>
       </Card>
     </>
   );

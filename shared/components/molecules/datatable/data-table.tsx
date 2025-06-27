@@ -75,6 +75,42 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const sort: ColumnSort[] = sortBy && sortDir ? [{ id: sortBy, desc: sortDir === 'desc' }] : [];
 
+  // Patch: prevent infinite rerender with nuqs by only calling setters if value changes
+  const safeOnSearchChange = React.useCallback(
+    (value: string | null) => {
+      if (search !== value) onSearchChange(value);
+    },
+    [search, onSearchChange]
+  );
+
+  const safeOnSortByChange = React.useCallback(
+    (value: string | null) => {
+      if (sortBy !== value) onSortByChange(value);
+    },
+    [sortBy, onSortByChange]
+  );
+
+  const safeOnSortDirChange = React.useCallback(
+    (value: SortDirection | null) => {
+      if (sortDir !== value) onSortDirChange(value);
+    },
+    [sortDir, onSortDirChange]
+  );
+
+  const safeOnPageChange = React.useCallback(
+    (newPage: number) => {
+      if (page !== newPage) onPageChange(newPage);
+    },
+    [page, onPageChange]
+  );
+
+  const safeOnPageSizeChange = React.useCallback(
+    (newSize: number) => {
+      if (pageSize !== newSize) onPageSizeChange(newSize);
+    },
+    [pageSize, onPageSizeChange]
+  );
+
   const table = useReactTable({
     data,
     columns,
@@ -99,12 +135,12 @@ export function DataTable<TData, TValue>({
     rowCount: meta.total,
     onGlobalFilterChange: (updater) => {
       const value = typeof updater === 'function' ? updater(search || '') : updater;
-      onSearchChange(value);
+      safeOnSearchChange(value);
     },
     onSortingChange: (updater) => {
       const value = typeof updater === 'function' ? updater(sort || []) : updater;
-      onSortByChange(value.length ? value[0].id : null);
-      onSortDirChange(value.length ? (value[0].desc ? 'desc' : 'asc') : null);
+      safeOnSortByChange(value.length ? value[0].id : null);
+      safeOnSortDirChange(value.length ? (value[0].desc ? 'desc' : 'asc') : null);
     },
     onColumnFiltersChange: (updater) => {
       const value = typeof updater === 'function' ? updater(filter || []) : updater;
@@ -115,8 +151,8 @@ export function DataTable<TData, TValue>({
       const safePageSize = pageSize ?? 10;
       const value =
         typeof updater === 'function' ? updater({ pageIndex: safePage - 1, pageSize: safePageSize }) : updater;
-      onPageChange(value.pageIndex + 1);
-      onPageSizeChange(value.pageSize);
+      safeOnPageChange(value.pageIndex + 1);
+      safeOnPageSizeChange(value.pageSize);
     },
     debugAll: false,
   });

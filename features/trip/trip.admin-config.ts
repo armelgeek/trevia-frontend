@@ -12,7 +12,7 @@ export const TripAdminConfig = createAdminEntity('Voyage', tripSchema, {
     read: true,
     update: true,
     delete: true,
-    bulk: false,
+    bulk: true,
     export: false
   },
   services: tripService,
