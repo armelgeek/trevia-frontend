@@ -40,7 +40,7 @@ export interface BulkAction {
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost';
 }
 
-export interface AdminConfig {
+export interface AdminConfig<T = any> {
   title: string;
   description?: string;
   icon?: string;
@@ -71,6 +71,7 @@ export interface AdminConfig {
         fields: string[];
       }[];
     };
+    toolbarActions?: React.ReactNode | ((selectedRows: T[]) => React.ReactNode);
   };
   bulkActions?: BulkAction[];
 }
@@ -81,6 +82,7 @@ export interface AdminConfigWithAccessor extends AdminConfig {
 }
 
 export interface AdminConfigWithServices<T extends Record<string, unknown>> extends AdminConfigWithAccessor {
+  children: ChildConfig[];
   services?: CrudService<T>;
   queryKey?: string[];
   parseEditItem?: (item: Partial<T>) => Partial<T> | T;
@@ -264,9 +266,22 @@ export const createField = {
 export function generateAdminConfig(schema: ZodObject<z.ZodRawShape>, title: string): AdminConfigWithAccessor {
   const fields: FieldConfig[] = [];
   const accessor = createDynamicAccessor();
-  
-  const shape = schema.shape;
-  
+
+  if (!(schema instanceof z.ZodObject)) {
+    throw new Error('[generateAdminConfig] Le schéma fourni n\'est pas un ZodObject.');
+  }
+  // Compatibilité Zod v3/v4 : shape peut être une fonction ou un objet
+  let shape: Record<string, z.ZodTypeAny>;
+  if (typeof (schema as any).shape === 'function') {
+    shape = (schema as any).shape();
+  } else if ((schema as any)._def?.shape) {
+    shape = (schema as any)._def.shape();
+  } else if ((schema as any)._def?.shape instanceof Object) {
+    shape = (schema as any)._def.shape;
+  } else {
+    throw new Error('[generateAdminConfig] Impossible de récupérer la shape du schéma ZodObject.');
+  }
+
   Object.entries(shape).forEach(([key, zodField]) => {
     // Pour les champs optionnels, récupérer les métadonnées du champ interne
     let metadata: ZodMetadata = {};
@@ -573,11 +588,11 @@ export function useZodValidation<T>(schema: ZodSchema<T>) {
   return { validate, safeValidate };
 }
 
-export function createAdminEntity<T extends z.ZodRawShape>(
+export function createAdminEntity<T extends Record<string, unknown>>(
   name: string,
-  schema: ZodObject<T>,
-  config?: Partial<AdminConfigWithChild<z.infer<ZodObject<T>>>>
-): AdminConfigWithChild<z.infer<ZodObject<T>>> {
+  schema: z.ZodObject<any>,
+  config?: Partial<AdminConfigWithChild<T>>
+): AdminConfigWithChild<T> {
   const baseConfig = generateAdminConfig(schema, name);
   return {
     ...baseConfig,

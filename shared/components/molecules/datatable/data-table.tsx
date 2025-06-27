@@ -10,12 +10,13 @@ import {
   getFacetedRowModel,
   SortDirection,
   useReactTable,
-  Row, // Ajout de Row
+  Row,
+  Table,
 } from '@tanstack/react-table';
 
 import { DataTablePagination } from '@/shared/components/molecules/datatable/data-table-pagination';
 import {
-  Table,
+  Table as UITable,
   TableBody,
   TableCell,
   TableHead,
@@ -23,7 +24,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { DataTableToolbar } from './data-table-toolbar';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -50,6 +52,23 @@ interface DataTableProps<TData, TValue> {
   // Ajout pour bulk selection
   rowSelection?: Record<string, boolean>;
   onRowSelectionChange?: (rowSelection: Record<string, boolean>) => void;
+  toolbarActions?: React.ReactNode | ((selectedRows: TData[]) => React.ReactNode);
+}
+
+function DataTableToolbar<TData>({ table, toolbarActions }: { table: Table<TData>; toolbarActions?: React.ReactNode | ((selectedRows: TData[]) => React.ReactNode) }) {
+  const selectedRows = table.getSelectedRowModel().rows.map(r => r.original as TData);
+  const selectedCount = selectedRows.length;
+  return (
+    <div className="flex items-center gap-2">
+      {selectedCount > 0 && (
+        <span className="text-sm text-muted-foreground">{selectedCount} sélectionné(s)</span>
+      )}
+      <div className="flex-1" />
+      {typeof toolbarActions === 'function'
+        ? toolbarActions(selectedRows)
+        : toolbarActions}
+    </div>
+  );
 }
 
 export function DataTable<TData, TValue>({
@@ -72,10 +91,10 @@ export function DataTable<TData, TValue>({
   renderRowActions,
   rowSelection,
   onRowSelectionChange,
+  toolbarActions,
 }: DataTableProps<TData, TValue>) {
   const sort: ColumnSort[] = sortBy && sortDir ? [{ id: sortBy, desc: sortDir === 'desc' }] : [];
 
-  // Patch: prevent infinite rerender with nuqs by only calling setters if value changes
   const safeOnSearchChange = React.useCallback(
     (value: string | null) => {
       if (search !== value) onSearchChange(value);
@@ -124,7 +143,15 @@ export function DataTable<TData, TValue>({
       },
       rowSelection: rowSelection ?? {},
     },
-    onRowSelectionChange,
+    onRowSelectionChange: onRowSelectionChange
+      ? (updaterOrValue) => {
+          const value =
+            typeof updaterOrValue === 'function'
+              ? updaterOrValue(rowSelection ?? {})
+              : updaterOrValue;
+          onRowSelectionChange(value);
+        }
+      : undefined,
     enableRowSelection: true,
     getCoreRowModel: getCoreRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
@@ -159,14 +186,38 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      <DataTableToolbar table={table} />
+      <div className="flex items-center gap-2 py-2">
+        <div className="relative w-full max-w-xs">
+          <Input
+            type="text"
+            placeholder="Rechercher..."
+            value={table.getState().globalFilter ?? ''}
+            onChange={e => table.setGlobalFilter(e.target.value)}
+            className="pl-8"
+            aria-label="Recherche globale"
+          />
+          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </span>
+        </div>
+        {table.getState().globalFilter && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => table.setGlobalFilter('')}
+            aria-label="Effacer la recherche"
+          >
+            Effacer
+          </Button>
+        )}
+      </div>
+      <DataTableToolbar<TData> table={table} toolbarActions={toolbarActions} />
       <div className="rounded-md border">
-        <Table>
+        <UITable>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
-                  // On insère la colonne d'action enfant juste avant la colonne Actions (si présente)
                   const isBeforeActions = renderRowActions && header.id === 'actions';
                   return (
                     <React.Fragment key={header.id}>
@@ -182,7 +233,6 @@ export function DataTable<TData, TValue>({
                     </React.Fragment>
                   );
                 })}
-                {/* Si pas de colonne Actions, on ajoute la colonne enfant à la fin */}
                 {renderRowActions && !table.getHeaderGroups()[0].headers.some(h => h.id === 'actions') && <TableHead> </TableHead>}
               </TableRow>
             ))}
@@ -208,7 +258,6 @@ export function DataTable<TData, TValue>({
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row) => {
-                // On insère la cellule d'action enfant juste avant la cellule Actions (si présente)
                 const cells = row.getVisibleCells();
                 const actionsIdx = cells.findIndex(cell => cell.column.id === 'actions');
                 return (
@@ -224,14 +273,13 @@ export function DataTable<TData, TValue>({
                         </TableCell>
                       </React.Fragment>
                     ))}
-                    {/* Si pas de colonne Actions, on ajoute la colonne enfant à la fin */}
                     {renderRowActions && actionsIdx === -1 && <TableCell>{renderRowActions(row)}</TableCell>}
                   </TableRow>
                 );
               })
             )}
           </TableBody>
-        </Table>
+        </UITable>
       </div>
       <DataTablePagination table={table} />
     </div>

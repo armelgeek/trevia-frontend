@@ -416,7 +416,7 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
           <DataTable
             columns={columns as ColumnDef<T, unknown>[]}
             data={itemsTyped}
-            meta={meta || { total: itemsTyped.length, totalPages: 1 }}
+            meta={meta || { total: itemsTyped.length, totalPages: 5 }}
             isLoading={isLoading}
             isError={!!error}
             search={search}
@@ -432,6 +432,7 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
             onRowSelectionChange={handleRowSelectionChange}
             rowSelection={rowSelection}
             renderRowActions={showRowActions ? renderChildrenActions : undefined}
+            toolbarActions={config.ui?.toolbarActions}
           />
 
           {editingItem && (

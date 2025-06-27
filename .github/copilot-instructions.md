@@ -52,7 +52,7 @@ export const [entity]Service = createMockService(mock[Entity
 
 ```ts
 import { BaseService } from '@/lib/base-service';
-import { API_ENDPOINTS } from '@/lib/api-endpoints';
+import { API_ENDPOINTS } from '@/shared/config/api';
 
 export const [entity]Service = new BaseService<[Entity]>(
   http.private,
@@ -647,3 +647,57 @@ Le widget est choisi dynamiquement selon la valeur de `display.widget` dans le s
 Accessibilité, focus clavier et feedback visuel sont gérés automatiquement dans le composant RelationField.
 
 ---
+
+## Actions personnalisées dans la toolbar et bulk du DataTable admin
+
+Pour ajouter des actions personnalisées dans la barre d’outils (toolbar) du tableau admin, la configuration admin accepte une clé optionnelle :
+
+- `ui.toolbarActions?: React.ReactNode | ((selectedRows: T[]) => React.ReactNode)`
+
+**Utilisation :**
+- Placez vos boutons ou actions contextuelles dans `ui.toolbarActions` de la config admin :
+  ```ts
+  ui: {
+    toolbarActions: (selectedRows) => (
+      <>
+        <Button onClick={...}>Exporter</Button>
+        <MyCustomAction selected={selectedRows} />
+      </>
+    )
+  }
+  ```
+- Si vous fournissez une fonction, elle reçoit le tableau des lignes sélectionnées (pour actions bulk/contextuelles).
+- Ces actions apparaîtront dans la barre d’outils du DataTable, à droite du compteur de sélection.
+
+**Pour les actions bulk natives** (supprimer, exporter, etc.), continuez d’utiliser la config `actions.bulk` et/ou `bulkActions`.
+
+---
+
+## Actions bulk natives et personnalisées
+
+Pour gérer les actions bulk (actions sur plusieurs lignes sélectionnées) dans l’admin :
+
+- **Actions bulk natives** (supprimer, exporter, etc.) :
+  - Activez-les via la clé `actions.bulk: true` dans la config admin.
+  - Pour la suppression groupée, activez aussi `actions.delete: true`.
+  - Vous pouvez personnaliser les actions bulk natives via la clé `bulkActions` :
+    ```ts
+    bulkActions: [
+      {
+        key: 'export',
+        label: 'Exporter',
+        icon: <DownloadIcon />, // optionnel
+        onClick: async (ids) => { ... },
+        variant: 'default' // ou 'destructive', etc.
+      },
+      // ...
+    ]
+    ```
+  - Les actions bulk natives s’affichent automatiquement dans la barre d’actions contextuelle quand des lignes sont sélectionnées.
+
+- **Actions personnalisées dans la toolbar** :
+  - Utilisez `ui.toolbarActions` pour ajouter des boutons ou actions contextuelles au-dessus du tableau (voir section précédente).
+  - Ces actions peuvent aussi exploiter les lignes sélectionnées si besoin.
+
+---
+````
