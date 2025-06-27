@@ -5,13 +5,13 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Plus, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 
 interface ModalFormProps<T> {
 
@@ -35,7 +35,6 @@ interface ModalFormProps<T> {
 
 export function EntityForm<T>({
   title,
-  description = "Click save when you're done.",
   initialData,
   onSubmit,
   isSubmitting = false,
@@ -63,11 +62,8 @@ export function EntityForm<T>({
   const actionText = isEditMode ? 'Edit' : 'Add';
 
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={(open) => setIsOpen(open)}
-    >
-      <DialogTrigger asChild>
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <SheetTrigger asChild>
         {!isEditMode ? (
           <Button variant={buttonVariant}>
             <Plus
@@ -79,7 +75,7 @@ export function EntityForm<T>({
             {buttonLabel || `${actionText} ${title}`}
           </Button>
         ) : (
-          <div className='flex flex-row gap-2 items-center ml-2 cursor-pointer'> 
+          <div className='flex flex-row gap-2 items-center ml-2 cursor-pointer'>
             <Edit
               size={14}
               strokeWidth={2}
@@ -89,13 +85,12 @@ export function EntityForm<T>({
             {buttonLabel || actionText}
           </div>
         )}
-      </DialogTrigger>
-      <DialogContent className={className}>
-        <DialogHeader>
-          <DialogTitle>{actionText} {title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
-
+      </SheetTrigger>
+      <SheetContent className={className}>
+        <SheetHeader>
+          <SheetTitle>{actionText} {title}</SheetTitle>
+          <SheetDescription />
+        </SheetHeader>
         <div className="grid gap-4 py-4">
           <Form
             initialData={initialData}
@@ -103,7 +98,7 @@ export function EntityForm<T>({
             isSubmitting={isSubmitting}
           />
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }

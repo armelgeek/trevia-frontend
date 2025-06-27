@@ -20,6 +20,7 @@ export interface FieldConfig {
     showInForm?: boolean;
     showInDetail?: boolean;
     order?: number;
+    widget?: 'select' | 'tag' | 'radio';
   };
   relation?: {
     entity: string;
@@ -458,7 +459,8 @@ export function createAdminEntity<T extends z.ZodRawShape>(
     services: config?.services,
     queryKey: config?.queryKey || [name.toLowerCase()],
     parent: config?.parent,
-    child: config?.child,
+    children: config?.children,
+    formFields: config?.formFields,
   };
 }
 
@@ -494,6 +496,8 @@ export interface CrudService<T extends Record<string, unknown>> {
 export interface AdminConfigWithServices<T extends Record<string, unknown>> extends AdminConfigWithAccessor {
   services?: CrudService<T>;
   queryKey?: string[];
+  parseData?: (item: Partial<T>) => Partial<T> | T;
+  formFields?: string[];
 }
 
 export interface AdminConfigWithParent<T extends Record<string, unknown>> extends AdminConfigWithServices<T> {
@@ -506,10 +510,12 @@ export interface AdminConfigWithParent<T extends Record<string, unknown>> extend
 }
 
 export interface AdminConfigWithChild<T extends Record<string, unknown>> extends AdminConfigWithParent<T> {
-  child?: {
+  children?: {
     route: string;
     label?: string;
-  };
+    icon?: string;
+    [key: string]: unknown;
+  }[];
 }
 
 export function createMockService<T extends Record<string, unknown>>(
@@ -620,12 +626,10 @@ export class AdminCrudService<T extends Record<string, unknown>> extends BaseSer
   }
 
   async deleteItem(id: string): Promise<void> {
-    try {
-      await this.remove(id);
-    } catch (error) {
-      console.error('AdminCrudService.deleteItem error:', error);
-      throw error;
-    }
+    await this.fetchData(this.endpoints.delete(id), {
+      method: 'DELETE',
+      credentials: 'include', 
+    });
   }
 }
 

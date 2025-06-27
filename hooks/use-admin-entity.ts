@@ -30,24 +30,29 @@ interface AdminEntityService<T> {
 }
 
 function createAdminService<T>(endpoint: string): AdminEntityService<T> {
+  // Ajout d'un prefix global si défini (ex: process.env.NEXT_PUBLIC_API_URL)
+  const API_PREFIX = process.env.NEXT_PUBLIC_API_URL || '';
+  const fullEndpoint = endpoint.startsWith('http') ? endpoint : `${API_PREFIX}${endpoint}`;
   return {
     async fetchItems(filters?: Record<string, unknown>) {
-      const response = await fetch(endpoint, {
+      const response = await fetch(fullEndpoint, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(filters),
+        credentials: 'include',
       });
       if (!response.ok) {
-        throw new Error(`Failed to fetch ${endpoint}`);
+        throw new Error(`Failed to fetch ${fullEndpoint}`);
       }
       return response.json();
     },
 
     async createItem(data: T) {
-      const response = await fetch(endpoint, {
+      const response = await fetch(fullEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
+        credentials: 'include',
       });
       if (!response.ok) {
         throw new Error(`Failed to create item`);
@@ -56,10 +61,11 @@ function createAdminService<T>(endpoint: string): AdminEntityService<T> {
     },
 
     async updateItem(id: string, data: Partial<T>) {
-      const response = await fetch(`${endpoint}/${id}`, {
+      const response = await fetch(`${fullEndpoint}/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
+        credentials: 'include',
       });
       if (!response.ok) {
         throw new Error(`Failed to update item`);
@@ -68,12 +74,10 @@ function createAdminService<T>(endpoint: string): AdminEntityService<T> {
     },
 
     async deleteItem(id: string) {
-      const response = await fetch(`${endpoint}/${id}`, {
+      await fetch(`${fullEndpoint}/${id}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
-      if (!response.ok) {
-        throw new Error(`Failed to delete item`);
-      }
     },
   };
 }
@@ -86,15 +90,23 @@ export function useAdminEntity<T extends Record<string, unknown>>(
     ? wrapParentService(options.customServices, options.parentId)
     : createAdminService<T>(options.apiEndpoint || '');
 
+  // Clé de query complète avec les filtres
   const query = useQuery({
-    queryKey: [...options.queryKey, options.filters || {}],
+    queryKey: options.filters && Object.keys(options.filters).length > 0
+      ? [...options.queryKey, options.filters]
+      : options.queryKey,
     queryFn: () => service.fetchItems(options.filters),
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
+    staleTime: 0, // Toujours stale, refetch immédiat après mutation
   });
-
+  
   const createMutation = useMutation({
     mutationFn: service.createItem,
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: options.queryKey });
+      // Invalider toutes les queries qui commencent par la queryKey de base
+      queryClient.invalidateQueries({ queryKey: options.queryKey});
       toast.success(`${options.config.title} créé avec succès`);
       options.onSuccess?.create?.(data);
     },
@@ -108,6 +120,7 @@ export function useAdminEntity<T extends Record<string, unknown>>(
     mutationFn: ({ id, data }: { id: string; data: Partial<T> }) => 
       service.updateItem(id, data),
     onSuccess: (data) => {
+      // Invalider toutes les queries qui commencent par la queryKey de base
       queryClient.invalidateQueries({ queryKey: options.queryKey });
       toast.success(`${options.config.title} modifié avec succès`);
       options.onSuccess?.update?.(data);
@@ -121,6 +134,7 @@ export function useAdminEntity<T extends Record<string, unknown>>(
   const deleteMutation = useMutation({
     mutationFn: service.deleteItem,
     onSuccess: (_, id) => {
+      // Invalider toutes les queries qui commencent par la queryKey de base
       queryClient.invalidateQueries({ queryKey: options.queryKey });
       toast.success(`${options.config.title} supprimé avec succès`);
       options.onSuccess?.delete?.(id);

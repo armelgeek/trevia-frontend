@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { DataTable } from '@/shared/components/molecules/datatable/data-table';
 import { useTableParams } from '@/shared/hooks/use-table-params';
@@ -13,6 +13,14 @@ import { generateTableColumns } from '@/components/ui/dynamic-table';
 import { toast } from 'sonner';
 import type { AdminConfig } from '@/lib/admin-generator';
 import { z } from 'zod';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 
 interface AdminPageProps<T extends Record<string, unknown>> {
   config: AdminConfig;
@@ -144,28 +152,30 @@ export function AdminPage<T extends Record<string, unknown>>({
         </div>
 
         {config.actions.create && (
-          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-            <DialogTrigger asChild>
+          <Sheet open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+            <SheetTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
                 Ajouter {config.title}
               </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Créer {config.title}</DialogTitle>
-                <DialogDescription>
+            </SheetTrigger>
+            <SheetContent className="max-w w-full md:max-w-2xl">
+              <SheetHeader>
+                <SheetTitle>Créer {config.title}</SheetTitle>
+                <SheetDescription>
                   Remplissez les informations pour créer un nouveau {config.title.toLowerCase()}.
-                </DialogDescription>
-              </DialogHeader>
-              <DynamicForm
-                config={config}
-                schema={schema}
-                onSubmit={(data: Record<string, unknown>) => handleCreate(data as T)}
-                isSubmitting={createMutation.isPending}
-              />
-            </DialogContent>
-          </Dialog>
+                </SheetDescription>
+              </SheetHeader>
+              <div className="py-4">
+                <DynamicForm
+                  config={config}
+                  schema={schema}
+                  onSubmit={(data: Record<string, unknown>) => handleCreate(data as T)}
+                  isSubmitting={createMutation.isPending}
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
         )}
       </div>
 
@@ -188,23 +198,25 @@ export function AdminPage<T extends Record<string, unknown>>({
       />
 
       {editingItem && (
-        <Dialog open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Modifier {config.title}</DialogTitle>
-              <DialogDescription>
+        <Sheet open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
+          <SheetContent className="max-w w-full md:max-w-2xl">
+            <SheetHeader>
+              <SheetTitle>Modifier {config.title}</SheetTitle>
+              <SheetDescription>
                 Modifiez les informations de ce {config.title.toLowerCase()}.
-              </DialogDescription>
-            </DialogHeader>
-            <DynamicForm
-              config={config}
-              schema={schema}
-              initialData={editingItem}
-              onSubmit={(data: Record<string, unknown>) => handleUpdate(data as T)}
-              isSubmitting={updateMutation.isPending}
-            />
-          </DialogContent>
-        </Dialog>
+              </SheetDescription>
+            </SheetHeader>
+            <div className="py-4">
+              <DynamicForm
+                config={config}
+                schema={schema}
+                initialData={editingItem}
+                onSubmit={(data: Record<string, unknown>) => handleUpdate(data as T)}
+                isSubmitting={updateMutation.isPending}
+              />
+            </div>
+          </SheetContent>
+        </Sheet>
       )}
 
       {deletingItem && (

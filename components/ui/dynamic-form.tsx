@@ -17,61 +17,78 @@ import { format } from 'date-fns';
 import { cn } from '@/shared/lib/utils';
 import { RelationField } from './relation-field';
 import type { FieldConfig, AdminConfig } from '@/lib/admin-generator';
+import { toast } from 'sonner';
 
 interface DynamicFormProps<T = Record<string, unknown>> {
   config: AdminConfig;
   schema: z.ZodSchema<T>;
   initialData?: T;
-  onSubmit: (data: Record<string, unknown>) => Promise<void>;
   onSuccess?: () => void;
   isSubmitting?: boolean;
   className?: string;
+  onCreate?: (data: Record<string, unknown>) => Promise<void>;
+  onUpdate?: (data: Record<string, unknown>) => Promise<void>;
 }
 
-export function DynamicForm({
+export function DynamicForm<
+  T extends { id?: string | number } = Record<string, unknown>
+>({
   config,
   schema,
   initialData,
-  onSubmit,
   onSuccess,
   isSubmitting = false,
   className,
-}: DynamicFormProps) {
-  const form = useForm({
+  onCreate,
+  onUpdate,
+}: Omit<DynamicFormProps<T>, 'onSubmit'>) {
+  const form = useForm<Record<string, unknown>>({
     resolver: zodResolver(schema),
-    defaultValues: initialData || {},
+    defaultValues: (initialData as Record<string, unknown>) || {},
   });
 
   // Réinitialiser le formulaire quand initialData change
   useEffect(() => {
     console.log('DynamicForm initialData changed:', initialData);
     if (initialData) {
-      form.reset(initialData);
+      const validation = schema.parse(initialData);
+      form.reset(validation);
     }
-  }, [initialData, form]);
+  }, [initialData, form, schema]);
 
   const handleSubmit = async (data: Record<string, unknown>) => {
-    console.log('Form submission started with data:', data);
-    console.log('Form validation state:', form.formState.isValid);
-    console.log('Form errors:', form.formState.errors);
-    console.log('Is initial data present:', !!initialData);
-    console.log('Initial data:', initialData);
-    
+  
     try {
-      console.log('Calling onSubmit function...');
-      await onSubmit(data);
-      console.log('Form submission successful');
-      onSuccess?.();
+      if (initialData && typeof (initialData as { id?: string | number }).id !== 'undefined') {
+        if (typeof onUpdate === 'function') {
+          await onUpdate({ ...data, id: (initialData as { id?: string | number }).id });
+          toast.success(`${config.title || 'Élément'} modifié avec succès`);
+          onSuccess?.(); // Ferme le sheet si le parent le gère
+        } else {
+          throw new Error('Aucune fonction de mutation update fournie.');
+        }
+      } else {
+        if (typeof onCreate === 'function') {
+          await onCreate(data);
+          toast.success(`${config.title || 'Élément'} créé avec succès`);
+          onSuccess?.(); // Ferme le sheet si le parent le gère
+        } else {
+          throw new Error('Aucune fonction de mutation create fournie.');
+        }
+      }
+      form.reset();
     } catch (error) {
+      const err = error as Error;
+      toast.error(err.message || 'Erreur lors de la soumission du formulaire');
       console.error('Form submission error:', error);
     }
   };
 
   const renderField = (field: FieldConfig) => {
-    console.log('Rendering field:', field.key, 'showInForm:', field.display?.showInForm);
+    //console.log('Rendering field:', field.key, 'showInForm:', field.display?.showInForm);
     
     if (!field.display?.showInForm) {
-      console.log('Field', field.key, 'hidden from form');
+     // console.log('Field', field.key, 'hidden from form');
       return null;
     }
 
@@ -79,7 +96,7 @@ export function DynamicForm({
       <FormField
         key={field.key}
         control={form.control}
-        name={field.key}
+        name={field.key as keyof Record<string, unknown>}
         render={({ field: fieldProps }) => (
           <FormItem>
             <FormLabel>{field.label}</FormLabel>
@@ -228,27 +245,15 @@ export function DynamicForm({
         );
 
       case 'image':
-      case 'file':
+      case 'file': {
         return (
-          <div className="space-y-2">
-            <Input
-              type="file"
-              accept={fieldConfig.type === 'image' ? 'image/*' : '*'}
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  // Ici vous pouvez implémenter votre logique d'upload
-                  fieldProps.onChange(file.name); // Temporaire
-                }
-              }}
-            />
-            {typeof fieldProps.value === 'string' && fieldProps.value && (
-              <p className="text-sm text-muted-foreground">
-                Fichier sélectionné: {fieldProps.value}
-              </p>
-            )}
-          </div>
+          <FileInputControl
+            value={fieldProps.value}
+            onChange={fieldProps.onChange}
+            accept={fieldConfig.type === 'image' ? 'image/*' : '*'}
+          />
         );
+      }
 
       case 'rich-text':
         return (
@@ -285,7 +290,7 @@ export function DynamicForm({
   };
 
   const renderFormSections = () => {
-    console.log('Available fields:', config.fields.map(f => ({ key: f.key, showInForm: f.display?.showInForm })));
+   // console.log('Available fields:', config.fields.map(f => ({ key: f.key, showInForm: f.display?.showInForm })));
     
     if (config.ui?.form?.layout === 'sections' && config.ui.form.sections) {
       return config.ui.form.sections.map((section) => (
@@ -319,17 +324,68 @@ export function DynamicForm({
       >
         {renderFormSections()}
 
+        {/* Affichage global des erreurs de validation */}
+        {Object.keys(form.formState.errors).length > 0 && (
+          <div className="text-red-600 text-sm mb-2">
+            <b>Erreur(s) de validation :</b>
+            <ul className="list-disc ml-5">
+              {Object.entries(form.formState.errors).map(([key, err]) => {
+                const message = typeof err === 'object' && err && 'message' in err ? (err as { message?: string }).message : undefined;
+                return (
+                  <li key={key}>{key} : {message || 'Champ invalide'}</li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+
         <div className="flex justify-end space-x-2">
           <Button
             type="submit"
             disabled={isSubmitting}
-            onClick={() => console.log('Submit button clicked, form valid:', form.formState.isValid, 'errors:', form.formState.errors)}
           >
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {initialData ? 'Mettre à jour' : 'Créer'}
+            {initialData && typeof (initialData as { id?: string | number }).id !== 'undefined' ? 'Mettre à jour' : 'Créer'}
           </Button>
         </div>
       </form>
     </Form>
+  );
+}
+
+// Ajout d'un composant contrôlé pour le champ file/image
+function FileInputControl({ value, onChange, accept }: { value: unknown; onChange: (file: File | undefined) => void; accept?: string }) {
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (fileInputRef.current && !value) {
+      fileInputRef.current.value = '';
+    }
+  }, [value]);
+  return (
+    <div className="space-y-2">
+      <Input
+        ref={fileInputRef}
+        type="file"
+        accept={accept}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) {
+            onChange(file);
+          } else {
+            onChange(undefined);
+          }
+        }}
+      />
+      {value instanceof File && (
+        <p className="text-sm text-muted-foreground">
+          Fichier sélectionné: {value.name}
+        </p>
+      )}
+      {typeof value === 'string' && value && (
+        <p className="text-sm text-muted-foreground">
+          Fichier sélectionné: {value}
+        </p>
+      )}
+    </div>
   );
 }

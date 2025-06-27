@@ -1,4 +1,3 @@
-````instructions
 ``instructions
 
 # Copilot Instructions: Générer une Simple Admin Page
@@ -628,5 +627,23 @@ services: {
 
 ---
 
-# (Le reste des instructions Copilot existantes suit ici)
-````
+## Widgets relation pour les champs relation admin
+
+Pour les champs de type relation dans un schéma Zod, tu peux choisir dynamiquement le rendu du widget via la clé `display.widget` :
+
+- `select` : menu déroulant natif stylisé (single ou multi)
+- `tag` : badges cliquables (single : choix unique, multi : toggle)
+- `radio` : radio group stylisé (single) ou checkbox group stylisé (multi)
+
+**Exemple :**
+```ts
+routeId: createField.relation('routes', 'routeLabel', false, {
+  label: 'Route',
+  display: { showInForm: true, widget: 'radio' }
+})
+```
+
+Le widget est choisi dynamiquement selon la valeur de `display.widget` dans le schéma Zod.
+Accessibilité, focus clavier et feedback visuel sont gérés automatiquement dans le composant RelationField.
+
+---

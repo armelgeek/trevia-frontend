@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { ZodType } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { DataTable } from '@/shared/components/molecules/datatable/data-table';
 import { DynamicForm } from '@/components/ui/dynamic-form';
@@ -14,6 +13,14 @@ import Link from 'next/link';
 import { Plus } from 'lucide-react';
 import type { AdminConfigWithServices } from '@/lib/admin-generator';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 
 interface SimpleAdminPageProps<T extends Record<string, unknown>> {
   config: AdminConfigWithServices<T>;
@@ -56,6 +63,10 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
     throw new Error(`QueryKey not configured for ${config.title}. Please add queryKey to your config.`);
   }
 
+  const pickFields = (data: Record<string, unknown>, fields: (string | number)[]) =>
+  Object.fromEntries(fields.map((key: string | number) => [key, data[key]]));
+
+  
   // Utilisation du hook avec les services de la config
   const {
     data: items,
@@ -69,44 +80,37 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
     isUpdating
   } = useAdminEntity({
     config,
-    apiEndpoint: '', // Non utilisé avec services custom
+    customServices: config.services, // Ajouté pour utiliser le vrai service CRUD externe
     queryKey: config.queryKey,
     onSuccess: {
       create: () => setIsCreateOpen(false),
       update: () => setEditingItem(null),
       delete: () => setDeletingItem(null),
     },
-    // Services personnalisés
-    customServices: config.services,
     filters,
-    parentId, // Ajouté pour injection dans le hook
+    parentId,
   });
 
   // Handlers pour les actions CRUD
-  const handleCreate = async (data: T) => {
-    console.log('handleCreate called with:', data);
+  const handleCreate = async (data: Record<string, unknown>) => {
+    const filtered = pickFields(data, config.formFields ?? []);
     try {
-      console.log('Calling create function...');
-      await create(data);
-      console.log('Create function completed successfully');
+      await create(filtered as T);
     } catch (error) {
       console.error('Error in handleCreate:', error);
       throw error;
     }
   };
 
-  const handleUpdate = async (data: T) => {
-    console.log('handleUpdate called with:', data);
+  const handleUpdate = async (data: Record<string, unknown>) => {
     if (!editingItem) {
       console.error('No editing item found');
       return;
     }
     const id = (editingItem as Record<string, unknown>).id as string;
-    console.log('Updating item with ID:', id);
+    const filtered = pickFields(data, config.formFields ?? []);
     try {
-      console.log('Calling update function...');
-      await update(id, data);
-      console.log('Update function completed successfully');
+      await update(id, filtered as T);
     } catch (error) {
       console.error('Error in handleUpdate:', error);
       throw error;
@@ -114,7 +118,7 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
   };
 
   const handleDelete = async () => {
-    if (!deletingItem) return;
+   if (!deletingItem) return;
     const id = (deletingItem as Record<string, unknown>).id as string;
     await deleteItem(id);
   };
@@ -122,8 +126,10 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
   // Génération des colonnes de table
   const columns = generateTableColumns<T>(
     config,
-    config.actions?.update ? setEditingItem : undefined,
-    config.actions?.delete ? setDeletingItem : undefined
+    config.actions?.update
+      ? (item) => setEditingItem(item): undefined,
+    config.actions?.delete ? setDeletingItem : undefined,
+    schema // <-- Ajout du schéma pour parsing Zod
   );
 
   // Ajout du bouton "Gérer l'enfant" si la config admin déclare un enfant
@@ -156,28 +162,30 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
           <div className="flex items-center gap-4 justify-between">
             <CardTitle className='text-red-500 text-lg'>{config.title}</CardTitle>
             {config.actions?.create && (
-              <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                <DialogTrigger asChild>
+              <Sheet open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+                <SheetTrigger asChild>
                   <Button>
                     <Plus className="h-4 w-4 mr-2" />
                     Créer
                   </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>Créer {config.title}</DialogTitle>
-                    <DialogDescription>
+                </SheetTrigger>
+                <SheetContent className="w-full max-w-full sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl">
+                  <SheetHeader>
+                    <SheetTitle>Créer {config.title}</SheetTitle>
+                    <SheetDescription>
                       Remplissez les informations pour créer un nouveau {config.title.toLowerCase()}.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <DynamicForm
-                    config={config}
-                    schema={schema}
-                    onSubmit={(data: Record<string, unknown>) => handleCreate(data as T)}
-                    isSubmitting={isCreating}
-                  />
-                </DialogContent>
-              </Dialog>
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="py-4">
+                    <DynamicForm
+                      config={config}
+                      schema={schema}
+                      onCreate={handleCreate}
+                      isSubmitting={isCreating}
+                    />
+                  </div>
+                </SheetContent>
+              </Sheet>
             )}
           </div>
           {config.description && (
@@ -190,7 +198,7 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
           {renderFilters && renderFilters()}
           {/* Data Table */}
           <DataTable
-            columns={columns}
+            columns={columns as any}
             data={items}
             meta={meta || { total: items.length, totalPages: 1 }}
             isLoading={isLoading}
@@ -209,25 +217,27 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
             renderRowActions={renderChildAction}
           />
 
-          {/* Edit Dialog */}
+          {/* Edit Sheet */}
           {editingItem && (
-            <Dialog open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
-              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>Modifier {config.title}</DialogTitle>
-                  <DialogDescription>
+            <Sheet open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
+              <SheetContent className="w-full max-w-full sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl">
+                <SheetHeader>
+                  <SheetTitle>Modifier {config.title}</SheetTitle>
+                  <SheetDescription>
                     Modifiez les informations de ce {config.title.toLowerCase()}.
-                  </DialogDescription>
-                </DialogHeader>
-                <DynamicForm
-                  config={config}
-                  schema={schema}
-                  initialData={editingItem}
-                  onSubmit={(data: Record<string, unknown>) => handleUpdate(data as T)}
-                  isSubmitting={isUpdating}
-                />
-              </DialogContent>
-            </Dialog>
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="py-4">
+                  <DynamicForm
+                    config={config}
+                    schema={schema}
+                    initialData={editingItem}
+                    onUpdate={handleUpdate}
+                    isSubmitting={isUpdating}
+                  />
+                </div>
+              </SheetContent>
+            </Sheet>
           )}
 
           {/* Delete Confirmation */}

@@ -42,13 +42,21 @@ export abstract class BaseServiceImpl<T, TPayload> implements BaseService<T, TPa
           errorData.message ||
           `Request failed with status ${response.status}: ${response.statusText}`
         );
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (err) {
+      } catch {
         throw new Error(`Request failed with status ${response.status}: ${response.statusText}`);
       }
     }
 
-    return response.json();
+    // PATCH: Ne parser en JSON que si le body n'est pas vide (ex: DELETE 204)
+    const contentLength = response.headers.get('content-length');
+    if (response.status === 204 || contentLength === '0') {
+      return undefined as R;
+    }
+    const text = await response.text();
+    if (!text) {
+      return undefined as R;
+    }
+    return JSON.parse(text) as R;
   }
 
   protected get<R>(endpoint: string): Promise<R> {
