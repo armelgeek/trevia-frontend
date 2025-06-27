@@ -149,17 +149,23 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
   const hasChildren = childrenArray.length > 0;
   const renderChildrenActions = hasChildren
     ? (row: { original: Record<string, unknown> }) => {
-        const id = row.original.id as string;
+        // Remplacement dynamique de tous les paramètres :xxx dans la route
+        const paramRegex = /:([a-zA-Z0-9_]+)/g;
         return (
           <div className="flex flex-wrap gap-1">
             {(config as any).children.map((child: any) => {
-              const route = child.route.replace(':parentId', id);
+              let route = child.route;
+              route = route.replace(paramRegex, (_: string, param: string) => {
+                const value = row.original[param] || params?.[param] || row.original.id;
+                return value || param;
+              });
+              const href = route.startsWith('/') ? `/admin${route}` : `/admin/${route}`;
               return (
                 <Link
                   key={child.route}
-                  href={`/admin/${route}`}
+                  href={href}
                   aria-label={child.label || 'Gérer'}
-                  className="text-sky-500 hover:underline font-medium whitespace-nowrap px-1 py-0.5 text-xs flex items-center rounded border border-sky-100 bg-sky-50 hover:bg-sky-100 transition"
+                  className="text-red-500 hover:underline font-medium whitespace-nowrap px-1 py-0.5 text-xs flex items-center rounded border border-red-100 bg-red-50 hover:bg-red-100 transition"
                   style={{ display: 'inline-block', minWidth: 0 }}
                 >
                   {child.icon && <span className="text-base align-middle mr-1">{child.icon}</span>}

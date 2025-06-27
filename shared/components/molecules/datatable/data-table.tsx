@@ -66,7 +66,7 @@ export function DataTable<TData, TValue>({
   onPageSizeChange,
   onFilterChange,
   isLoading,
-  renderRowActions, // Ajout ici
+  renderRowActions, 
 }: DataTableProps<TData, TValue>) {
   const sort: ColumnSort[] = sortBy && sortDir ? [{ id: sortBy, desc: sortDir === 'desc' }] : [];
 
@@ -125,7 +125,7 @@ export function DataTable<TData, TValue>({
                   const isBeforeActions = renderRowActions && header.id === 'actions';
                   return (
                     <React.Fragment key={header.id}>
-                      {isBeforeActions && <TableHead> </TableHead>}
+                      {isBeforeActions && <TableHead className='w-[250px]'> </TableHead>}
                       <TableHead
                         colSpan={header.colSpan}
                         style={{ width: header.getSize(),  textTransform: 'uppercase' }}

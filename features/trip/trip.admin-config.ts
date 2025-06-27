@@ -10,6 +10,10 @@ export const TripAdminConfig = createAdminEntity('Voyage', tripSchema, {
   actions: { create: true, read: true, update: true, delete: true, bulk: false, export: false },
   services: tripService,
   queryKey: ['trips'],
+  parent: {
+  key: 'trip',
+  routeParam: 'tripId',
+},
   formFields: [
     'vehicleId',
     'routeId',
@@ -31,12 +35,12 @@ export const TripAdminConfig = createAdminEntity('Voyage', tripSchema, {
   }),
   children: [
     {
-      route: '/:trip/seats',
+      route: '/trip/:tripId/seats',
       label: 'Voir les places',
       icon: '🪑',
     },
     {
-      route: '/:trip/schedule',
+      route: '/trip/:tripId/schedule',
       label: 'Ajouter un schedule',
       icon: '📅',
     },
