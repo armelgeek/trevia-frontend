@@ -21,6 +21,12 @@ import {
   SheetDescription,
   SheetTrigger,
 } from '@/components/ui/sheet';
+type ChildConfig = {
+    route: string;
+    label?: string;
+    icon?: React.ReactNode;
+    [key: string]: unknown;
+  };
 
 interface SimpleAdminPageProps<T extends Record<string, unknown>> {
   config: AdminConfigWithServices<T>;
@@ -125,7 +131,7 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
 
   // Génération des colonnes de table
   const columns = generateTableColumns<T>(
-    config,
+    config as unknown as Parameters<typeof generateTableColumns<T>>[0],
     config.actions?.update
       ? (item) => setEditingItem(item): undefined,
     config.actions?.delete ? setDeletingItem : undefined,
@@ -134,23 +140,34 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
 
   // Ajout du bouton "Gérer l'enfant" si la config admin déclare un enfant
   const childConfig = (config as { child?: { route: string; label?: string } }).child;
-  const hasChild = !!(childConfig && typeof childConfig.route === 'string');
 
-  // Fonction pour rendre l'action enfant (lien stylisé bleu)
-  const renderChildAction = hasChild && childConfig
+
+  const childrenArray: ChildConfig[] = Array.isArray((config as { children?: ChildConfig[] }).children)
+    ? ((config as unknown as { children: ChildConfig[] }).children)
+    : [];
+
+  const hasChildren = childrenArray.length > 0;
+  const renderChildrenActions = hasChildren
     ? (row: { original: Record<string, unknown> }) => {
         const id = row.original.id as string;
-        const route = childConfig.route.replace(':parentId', id);
         return (
-          <Link
-            href={`/admin/${route}`}
-            aria-label={childConfig.label || 'Gérer'}
-            className="text-sky-500 hover:underline font-medium whitespace-nowrap px-2 py-1"
-            style={{ display: 'inline-block' }}
-          >
-            <span className="text-xl align-middle mr-1">+</span>
-            <span className="align-middle">{childConfig.label || 'Ajouter un autre leçon'}</span>
-          </Link>
+          <div className="flex flex-wrap gap-1">
+            {(config as any).children.map((child: any) => {
+              const route = child.route.replace(':parentId', id);
+              return (
+                <Link
+                  key={child.route}
+                  href={`/admin/${route}`}
+                  aria-label={child.label || 'Gérer'}
+                  className="text-sky-500 hover:underline font-medium whitespace-nowrap px-1 py-0.5 text-xs flex items-center rounded border border-sky-100 bg-sky-50 hover:bg-sky-100 transition"
+                  style={{ display: 'inline-block', minWidth: 0 }}
+                >
+                  {child.icon && <span className="text-base align-middle mr-1">{child.icon}</span>}
+                  <span className="align-middle truncate max-w-[80px]">{child.label || 'Action'}</span>
+                </Link>
+              );
+            })}
+          </div>
         );
       }
     : undefined;
@@ -213,8 +230,7 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
             onSortDirChange={() => {}}
             onPageChange={() => {}}
             onPageSizeChange={() => {}}
-            // Place l'action enfant AVANT la colonne Actions
-            renderRowActions={renderChildAction}
+            renderRowActions={renderChildrenActions}
           />
 
           {/* Edit Sheet */}

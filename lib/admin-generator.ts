@@ -460,7 +460,7 @@ export function createAdminEntity<T extends z.ZodRawShape>(
     queryKey: config?.queryKey || [name.toLowerCase()],
     parent: config?.parent,
     children: config?.children,
-    formFields: config?.formFields,
+    formFields: config?.formFields || baseConfig.fields.map(field => field.key),
   };
 }
 
@@ -497,7 +497,7 @@ export interface AdminConfigWithServices<T extends Record<string, unknown>> exte
   services?: CrudService<T>;
   queryKey?: string[];
   parseData?: (item: Partial<T>) => Partial<T> | T;
-  formFields?: string[];
+  formFields?: string[]
 }
 
 export interface AdminConfigWithParent<T extends Record<string, unknown>> extends AdminConfigWithServices<T> {
@@ -514,7 +514,6 @@ export interface AdminConfigWithChild<T extends Record<string, unknown>> extends
     route: string;
     label?: string;
     icon?: string;
-    [key: string]: unknown;
   }[];
 }
 

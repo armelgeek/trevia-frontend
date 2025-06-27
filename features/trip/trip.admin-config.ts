@@ -18,7 +18,7 @@ export const TripAdminConfig = createAdminEntity('Voyage', tripSchema, {
     'arrivalDate',
     'price',
   ],
-  parseData: (item: { departureDate: string | number | Date; arrivalDate: string | number | Date; }) => ({
+  parseData: (item) => ({
     ...item,
     departureDate:
       typeof item.departureDate === 'string' || typeof item.departureDate === 'number' || item.departureDate instanceof Date
@@ -29,4 +29,16 @@ export const TripAdminConfig = createAdminEntity('Voyage', tripSchema, {
         ? new Date(item.arrivalDate)
         : undefined,
   }),
+  children: [
+    {
+      route: 'seats',
+      label: 'Voir les places',
+      icon: '🪑',
+    },
+    {
+      route: '/:parentId/schedule',
+      label: 'Ajouter un schedule',
+      icon: '📅',
+    },
+  ],
 });
