@@ -7,13 +7,20 @@ export const TripAdminConfig = createAdminEntity('Voyage', tripSchema, {
   title: 'Voyages',
   description: 'Gérez vos voyages',
   icon: '🧳',
-  actions: { create: true, read: true, update: true, delete: true, bulk: true, export: false },
+  actions: {
+    create: true,
+    read: true,
+    update: true,
+    delete: true,
+    bulk: false,
+    export: false
+  },
   services: tripService,
   queryKey: ['trips'],
   parent: {
-  key: 'trip',
-  routeParam: 'tripId',
-},
+    key: 'trip',
+    routeParam: 'tripId',
+  },
   formFields: [
     'vehicleId',
     'routeId',
@@ -35,15 +42,15 @@ export const TripAdminConfig = createAdminEntity('Voyage', tripSchema, {
     },
   ],
   bulkActions: [
-  {
-    key: 'export',
-    label: 'Exporter',
-    icon: null,
-    variant: 'outline',
-    onClick: async (ids) => {
-      console.log('Exporting trips with IDs:', ids);
-      // votre logique d’export avec les ids sélectionnés
+    {
+      key: 'export',
+      label: 'Exporter',
+      icon: null,
+      variant: 'outline',
+      onClick: async (ids) => {
+        console.log('Exporting trips with IDs:', ids);
+        // votre logique d’export avec les ids sélectionnés
+      }
     }
-  }
-]
+  ]
 });

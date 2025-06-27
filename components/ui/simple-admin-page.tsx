@@ -43,7 +43,7 @@ interface SimpleAdminPageProps<T extends Record<string, unknown>> {
 }
 
 // Ajout d'un type pour la propriété optionnelle parseData (legacy)
-interface AdminConfigWithLegacyParse<T> extends AdminConfigWithServices<T> {
+interface AdminConfigWithLegacyParse<T extends Record<string, unknown>> extends AdminConfigWithServices<T> {
   parseData?: (item: Record<string, unknown>) => T;
   children?: ChildConfig[];
 }

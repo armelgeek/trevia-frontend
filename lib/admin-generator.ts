@@ -7,7 +7,7 @@ import * as React from 'react';
 export interface FieldConfig {
   key: string;
   label: string;
-  type: 'text' | 'number' | 'boolean' | 'select' | 'textarea' | 'date' | 'email' | 'url' | 'rich-text' | 'image' | 'file' | 'relation';
+  type: 'text' | 'number' | 'boolean' | 'select' | 'textarea' | 'date' | 'email' | 'url' | 'rich-text' | 'image' | 'file' | 'relation' | 'list' | 'array';
   required?: boolean;
   options?: string[] | { value: string; label: string }[];
   placeholder?: string;
@@ -30,6 +30,14 @@ export interface FieldConfig {
     displayField: string;
     multiple?: boolean;
   };
+}
+
+export interface BulkAction {
+  key: string;
+  label: string;
+  icon?: React.ReactNode;
+  onClick: (ids: string[]) => Promise<void> | void;
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost';
 }
 
 export interface AdminConfig {
@@ -64,6 +72,39 @@ export interface AdminConfig {
       }[];
     };
   };
+  bulkActions?: BulkAction[];
+}
+
+export interface AdminConfigWithAccessor extends AdminConfig {
+  accessor: DynamicFieldAccess;
+  bulkActions?: BulkAction[];
+}
+
+export interface AdminConfigWithServices<T extends Record<string, unknown>> extends AdminConfigWithAccessor {
+  services?: CrudService<T>;
+  queryKey?: string[];
+  parseEditItem?: (item: Partial<T>) => Partial<T> | T;
+  formFields?: string[];
+  bulkActions?: BulkAction[];
+}
+
+export interface AdminConfigWithParent<T extends Record<string, unknown>> extends AdminConfigWithServices<T> {
+  parent?: {
+    key: string;
+    routeParam: string;
+    parentEntity?: string;
+    parentLabel?: string;
+  };
+  bulkActions?: BulkAction[];
+}
+
+export interface AdminConfigWithChild<T extends Record<string, unknown>> extends AdminConfigWithParent<T> {
+  children?: {
+    route: string;
+    label?: string;
+    icon?: string;
+  }[];
+  bulkActions?: BulkAction[];
 }
 
 interface ZodMetadata {
@@ -547,7 +588,8 @@ export function createAdminEntity<T extends z.ZodRawShape>(
     services: config?.services,
     queryKey: config?.queryKey || [name.toLowerCase()],
     parent: config?.parent,
-    child: config?.child,
+    children: config?.children,
+    formFields: config?.formFields
   };
 }
 
@@ -584,6 +626,8 @@ export interface AdminConfigWithServices<T extends Record<string, unknown>> exte
   services?: CrudService<T>;
   queryKey?: string[];
   parseEditItem?: (item: Partial<T>) => Partial<T> | T;
+  formFields?: string[];
+  bulkActions?: BulkAction[];
 }
 
 export interface AdminConfigWithParent<T extends Record<string, unknown>> extends AdminConfigWithServices<T> {
@@ -593,13 +637,16 @@ export interface AdminConfigWithParent<T extends Record<string, unknown>> extend
     parentEntity?: string;
     parentLabel?: string;
   };
+  bulkActions?: BulkAction[];
 }
 
 export interface AdminConfigWithChild<T extends Record<string, unknown>> extends AdminConfigWithParent<T> {
-  child?: {
+  children?: {
     route: string;
     label?: string;
-  };
+    icon?: string;
+  }[];
+  bulkActions?: BulkAction[];
 }
 
 export function createMockService<T extends Record<string, unknown>>(
