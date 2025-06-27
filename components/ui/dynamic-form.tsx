@@ -18,6 +18,7 @@ import { cn } from '@/shared/lib/utils';
 import { RelationField } from './relation-field';
 import type { FieldConfig, AdminConfig } from '@/lib/admin-generator';
 import { toast } from 'sonner';
+import { Icons } from '@/components/ui/icons';
 
 interface DynamicFormProps<T = Record<string, unknown>> {
   config: AdminConfig;
@@ -165,7 +166,60 @@ export function DynamicForm<
           />
         );
 
-      case 'select':
+      case 'select': {
+        // Gestion widget radio/tag
+        const widget = fieldConfig.display?.widget;
+        if (widget === 'radio') {
+          return (
+            <div className="flex flex-col gap-2">
+              {fieldConfig.options?.map((option) => {
+                const value = typeof option === 'string' ? option : option.value;
+                const label = typeof option === 'string' ? option : option.label;
+                return (
+                  <label key={value} className="inline-flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name={fieldConfig.key}
+                      value={value}
+                      checked={fieldProps.value === value}
+                      onChange={() => fieldProps.onChange(value)}
+                      className="form-radio text-primary focus:ring-primary"
+                    />
+                    <span>{label}</span>
+                  </label>
+                );
+              })}
+            </div>
+          );
+        }
+        if (widget === 'tag') {
+          return (
+            <div className="flex flex-wrap gap-2">
+              {fieldConfig.options?.map((option) => {
+                const value = typeof option === 'string' ? option : option.value;
+                const label = typeof option === 'string' ? option : option.label;
+                const selected = fieldProps.value === value;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => fieldProps.onChange(value)}
+                    className={cn(
+                      'px-3 py-1 rounded-full border text-sm',
+                      selected
+                        ? 'bg-primary text-white border-primary'
+                        : 'bg-muted text-muted-foreground border-muted'
+                    )}
+                    aria-pressed={selected}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          );
+        }
+        // fallback: select natif
         return (
           <Select
             onValueChange={fieldProps.onChange}
@@ -187,6 +241,7 @@ export function DynamicForm<
             </SelectContent>
           </Select>
         );
+      }
 
       case 'date':
         let dateValue: Date | undefined;
@@ -275,6 +330,11 @@ export function DynamicForm<
             onChange={fieldProps.onChange}
           />
         );
+
+      case 'list': {
+        // Champ input tag dynamique pour array de string
+        return <InputTagArray value={fieldProps.value as string[] || []} onChange={fieldProps.onChange} />;
+      }
 
       default:
         return (
@@ -385,6 +445,68 @@ function FileInputControl({ value, onChange, accept }: { value: unknown; onChang
         <p className="text-sm text-muted-foreground">
           Fichier sélectionné: {value}
         </p>
+      )}
+    </div>
+  );
+}
+
+function InputTagArray({ value, onChange }: { value: string[] | string; onChange: (val: string) => void }) {
+  const safeValue = Array.isArray(value)
+    ? value
+    : typeof value === 'string' && value.trim().length > 0
+      ? value.split(',').map((s) => s.trim()).filter(Boolean)
+      : [];
+  const [input, setInput] = React.useState('');
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleAdd = () => {
+    const trimmed = input.trim();
+    if (trimmed && !safeValue.includes(trimmed)) {
+      const newList = [...safeValue, trimmed];
+      onChange(newList.join(','));
+      setInput('');
+      setTimeout(() => inputRef.current?.focus(), 0);
+    }
+  };
+  const handleRemove = (tag: string) => {
+    const newList = safeValue.filter((t) => t !== tag);
+    onChange(newList.join(','));
+    setTimeout(() => inputRef.current?.focus(), 0);
+  };
+  return (
+    <div className="flex flex-wrap items-center gap-2 mb-2">
+      {safeValue.map((tag) => (
+        <span key={tag} className="inline-flex items-center bg-primary/10 text-primary rounded-full px-2 py-1 text-xs font-medium border border-primary/20">
+          <span className="mr-1">{tag}</span>
+          <button
+            type="button"
+            aria-label={`Supprimer ${tag}`}
+            className="ml-1 text-primary-foreground bg-primary/30 hover:bg-primary/60 rounded-full w-4 h-4 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary"
+            onClick={() => handleRemove(tag)}
+            tabIndex={0}
+          >
+            <Icons.close className="w-2 h-2" aria-hidden />
+          </button>
+        </span>
+      ))}
+      <Input
+        ref={inputRef}
+        type="text"
+        value={input}
+        onChange={e => setInput(e.target.value)}
+        onKeyDown={e => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            handleAdd();
+          }
+        }}
+        placeholder="Ajouter un tag..."
+        aria-label="Ajouter un tag"
+        className="w-auto min-w-[50px] flex-1 h-7 px-2 py-1 text-xs rounded-md border border-primary/30 focus:border-primary/60"
+        style={{ maxWidth: 120 }}
+      />
+      {safeValue.length === 0 && (
+        <div className="text-xs text-muted-foreground mt-1">Aucun tag ajouté</div>
       )}
     </div>
   );

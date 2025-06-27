@@ -7,10 +7,10 @@ import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { DataTable } from '@/shared/components/molecules/datatable/data-table';
 import { DynamicForm } from '@/components/ui/dynamic-form';
-import { generateTableColumns } from '@/components/ui/dynamic-table';
+import { createDynamicColumns } from '@/lib/admin-generator';
 import { useAdminEntity } from '@/hooks/use-admin-entity';
 import Link from 'next/link';
-import { Plus } from 'lucide-react';
+import { Plus, EllipsisVertical } from 'lucide-react';
 import type { AdminConfigWithServices } from '@/lib/admin-generator';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import {
@@ -21,6 +21,12 @@ import {
   SheetDescription,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
 type ChildConfig = {
     route: string;
     label?: string;
@@ -129,17 +135,63 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
     await deleteItem(id);
   };
 
-  // Génération des colonnes de table
-  const columns = generateTableColumns<T>(
-    config as unknown as Parameters<typeof generateTableColumns<T>>[0],
-    config.actions?.update
-      ? (item) => setEditingItem(item): undefined,
-    config.actions?.delete ? setDeletingItem : undefined,
-    schema // <-- Ajout du schéma pour parsing Zod
+  // Génération des colonnes de table dynamiques (centrage, badges, etc)
+  let columns = createDynamicColumns(
+    config.fields,
+    config.accessor
   );
 
-  // Ajout du bouton "Gérer l'enfant" si la config admin déclare un enfant
-  const childConfig = (config as { child?: { route: string; label?: string } }).child;
+  // Ajout dynamique de la colonne d'actions (edit/delete) si besoin
+  const hasRowActions = !!(config.actions?.update || config.actions?.delete);
+  if (hasRowActions) {
+    columns = [
+      ...columns,
+      {
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }: { row: { original: Record<string, unknown> } }) => (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="icon" variant="ghost" aria-label="Actions">
+                <EllipsisVertical className="w-3 h-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {config.actions?.update && (
+                <DropdownMenuItem onClick={() => {
+                  let parsed: T | undefined;
+                  const parseFn = config.parseEditItem || (config as any).parseData;
+                  if (parseFn) {
+                    try {
+                      parsed = parseFn(row.original);
+                    } catch (e) {
+                      // eslint-disable-next-line no-console
+                      console.error('parseEditItem/parseData error:', e, row.original);
+                      return;
+                    }
+                  } else {
+                    parsed = row.original as T;
+                  }
+                  setEditingItem(parsed);
+                }}>
+                  Modifier
+                </DropdownMenuItem>
+              )}
+              {config.actions?.delete && (
+                <DropdownMenuItem onClick={() => setDeletingItem(row.original as T)}>
+                  Supprimer
+                </DropdownMenuItem>
+              )}
+              {/* Ajoutez ici d'autres DropdownMenuItem pour de futures actions personnalisées */}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ),
+        meta: {
+          className: 'text-center',
+        },
+      },
+    ];
+  }
 
 
   const childrenArray: ChildConfig[] = Array.isArray((config as { children?: ChildConfig[] }).children)
@@ -177,6 +229,9 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
         );
       }
     : undefined;
+
+  // Affichage conditionnel des actions de ligne (edit/delete)
+  const showRowActions = !!(config.actions?.update || config.actions?.delete || hasChildren);
 
   return (
     <>
@@ -236,7 +291,7 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
             onSortDirChange={() => {}}
             onPageChange={() => {}}
             onPageSizeChange={() => {}}
-            renderRowActions={renderChildrenActions}
+            renderRowActions={showRowActions ? renderChildrenActions : undefined}
           />
 
           {/* Edit Sheet */}

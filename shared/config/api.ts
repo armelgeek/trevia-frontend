@@ -22,5 +22,13 @@ export const API_ENDPOINTS = {
     detail: (id: string) => `/api/admin/bookings/${id}`,
     update: (id: string) => `/api/admin/bookings/${id}`,
     delete: (id: string) => `/api/admin/bookings/${id}`
+  },
+  vehicle: {
+    base: '/api/vehicles',
+    create: '/api/vehicles',
+    list: (qs: string = '') => `/api/vehicles${qs ? `?${qs}` : ''}`,
+    detail: (id: string) => `/api/vehicles/${id}`,
+    update: (id: string) => `/api/vehicles/${id}`,
+    delete: (id: string) => `/api/vehicles/${id}`
   }
 };

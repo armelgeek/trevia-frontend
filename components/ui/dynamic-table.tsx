@@ -12,7 +12,7 @@ import type { FieldConfig, AdminConfig } from '@/lib/admin-generator';
 import { toast } from 'sonner';
 
 export interface AdminConfigWithParseEdit<T = Record<string, unknown>> extends AdminConfig {
-  parseData?: (item: Record<string, unknown>) => T;
+  parseEditItem?: (item: Record<string, unknown>) => T;
 }
 
 export function generateTableColumns<T extends Record<string, unknown>>(
@@ -71,12 +71,14 @@ export function generateTableColumns<T extends Record<string, unknown>>(
               {config.actions.update && onEdit && (
                 <DropdownMenuItem onClick={() => {
                   let parsed: T | undefined;
-                  if (config.parseData) {
+                  // Utilise parseEditItem (nouveau standard), sinon parseData (legacy)
+                  const parseFn = config.parseEditItem || (config as any).parseData;
+                  if (parseFn) {
                     try {
-                      parsed = config.parseData(item);
+                      parsed = parseFn(item);
                     } catch (e) {
-                      toast.error('Erreur lors du parsing custom de l’item.');
-                      console.error('parseData error:', e, item);
+                      toast.error('Erreur lors du parsing de l’item.');
+                      console.error('parseEditItem/parseData error:', e, item);
                       return;
                     }
                   } else {

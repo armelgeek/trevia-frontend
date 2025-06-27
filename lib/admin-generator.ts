@@ -1,6 +1,8 @@
 import { z, ZodSchema, ZodObject } from 'zod';
 import { BaseServiceImpl, ResourceEndpoints } from '@/shared/domain/base.service';
 import { Filter } from '@/shared/lib/types/filter';
+import { Badge } from '@/components/ui/badge';
+import * as React from 'react';
 
 export interface FieldConfig {
   key: string;
@@ -178,12 +180,8 @@ export const createField = {
   date: (metadata?: ZodMetadata) => 
     withMeta(z.date(), { type: 'date', ...metadata }),
   
-  select: (options: [string, ...string[]], metadata?: ZodMetadata) => 
-    withMeta(z.enum(options), { 
-      type: 'select', 
-      options, 
-      ...metadata 
-    }),
+  select: (options: string[] | { value: string; label: string }[], metadata?: ZodMetadata) => 
+    withMeta(z.string(), { type: 'select', options, ...metadata }),
   
   relation: (entity: string, displayField: string = 'name', multiple: boolean = false, metadata?: ZodMetadata) =>
     withMeta(multiple ? z.array(z.string()) : z.string(), { 
@@ -197,6 +195,29 @@ export const createField = {
   
   file: (metadata?: ZodMetadata) => 
     withMeta(z.string(), { type: 'file', ...metadata }),
+  
+  radio: (options: string[] | { value: string; label: string }[], metadata?: ZodMetadata) =>
+    withMeta(z.string(), { type: 'select', options, display: { widget: 'radio', ...(metadata?.display || {}) }, ...metadata }),
+  tag: (options: string[] | { value: string; label: string }[], metadata?: ZodMetadata) =>
+    withMeta(z.string(), { type: 'select', options, display: { widget: 'tag', ...(metadata?.display || {}) }, ...metadata }),
+  list: (metadata?: ZodMetadata) =>
+    withMeta(z.preprocess(
+      (val) => {
+        // Autorise string (CSV) ou array en entrée, convertit toujours en string CSV pour la valeur retournée
+        if (typeof val === 'string') {
+          return val
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean)
+            .join(',');
+        }
+        if (Array.isArray(val)) {
+          return val.map((s) => String(s)).filter(Boolean).join(',');
+        }
+        return '';
+      },
+      z.string()
+    ), { type: 'list', ...metadata }),
 };
 
 export function generateAdminConfig(schema: ZodObject<z.ZodRawShape>, title: string): AdminConfigWithAccessor {
@@ -305,7 +326,7 @@ export function generateAdminConfig(schema: ZodObject<z.ZodRawShape>, title: str
   return {
     title,
     fields,
-    accessor, // Ajout de l'accessor dynamique
+    accessor,
     actions: {
       create: true,
       read: true,
@@ -324,86 +345,123 @@ export function generateAdminConfig(schema: ZodObject<z.ZodRawShape>, title: str
         layout: 'simple',
       },
     },
+    parseEditItem: (item: Record<string, unknown>) => {
+      const parsed: Record<string, unknown> = { ...item };
+      const dateRegex = /date|at$/i;
+      const isoDateRegex = /^\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2})?)?/;
+      for (const key in item) {
+        const value = item[key];
+        if (
+          dateRegex.test(key) ||
+          (typeof value === 'string' && isoDateRegex.test(value)) ||
+          (typeof value === 'number' && value > 1000000000)
+        ) {
+          if (value === null || value === undefined || value === '') {
+            parsed[key] = undefined;
+          } else if (value instanceof Date) {
+            parsed[key] = value;
+          } else if (typeof value === 'string' || typeof value === 'number') {
+            const d = new Date(value);
+            parsed[key] = !isNaN(d.getTime()) ? d : undefined;
+          } else {
+            parsed[key] = undefined;
+          }
+        }
+      }
+      return parsed;
+    },
   };
+}
+
+// Détection dynamique du type de contenu via regex
+export function detectContentType(value: unknown): 'number' | 'date' | 'boolean' | 'string' {
+  if (typeof value === 'number') return 'number';
+  if (typeof value === 'boolean') return 'boolean';
+  if (value === null || value === undefined) return 'string';
+  const str = String(value).trim();
+  if (/^-?\d+(?:[.,]\d+)?$/.test(str)) return 'number';
+  if (/^\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2})?)?/.test(str)) return 'date';
+  if (/^(true|false|oui|non|yes|no|0|1)$/i.test(str)) return 'boolean';
+  return 'string';
 }
 
 // Fonction pour créer des colonnes React Table dynamiquement
 export function createDynamicColumns(fields: FieldConfig[], accessor: DynamicFieldAccess) {
   return fields
     .filter(field => field.display?.showInTable !== false)
-    .map(field => ({
-      accessorKey: field.key,
-      header: field.label,
-      cell: ({ row }: { row: { original: Record<string, unknown> } }) => {
-        const value = accessor.getValue(row.original, field.key);
-        
-        // Formatage selon le type de champ
-        switch (field.type) {
-          case 'date':
+    .map(field => {
+      return {
+        accessorKey: field.key,
+        header: field.label,
+        cell: ({ row }: { row: { original: Record<string, unknown> } }) => {
+          const value = accessor.getValue(row.original, field.key);
+          const detected = detectContentType(value);
+          // Affichage dynamique selon le type détecté
+          if (detected === 'number') {
+            return value !== undefined && value !== null ? String(value) : '';
+          }
+          if (detected === 'date') {
             if (!value) return '';
             const date = new Date(value as string);
-            return isNaN(date.getTime()) ? value : date.toLocaleDateString('fr-FR');
-          case 'boolean':
-            return value ? '✓' : '✗';
-          case 'email':
-            return value ? String(value) : '';
-          case 'url':
-            return value ? String(value) : '';
-          case 'select':
-            if (field.options && Array.isArray(field.options)) {
-              const option = field.options.find(opt => 
-                typeof opt === 'string' ? opt === value : opt.value === value
-              );
-              return typeof option === 'string' ? option : option?.label || String(value || '');
+            return isNaN(date.getTime()) ? String(value) : date.toLocaleDateString('fr-FR');
+          }
+          if (detected === 'boolean') {
+            if (typeof value === 'boolean') return value ? '✓' : '✗';
+            if (typeof value === 'string') {
+              const v = value.toLowerCase();
+              if (['true', 'oui', 'yes', '1'].includes(v)) return '✓';
+              if (['false', 'non', 'no', '0'].includes(v)) return '✗';
             }
-            return String(value || '');
-          case 'relation':
-            return String(value || '');
-          case 'number':
-            return value !== undefined && value !== null ? String(value) : '';
-          case 'object':
-            if (Array.isArray(value)) {
-              if (value.length > 0 && typeof value[0] === 'object') {
-                const arrayDisplayField = field.display?.arrayDisplayField;
-                return value
-                  .map((v: Record<string, unknown>) => {
-                    if (arrayDisplayField && arrayDisplayField in v && v[arrayDisplayField]) {
-                      return String(v[arrayDisplayField]);
-                    }
-                    // Fallback: stringify the object safely
-                    return JSON.stringify(v);
-                  })
-                  .filter(Boolean)
-                  .join(', ');
-              }
-              return value.map(String).join(', ');
+            return String(value);
+          }
+          // Affichage spécial pour les listes de tags (type list)
+          if (field.type === 'list') {
+            if (!value) return '';
+            const tags = String(value)
+              .split(',')
+              .map((tag) => tag.trim())
+              .filter(Boolean);
+            if (tags.length === 0) return '';
+            return React.createElement(
+              'div',
+              { className: 'flex flex-wrap gap-1', 'aria-label': field.label },
+              tags.map((tag, i) =>
+                React.createElement(
+                  Badge,
+                  { variant: 'secondary', key: i },
+                  tag
+                )
+              )
+            );
+          }
+          // Affichage spécial pour les tableaux d'objets
+          if (field.type === 'array' && Array.isArray(value)) {
+            if (value.length > 0 && typeof value[0] === 'object') {
+              const arrayDisplayField = field.display?.arrayDisplayField;
+              return value
+                .map((v: Record<string, unknown>) => {
+                  if (arrayDisplayField && arrayDisplayField in v && v[arrayDisplayField]) {
+                    return String(v[arrayDisplayField]);
+                  }
+                  return JSON.stringify(v);
+                })
+                .filter(Boolean)
+                .join(', ');
             }
-            // Fallback: always return a string
-            return value ? JSON.stringify(value) : '';
-          case 'array':
-            if (Array.isArray(value)) {
-              if (value.length > 0 && typeof value[0] === 'object') {
-                const arrayDisplayField = field.display?.arrayDisplayField;
-                return value
-                  .map((v: Record<string, unknown>) => {
-                    if (arrayDisplayField && arrayDisplayField in v && v[arrayDisplayField]) {
-                      return String(v[arrayDisplayField]);
-                    }
-                    // Fallback: stringify the object safely
-                    return JSON.stringify(v);
-                  })
-                  .filter(Boolean)
-                  .join(', ');
-              }
-              return value.map(String).join(', ');
-            }
-            // Fallback: always return a string
-            return value ? JSON.stringify(value) : '';
-          default:
-            return String(value || '');
+            return value.map(String).join(', ');
+          }
+          return String(value || '');
+        },
+        meta: {
+          className: (row: { original: Record<string, unknown> }) => {
+            const raw = accessor.getValue(row.original, field.key);
+            const detected = detectContentType(raw);
+            if (detected === 'number' || detected === 'date' || detected === 'boolean') return 'text-center';
+            return undefined;
+          }
         }
-      }
-    }));
+      };
+    });
 }
 
 // Fonction utilitaire pour créer des accesseurs de formulaire dynamiques
@@ -435,7 +493,6 @@ export function createFormAccessors<T extends Record<string, unknown>>(
       return values;
     },
     
-    // Valider les champs requis
     validateRequired: () => {
       const errors: string[] = [];
       fields

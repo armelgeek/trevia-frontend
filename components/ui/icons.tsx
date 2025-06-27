@@ -1,3 +1,4 @@
+import { Car, Plane } from 'lucide-react';
 import {
   AlertTriangle,
   ArrowRight,
@@ -82,5 +83,7 @@ export const Icons = {
     </svg>
   ),
   twitter: Twitter,
-  check: Check
+  check: Check,
+  car: Car,
+  plane: Plane
 };

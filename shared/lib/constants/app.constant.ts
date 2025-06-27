@@ -60,8 +60,16 @@ export const navItems: NavItem[] = [
   {
     title: 'Voyages',
     url: '/admin/trip',
-    icon: 'post',
+    icon: 'plane',
     shortcut: ['v', 'v'],
+    isActive: false,
+    items: []
+  },
+  {
+    title: 'Véhicules',
+    url: '/admin/vehicle',
+    icon: 'car',
+    shortcut: ['v', 'h'],
     isActive: false,
     items: []
   }

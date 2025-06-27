@@ -124,7 +124,7 @@ export default function AppSidebar({ session }: { session: { user?: { name?: str
                     >
                       <Link href={item.url}>
                         <div className="flex items-center space-x-3">
-                          <Icon className="w-5 h-5" />
+                          {item.icon && <Icon className="w-5 h-5" />}
                           <span>{item.title}</span>
                         </div>
                       </Link>
