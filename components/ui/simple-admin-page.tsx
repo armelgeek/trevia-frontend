@@ -42,6 +42,26 @@ interface SimpleAdminPageProps<T extends Record<string, unknown>> {
   filters?: Record<string, string | number | undefined>;
 }
 
+// Ajout d'un type pour la propriété optionnelle parseData (legacy)
+interface AdminConfigWithLegacyParse<T> extends AdminConfigWithServices<T> {
+  parseData?: (item: Record<string, unknown>) => T;
+  children?: ChildConfig[];
+}
+
+// Type pour une bulk action personnalisée
+interface BulkAction {
+  key: string;
+  label: string;
+  icon?: React.ReactNode;
+  onClick: (ids: string[]) => Promise<void> | void;
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost';
+}
+
+// Extension de la config admin pour bulkActions personnalisées
+interface AdminConfigWithBulkActions<T> extends AdminConfigWithLegacyParse<T> {
+  bulkActions?: BulkAction[];
+}
+
 export function SimpleAdminPage<T extends Record<string, unknown>>({
   config,
   schema,
@@ -51,14 +71,8 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<T | null>(null);
   const [deletingItem, setDeletingItem] = useState<T | null>(null);
+  const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
 
-  // ---
-  // PATTERN RELATION PARENT/ENFANT (admin nested):
-  // Ici, l'ID du parent (ex: moduleId) est récupéré via l'URL (params) et injecté dans le hook et la config.
-  // Le champ de relation (ex: moduleId) N'EST PAS affiché comme dropdown dans le formulaire enfant (lesson),
-  // il est automatiquement renseigné côté service/hook lors de la création/mise à jour.
-  // Cela évite toute sélection manuelle et garantit la cohérence parent/enfant.
-  // ---
   const params = useParams();
   let parentId: string | undefined = undefined;
   if ('parent' in config && config.parent && typeof config.parent === 'object' && 'routeParam' in config.parent) {
@@ -66,7 +80,6 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
     parentId = Array.isArray(paramValue) ? paramValue[0] : paramValue;
   }
 
-  // Vérification que les services sont configurés
   if (!config.services) {
     throw new Error(`Services not configured for ${config.title}. Please add services to your config or use the regular AdminPage component.`);
   }
@@ -79,7 +92,6 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
   Object.fromEntries(fields.map((key: string | number) => [key, data[key]]));
 
   
-  // Utilisation du hook avec les services de la config
   const {
     data: items,
     meta,
@@ -92,7 +104,7 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
     isUpdating
   } = useAdminEntity({
     config,
-    customServices: config.services, // Ajouté pour utiliser le vrai service CRUD externe
+    customServices: config.services, 
     queryKey: config.queryKey,
     onSuccess: {
       create: () => setIsCreateOpen(false),
@@ -103,7 +115,6 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
     parentId,
   });
 
-  // Handlers pour les actions CRUD
   const handleCreate = async (data: Record<string, unknown>) => {
     const filtered = pickFields(data, config.formFields ?? []);
     try {
@@ -135,13 +146,53 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
     await deleteItem(id);
   };
 
-  // Génération des colonnes de table dynamiques (centrage, badges, etc)
   let columns = createDynamicColumns(
     config.fields,
     config.accessor
   );
 
-  // Ajout dynamique de la colonne d'actions (edit/delete) si besoin
+  const selectedRows = Object.keys(rowSelection).filter((id) => rowSelection[id]);
+
+  const handleRowSelectionChange = (selection: Record<string, boolean>) => {
+    setRowSelection(selection);
+  };
+
+  const handleBulkDelete = async () => {
+    if (!selectedRows.length) return;
+    for (const id of selectedRows) {
+      await deleteItem(id);
+    }
+    setRowSelection({});
+  };
+
+  const hasBulkActions = !!config.actions?.bulk;
+  if (hasBulkActions) {
+    columns = [
+      {
+        id: 'select',
+        header: () => <span className="sr-only">Sélectionner</span>,
+        cell: ({ row }: { row: { original: Record<string, unknown>; getIsSelected: () => boolean; toggleSelected: (value?: boolean) => void } }) => (
+          <input
+            type="checkbox"
+            aria-label="Sélectionner la ligne"
+            checked={row.getIsSelected()}
+            onChange={() => row.toggleSelected()}
+            className="accent-red-500 w-4 h-4 cursor-pointer"
+          />
+        ),
+        meta: {
+          className: 'text-center',
+        },
+        size: 32,
+        minSize: 32,
+        maxSize: 32,
+        enableSorting: false,
+        enableResizing: false,
+      },
+      ...columns,
+    ];
+  }
+
   const hasRowActions = !!(config.actions?.update || config.actions?.delete);
   if (hasRowActions) {
     columns = [
@@ -160,12 +211,12 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
               {config.actions?.update && (
                 <DropdownMenuItem onClick={() => {
                   let parsed: T | undefined;
-                  const parseFn = config.parseEditItem || (config as any).parseData;
+                  const configTyped = config as AdminConfigWithLegacyParse<T>;
+                  const parseFn = config.parseEditItem || configTyped.parseData;
                   if (parseFn) {
                     try {
                       parsed = parseFn(row.original);
                     } catch (e) {
-                      // eslint-disable-next-line no-console
                       console.error('parseEditItem/parseData error:', e, row.original);
                       return;
                     }
@@ -194,18 +245,17 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
   }
 
 
-  const childrenArray: ChildConfig[] = Array.isArray((config as { children?: ChildConfig[] }).children)
-    ? ((config as unknown as { children: ChildConfig[] }).children)
+  const childrenArray: ChildConfig[] = Array.isArray(config.children)
+    ? config.children
     : [];
 
   const hasChildren = childrenArray.length > 0;
   const renderChildrenActions = hasChildren
     ? (row: { original: Record<string, unknown> }) => {
-        // Remplacement dynamique de tous les paramètres :xxx dans la route
         const paramRegex = /:([a-zA-Z0-9_]+)/g;
         return (
           <div className="flex flex-wrap gap-1">
-            {(config as any).children.map((child: any) => {
+            {childrenArray.map((child: ChildConfig) => {
               let route = child.route;
               route = route.replace(paramRegex, (_: string, param: string) => {
                 const value = row.original[param] || params?.[param] || row.original.id;
@@ -230,8 +280,43 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
       }
     : undefined;
 
-  // Affichage conditionnel des actions de ligne (edit/delete)
   const showRowActions = !!(config.actions?.update || config.actions?.delete || hasChildren);
+
+
+  const configWithBulk = config as AdminConfigWithBulkActions<T>;
+
+  const selectedIds = items
+    .filter((item: T) => rowSelection[(item as Record<string, unknown>).id as string])
+    .map((item: T) => String((item as Record<string, unknown>).id));
+
+  const renderBulkActionsBar = hasBulkActions && selectedIds.length > 0 ? (
+    <div className="flex items-center gap-4 bg-red-50 border border-red-200 rounded px-4 py-2 mb-2 animate-in fade-in slide-in-from-top-2">
+      <span className="text-sm text-red-700 font-medium">{selectedIds.length} sélectionné(s)</span>
+      {config.actions?.bulk && config.actions?.delete && (
+        <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
+          Supprimer la sélection
+        </Button>
+      )}
+      {configWithBulk.bulkActions?.map((action) => (
+        <Button
+          key={action.key}
+          variant={action.variant || 'default'}
+          size="sm"
+          onClick={async () => {
+            await action.onClick(selectedIds);
+            setRowSelection({});
+          }}
+        >
+          {action.icon && <span className="mr-1">{action.icon}</span>}
+          {action.label}
+        </Button>
+      ))}
+      <Button variant="ghost" size="sm" onClick={() => setRowSelection({})}>
+        Annuler
+      </Button>
+    </div>
+  ) : null;
+
 
   return (
     <>
@@ -274,9 +359,9 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
         </CardHeader>
         <CardContent>
           {renderFilters && renderFilters()}
-          {/* Data Table */}
+          {renderBulkActionsBar}
           <DataTable
-            columns={columns as any}
+            columns={columns as typeof columns}
             data={items}
             meta={meta || { total: items.length, totalPages: 1 }}
             isLoading={isLoading}
@@ -284,6 +369,8 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
             search=""
             sortBy=""
             sortDir="asc"
+            onRowSelectionChange={handleRowSelectionChange}
+            rowSelection={rowSelection}
             page={1}
             pageSize={10}
             onSearchChange={() => {}}
@@ -317,7 +404,6 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
             </Sheet>
           )}
 
-          {/* Delete Confirmation */}
           {deletingItem && (
             <AlertDialog open={!!deletingItem} onOpenChange={() => setDeletingItem(null)}>
               <AlertDialogContent>
@@ -330,7 +416,7 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Annuler</AlertDialogCancel>
-                  <AlertDialogAction 
+                  <AlertDialogAction
                     onClick={handleDelete}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >

@@ -46,7 +46,10 @@ interface DataTableProps<TData, TValue> {
   onFilterChange?: (filters: ColumnFiltersState) => void;
   isLoading: boolean;
   isError: boolean;
-  renderRowActions?: (row: Row<TData>) => React.ReactNode; // Ajout de la prop
+  renderRowActions?: (row: Row<TData>) => React.ReactNode;
+  // Ajout pour bulk selection
+  rowSelection?: Record<string, boolean>;
+  onRowSelectionChange?: (rowSelection: Record<string, boolean>) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -66,13 +69,16 @@ export function DataTable<TData, TValue>({
   onPageSizeChange,
   onFilterChange,
   isLoading,
-  renderRowActions, 
+  renderRowActions,
+  rowSelection,
+  onRowSelectionChange,
 }: DataTableProps<TData, TValue>) {
   const sort: ColumnSort[] = sortBy && sortDir ? [{ id: sortBy, desc: sortDir === 'desc' }] : [];
 
   const table = useReactTable({
     data,
     columns,
+    getRowId: (row) => String((row as { id?: string | number }).id ?? ''),
     state: {
       globalFilter: search ?? '',
       columnFilters: filter ?? [],
@@ -80,7 +86,10 @@ export function DataTable<TData, TValue>({
         pageIndex: (page ?? 1) - 1,
         pageSize: pageSize ?? 10,
       },
+      rowSelection: rowSelection ?? {},
     },
+    onRowSelectionChange,
+    enableRowSelection: true,
     getCoreRowModel: getCoreRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     manualFiltering: true,

@@ -7,7 +7,7 @@ export const TripAdminConfig = createAdminEntity('Voyage', tripSchema, {
   title: 'Voyages',
   description: 'Gérez vos voyages',
   icon: '🧳',
-  actions: { create: true, read: true, update: true, delete: true, bulk: false, export: false },
+  actions: { create: true, read: true, update: true, delete: true, bulk: true, export: false },
   services: tripService,
   queryKey: ['trips'],
   parent: {
@@ -22,17 +22,6 @@ export const TripAdminConfig = createAdminEntity('Voyage', tripSchema, {
     'arrivalDate',
     'price',
   ],
-  parseData: (item) => ({
-    ...item,
-    departureDate:
-      typeof item.departureDate === 'string' || typeof item.departureDate === 'number' || item.departureDate instanceof Date
-        ? new Date(item.departureDate)
-        : undefined,
-    arrivalDate:
-      item.arrivalDate
-        ? new Date(item.arrivalDate)
-        : undefined,
-  }),
   children: [
     {
       route: '/trip/:tripId/seats',
@@ -45,4 +34,16 @@ export const TripAdminConfig = createAdminEntity('Voyage', tripSchema, {
       icon: '📅',
     },
   ],
+  bulkActions: [
+  {
+    key: 'export',
+    label: 'Exporter',
+    icon: null,
+    variant: 'outline',
+    onClick: async (ids) => {
+      console.log('Exporting trips with IDs:', ids);
+      // votre logique d’export avec les ids sélectionnés
+    }
+  }
+]
 });

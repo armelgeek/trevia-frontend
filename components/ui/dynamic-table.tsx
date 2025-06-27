@@ -15,8 +15,12 @@ export interface AdminConfigWithParseEdit<T = Record<string, unknown>> extends A
   parseEditItem?: (item: Record<string, unknown>) => T;
 }
 
+export interface AdminConfigWithLegacyParse<T = Record<string, unknown>> extends AdminConfigWithParseEdit<T> {
+  parseData?: (item: Record<string, unknown>) => T;
+}
+
 export function generateTableColumns<T extends Record<string, unknown>>(
-  config: AdminConfigWithParseEdit<T>,
+  config: AdminConfigWithLegacyParse<T>,
   onEdit?: (item: T) => void,
   onDelete?: (item: T) => void
 ): ColumnDef<T>[] {
@@ -72,7 +76,7 @@ export function generateTableColumns<T extends Record<string, unknown>>(
                 <DropdownMenuItem onClick={() => {
                   let parsed: T | undefined;
                   // Utilise parseEditItem (nouveau standard), sinon parseData (legacy)
-                  const parseFn = config.parseEditItem || (config as any).parseData;
+                  const parseFn = config.parseEditItem || config.parseData;
                   if (parseFn) {
                     try {
                       parsed = parseFn(item);
