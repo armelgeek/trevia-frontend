@@ -10,7 +10,6 @@ import { MoreHorizontal, Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import type { FieldConfig, AdminConfig } from '@/lib/admin-generator';
 import { toast } from 'sonner';
-import { ZodType } from 'zod';
 
 export interface AdminConfigWithParseEdit<T = Record<string, unknown>> extends AdminConfig {
   parseData?: (item: Record<string, unknown>) => T;
@@ -19,8 +18,7 @@ export interface AdminConfigWithParseEdit<T = Record<string, unknown>> extends A
 export function generateTableColumns<T extends Record<string, unknown>>(
   config: AdminConfigWithParseEdit<T>,
   onEdit?: (item: T) => void,
-  onDelete?: (item: T) => void,
-  schema?: ZodType<T>
+  onDelete?: (item: T) => void
 ): ColumnDef<T>[] {
   const columns: ColumnDef<T>[] = [];
 
@@ -124,27 +122,19 @@ function renderCellValue(value: unknown, field: FieldConfig): React.ReactNode {
       );
 
     case 'date':
-      // console.log(`[renderCellValue] Processing date field ${field.key}:`, value);
       try {
-        // Gestion des différents types de valeurs de date
         let date: Date;
         if (value instanceof Date) {
           date = value;
         } else if (typeof value === 'string' || typeof value === 'number') {
           date = new Date(value);
         } else {
-          // console.error(`[renderCellValue] Invalid date type for ${field.key}:`, typeof value, value);
           return <span className="text-muted-foreground">Date invalide</span>;
         }
-
-        // Vérifier si la date est valide
         if (isNaN(date.getTime())) {
-          // console.error(`[renderCellValue] Invalid date value for ${field.key}:`, date);
           return <span className="text-muted-foreground">Date invalide</span>;
         }
-
         const formattedDate = format(date, 'dd/MM/yyyy');
-        //console.log(`[renderCellValue] Formatted date for ${field.key}:`, formattedDate);
         return formattedDate;
       } catch (error) {
         console.error('Error formatting date:', error, value);
@@ -219,35 +209,37 @@ function renderCellValue(value: unknown, field: FieldConfig): React.ReactNode {
         </Badge>
       );
 
-    default:
-      return value as string;
-  }
-}
-
-import { ZodObject, ZodRawShape } from 'zod';
-
-function coerceItemWithSchema<T extends Record<string, unknown>>(item: Record<string, unknown>, schema: ZodType<T>): Record<string, unknown> {
-  if (!('shape' in schema)) return item;
-  const zodObject = schema as unknown as ZodObject<ZodRawShape>;
-  const shape = zodObject.shape;
-  console.log('shape', shape);
-  const result: Record<string, unknown> = { ...item };
-  for (const key in shape) {
-    if (!(key in item)) continue;
-    const field = shape[key];
-    // Zod types : ZodNumber, ZodDate, ZodBoolean, ZodArray, ZodObject, etc.
-    if (field?._def?.typeName === 'ZodNumber') {
-      result[key] = typeof item[key] === 'string' ? Number(item[key]) : item[key];
-    } else if (field?._def?.typeName === 'ZodDate') {
-      result[key] = typeof item[key] === 'string' ? new Date(item[key] as string) : item[key];
-    } else if (field?._def?.typeName === 'ZodBoolean') {
-      if (typeof item[key] === 'string') {
-        result[key] = item[key] === 'true' || item[key] === '1';
+    default: {
+      // Handle arrays and objects for admin table rendering
+      if (Array.isArray(value)) {
+        if (value.length > 0 && typeof value[0] === 'object') {
+          const arrayDisplayField = field.display?.arrayDisplayField;
+          if (arrayDisplayField) {
+            const values = value
+              .map((v: Record<string, unknown>) =>
+                arrayDisplayField in v && v[arrayDisplayField] ? String(v[arrayDisplayField]) : null
+              )
+              .filter(Boolean);
+            if (values.length > 0) {
+              return <span>{values.join(', ')}</span>;
+            }
+          }
+          // fallback: show a dash if no value
+          return <span className="text-muted-foreground">-</span>;
+        }
+        // array of primitives (robust: filter null/undefined/falsy except 0)
+        const filtered = value.filter(v => v !== null && v !== undefined && v !== '');
+        if (filtered.length > 0) {
+          return <span>{filtered.map(String).join(', ')}</span>;
+        }
+        return <span className="text-muted-foreground">-</span>;
       }
+      if (typeof value === 'object') {
+        return <span className="text-muted-foreground">-</span>;
+      }
+      return <span>{String(value)}</span>;
     }
-    // Pour les arrays, objets imbriqués, etc. : à adapter si besoin
   }
-  return result;
 }
 
 export { renderCellValue };

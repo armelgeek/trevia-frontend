@@ -11,7 +11,7 @@
   - Critères d’acceptation :
     - Les données sont correctes et à jour
 
-- [ ] **Lister toutes les réservations** (`GET /api/admin/bookings`)
+- [x] **Lister toutes les réservations** (`GET /api/admin/bookings`)
   - Use case : Consultation de toutes les réservations (admin)
   - Scénario nominal :
     1. L’admin consulte la liste paginée
@@ -21,7 +21,7 @@
     - Liste paginée retournée
   - Paramètres : query (page, limit), header (Authorization)
 
-- [ ] **Lister tous les voyages** (`GET /api/admin/trips`)
+- [x] **Lister tous les voyages** (`GET /api/admin/trips`)
   - Use case : Consultation de tous les voyages (admin)
   - Scénario nominal :
     1. L’admin consulte la liste paginée

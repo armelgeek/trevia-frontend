@@ -12,5 +12,13 @@ export const API_ENDPOINTS = {
     detail: (slug: string) => `/categories/${slug}`,
     update: (slug: string) => `/categories/${slug}`,
     delete: (slug: string) => `/categories/${slug}`,
+  },
+  bookings: {
+    base: '/api/admin/bookings',
+    list: (qs: string) => `/api/admin/bookings${qs}`,
+    create: '/api/admin/bookings',
+    detail: (id: string) => `/api/admin/bookings/${id}`,
+    update: (id: string) => `/api/admin/bookings/${id}`,
+    delete: (id: string) => `/api/admin/bookings/${id}`,
   }
 } as const;

@@ -29,6 +29,7 @@ export abstract class BaseServiceImpl<T, TPayload> implements BaseService<T, TPa
   protected async fetchData<R>(url: string, options: RequestInit): Promise<R> {
     const response = await fetch(`${API_URL}${url}`, {
       ...options,
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
         ...options.headers,

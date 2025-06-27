@@ -1,3 +1,5 @@
-import { BaseService } from '@/lib/base-service';
+import { createApiService } from '@/lib/admin-generator';
+import type { Booking } from './booking.schema';
+import { API_ENDPOINTS } from '@/shared/lib/config/api';
 
-export const bookingService = new BaseService('/api/bookings');
+export const bookingService = createApiService<Booking>(API_ENDPOINTS.bookings.base);

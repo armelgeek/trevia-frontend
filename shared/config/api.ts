@@ -14,5 +14,13 @@ export const API_ENDPOINTS = {
     detail: (id: string) => `/api/lessons/${id}`,
     update: (id: string) => `/api/lessons/${id}`,
     delete: (id: string) => `/api/lessons/${id}`
+  },
+  booking: {
+    base: '/api/admin/bookings',
+    create: '/api/admin/bookings',
+    list: (qs: string = '') => `/api/admin/bookings${qs ? `?${qs}` : ''}`,
+    detail: (id: string) => `/api/admin/bookings/${id}`,
+    update: (id: string) => `/api/admin/bookings/${id}`,
+    delete: (id: string) => `/api/admin/bookings/${id}`
   }
 };

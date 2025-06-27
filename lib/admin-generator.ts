@@ -21,6 +21,7 @@ export interface FieldConfig {
     showInDetail?: boolean;
     order?: number;
     widget?: 'select' | 'tag' | 'radio';
+    arrayDisplayField?: string; // Champ à exposer pour un tableau d'objets
   };
   relation?: {
     entity: string;
@@ -342,16 +343,12 @@ export function createDynamicColumns(fields: FieldConfig[], accessor: DynamicFie
             if (!value) return '';
             const date = new Date(value as string);
             return isNaN(date.getTime()) ? value : date.toLocaleDateString('fr-FR');
-          
           case 'boolean':
             return value ? '✓' : '✗';
-          
           case 'email':
             return value ? String(value) : '';
-          
           case 'url':
             return value ? String(value) : '';
-          
           case 'select':
             if (field.options && Array.isArray(field.options)) {
               const option = field.options.find(opt => 
@@ -360,14 +357,48 @@ export function createDynamicColumns(fields: FieldConfig[], accessor: DynamicFie
               return typeof option === 'string' ? option : option?.label || String(value || '');
             }
             return String(value || '');
-          
           case 'relation':
-            // Pour les relations, vous pourriez avoir besoin de données supplémentaires
             return String(value || '');
-          
           case 'number':
             return value !== undefined && value !== null ? String(value) : '';
-          
+          case 'object':
+            if (Array.isArray(value)) {
+              if (value.length > 0 && typeof value[0] === 'object') {
+                const arrayDisplayField = field.display?.arrayDisplayField;
+                return value
+                  .map((v: Record<string, unknown>) => {
+                    if (arrayDisplayField && arrayDisplayField in v && v[arrayDisplayField]) {
+                      return String(v[arrayDisplayField]);
+                    }
+                    // Fallback: stringify the object safely
+                    return JSON.stringify(v);
+                  })
+                  .filter(Boolean)
+                  .join(', ');
+              }
+              return value.map(String).join(', ');
+            }
+            // Fallback: always return a string
+            return value ? JSON.stringify(value) : '';
+          case 'array':
+            if (Array.isArray(value)) {
+              if (value.length > 0 && typeof value[0] === 'object') {
+                const arrayDisplayField = field.display?.arrayDisplayField;
+                return value
+                  .map((v: Record<string, unknown>) => {
+                    if (arrayDisplayField && arrayDisplayField in v && v[arrayDisplayField]) {
+                      return String(v[arrayDisplayField]);
+                    }
+                    // Fallback: stringify the object safely
+                    return JSON.stringify(v);
+                  })
+                  .filter(Boolean)
+                  .join(', ');
+              }
+              return value.map(String).join(', ');
+            }
+            // Fallback: always return a string
+            return value ? JSON.stringify(value) : '';
           default:
             return String(value || '');
         }
@@ -459,8 +490,7 @@ export function createAdminEntity<T extends z.ZodRawShape>(
     services: config?.services,
     queryKey: config?.queryKey || [name.toLowerCase()],
     parent: config?.parent,
-    children: config?.children,
-    formFields: config?.formFields || baseConfig.fields.map(field => field.key),
+    child: config?.child,
   };
 }
 
@@ -496,8 +526,7 @@ export interface CrudService<T extends Record<string, unknown>> {
 export interface AdminConfigWithServices<T extends Record<string, unknown>> extends AdminConfigWithAccessor {
   services?: CrudService<T>;
   queryKey?: string[];
-  parseData?: (item: Partial<T>) => Partial<T> | T;
-  formFields?: string[]
+  parseEditItem?: (item: Partial<T>) => Partial<T> | T;
 }
 
 export interface AdminConfigWithParent<T extends Record<string, unknown>> extends AdminConfigWithServices<T> {
@@ -510,11 +539,10 @@ export interface AdminConfigWithParent<T extends Record<string, unknown>> extend
 }
 
 export interface AdminConfigWithChild<T extends Record<string, unknown>> extends AdminConfigWithParent<T> {
-  children?: {
+  child?: {
     route: string;
     label?: string;
-    icon?: string;
-  }[];
+  };
 }
 
 export function createMockService<T extends Record<string, unknown>>(
