@@ -30,5 +30,21 @@ export const API_ENDPOINTS = {
     detail: (id: string) => `/api/vehicles/${id}`,
     update: (id: string) => `/api/vehicles/${id}`,
     delete: (id: string) => `/api/vehicles/${id}`
+  },
+  driver: {
+    base: '/api/drivers',
+    create: '/api/drivers',
+    list: (qs: string = '') => `/api/drivers${qs ? `?${qs}` : ''}`,
+    detail: (id: string) => `/api/drivers/${id}`,
+    update: (id: string) => `/api/drivers/${id}`,
+    delete: (id: string) => `/api/drivers/${id}`
+  },
+  route: {
+    base: '/api/routes',
+    create: '/api/routes',
+    list: (qs: string = '') => `/api/routes${qs ? `?${qs}` : ''}`,
+    detail: (id: string) => `/api/routes/${id}`,
+    update: (id: string) => `/api/routes/${id}`,
+    delete: (id: string) => `/api/routes/${id}`
   }
 };

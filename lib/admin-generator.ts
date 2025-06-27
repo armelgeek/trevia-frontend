@@ -40,7 +40,7 @@ export interface BulkAction {
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost';
 }
 
-export interface AdminConfig<T = any> {
+export interface AdminConfig<T = Record<string, unknown>> {
   title: string;
   description?: string;
   icon?: string;
@@ -81,13 +81,20 @@ export interface AdminConfigWithAccessor extends AdminConfig {
   bulkActions?: BulkAction[];
 }
 
+export type ChildConfig = {
+  route: string;
+  label?: string;
+  icon?: string;
+  [key: string]: unknown;
+};
+
 export interface AdminConfigWithServices<T extends Record<string, unknown>> extends AdminConfigWithAccessor {
-  children: ChildConfig[];
   services?: CrudService<T>;
   queryKey?: string[];
   parseEditItem?: (item: Partial<T>) => Partial<T> | T;
   formFields?: string[];
   bulkActions?: BulkAction[];
+  children?: ChildConfig[]; // Ajouté pour compatibilité typage
 }
 
 export interface AdminConfigWithParent<T extends Record<string, unknown>> extends AdminConfigWithServices<T> {
@@ -101,11 +108,7 @@ export interface AdminConfigWithParent<T extends Record<string, unknown>> extend
 }
 
 export interface AdminConfigWithChild<T extends Record<string, unknown>> extends AdminConfigWithParent<T> {
-  children?: {
-    route: string;
-    label?: string;
-    icon?: string;
-  }[];
+  children?: ChildConfig[];
   bulkActions?: BulkAction[];
 }
 
@@ -136,16 +139,16 @@ export function getNestedProperty<T = unknown>(obj: Record<string, unknown>, pat
 export function setNestedProperty(obj: Record<string, unknown>, path: string, value: unknown): void {
   const keys = path.split('.');
   const lastKey = keys.pop();
-  
+
   if (!lastKey) return;
-  
+
   const target = keys.reduce((current, key) => {
     if (!current[key] || typeof current[key] !== 'object') {
       current[key] = {};
     }
     return current[key] as Record<string, unknown>;
   }, obj);
-  
+
   target[lastKey] = value;
 }
 
@@ -171,7 +174,7 @@ export function createDynamicAccessor(): DynamicFieldAccess {
       }
       return obj[field] as T | undefined;
     },
-    
+
     setValue: (obj: Record<string, unknown>, field: string, value: unknown): void => {
       if (field.includes('.')) {
         setNestedProperty(obj, field, value);
@@ -199,46 +202,46 @@ export function withMeta<T extends ZodSchema>(schema: T, metadata: ZodMetadata):
 }
 
 export const createField = {
-  string: (metadata?: ZodMetadata) => 
+  string: (metadata?: ZodMetadata) =>
     withMeta(z.string(), { type: 'text', ...metadata }),
-  
-  email: (metadata?: ZodMetadata) => 
+
+  email: (metadata?: ZodMetadata) =>
     withMeta(z.string().email(), { type: 'email', ...metadata }),
-  
-  url: (metadata?: ZodMetadata) => 
+
+  url: (metadata?: ZodMetadata) =>
     withMeta(z.string().url(), { type: 'url', ...metadata }),
-  
-  textarea: (metadata?: ZodMetadata) => 
+
+  textarea: (metadata?: ZodMetadata) =>
     withMeta(z.string(), { type: 'textarea', ...metadata }),
-  
-  richText: (metadata?: ZodMetadata) => 
+
+  richText: (metadata?: ZodMetadata) =>
     withMeta(z.string(), { type: 'rich-text', ...metadata }),
-  
-  number: (metadata?: ZodMetadata) => 
+
+  number: (metadata?: ZodMetadata) =>
     withMeta(z.number(), { type: 'number', ...metadata }),
-  
-  boolean: (metadata?: ZodMetadata) => 
+
+  boolean: (metadata?: ZodMetadata) =>
     withMeta(z.boolean(), { type: 'boolean', ...metadata }),
-  
-  date: (metadata?: ZodMetadata) => 
+
+  date: (metadata?: ZodMetadata) =>
     withMeta(z.date(), { type: 'date', ...metadata }),
-  
-  select: (options: string[] | { value: string; label: string }[], metadata?: ZodMetadata) => 
+
+  select: (options: string[] | { value: string; label: string }[], metadata?: ZodMetadata) =>
     withMeta(z.string(), { type: 'select', options, ...metadata }),
-  
+
   relation: (entity: string, displayField: string = 'name', multiple: boolean = false, metadata?: ZodMetadata) =>
-    withMeta(multiple ? z.array(z.string()) : z.string(), { 
-      type: 'relation', 
-      relation: { entity, displayField, multiple }, 
-      ...metadata 
+    withMeta(multiple ? z.array(z.string()) : z.string(), {
+      type: 'relation',
+      relation: { entity, displayField, multiple },
+      ...metadata
     }),
-  
-  image: (metadata?: ZodMetadata) => 
+
+  image: (metadata?: ZodMetadata) =>
     withMeta(z.string(), { type: 'image', ...metadata }),
-  
-  file: (metadata?: ZodMetadata) => 
+
+  file: (metadata?: ZodMetadata) =>
     withMeta(z.string(), { type: 'file', ...metadata }),
-  
+
   radio: (options: string[] | { value: string; label: string }[], metadata?: ZodMetadata) =>
     withMeta(z.string(), { type: 'select', options, display: { widget: 'radio', ...(metadata?.display || {}) }, ...metadata }),
   tag: (options: string[] | { value: string; label: string }[], metadata?: ZodMetadata) =>
@@ -286,19 +289,19 @@ export function generateAdminConfig(schema: ZodObject<z.ZodRawShape>, title: str
     // Pour les champs optionnels, récupérer les métadonnées du champ interne
     let metadata: ZodMetadata = {};
     let actualField = zodField;
-    
+
     // Si c'est un champ optionnel, récupérer le champ interne
     if (zodField instanceof z.ZodOptional) {
       actualField = zodField._def.innerType;
     }
-    
+
     // Récupérer les métadonnées
     if ((actualField as { _metadata?: ZodMetadata })._metadata) {
       metadata = (actualField as { _metadata?: ZodMetadata })._metadata || {};
     } else if ((zodField as { _metadata?: ZodMetadata })._metadata) {
       metadata = (zodField as { _metadata?: ZodMetadata })._metadata || {};
     }
-    
+
     console.log(`[generateAdminConfig] Processing field ${key}:`, {
       metadata,
       zodFieldType: zodField.constructor.name,
@@ -307,7 +310,7 @@ export function generateAdminConfig(schema: ZodObject<z.ZodRawShape>, title: str
       metadataType: metadata.type,
       isOptional: zodField instanceof z.ZodOptional
     });
-    
+
     const field: FieldConfig = {
       key,
       label: metadata.label || key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1'),
@@ -400,31 +403,6 @@ export function generateAdminConfig(schema: ZodObject<z.ZodRawShape>, title: str
       form: {
         layout: 'simple',
       },
-    },
-    parseEditItem: (item: Record<string, unknown>) => {
-      const parsed: Record<string, unknown> = { ...item };
-      const dateRegex = /date|at$/i;
-      const isoDateRegex = /^\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2})?)?/;
-      for (const key in item) {
-        const value = item[key];
-        if (
-          dateRegex.test(key) ||
-          (typeof value === 'string' && isoDateRegex.test(value)) ||
-          (typeof value === 'number' && value > 1000000000)
-        ) {
-          if (value === null || value === undefined || value === '') {
-            parsed[key] = undefined;
-          } else if (value instanceof Date) {
-            parsed[key] = value;
-          } else if (typeof value === 'string' || typeof value === 'number') {
-            const d = new Date(value);
-            parsed[key] = !isNaN(d.getTime()) ? d : undefined;
-          } else {
-            parsed[key] = undefined;
-          }
-        }
-      }
-      return parsed;
     },
   };
 }
@@ -526,18 +504,18 @@ export function createFormAccessors<T extends Record<string, unknown>>(
   fields: FieldConfig[]
 ) {
   const accessor = createDynamicAccessor();
-  
+
   return {
     // Obtenir la valeur d'un champ
     getFieldValue: (fieldKey: string) => {
       return accessor.getValue(data, fieldKey);
     },
-    
+
     // Définir la valeur d'un champ
     setFieldValue: (fieldKey: string, value: unknown) => {
       accessor.setValue(data, fieldKey, value);
     },
-    
+
     // Obtenir toutes les valeurs des champs visibles dans le formulaire
     getFormValues: () => {
       const values: Record<string, unknown> = {};
@@ -548,7 +526,7 @@ export function createFormAccessors<T extends Record<string, unknown>>(
         });
       return values;
     },
-    
+
     validateRequired: () => {
       const errors: string[] = [];
       fields
@@ -590,7 +568,7 @@ export function useZodValidation<T>(schema: ZodSchema<T>) {
 
 export function createAdminEntity<T extends Record<string, unknown>>(
   name: string,
-  schema: z.ZodObject<any>,
+  schema: z.ZodObject<z.ZodRawShape>,
   config?: Partial<AdminConfigWithChild<T>>
 ): AdminConfigWithChild<T> {
   const baseConfig = generateAdminConfig(schema, name);
@@ -604,7 +582,34 @@ export function createAdminEntity<T extends Record<string, unknown>>(
     queryKey: config?.queryKey || [name.toLowerCase()],
     parent: config?.parent,
     children: config?.children,
-    formFields: config?.formFields
+    formFields: config?.formFields,
+    parseEditItem: config?.parseEditItem || ((item: Record<string, unknown>) => {
+      const parsed: Record<string, unknown> = { ...item };
+      const dateRegex = /date|at$/i;
+      const isoDateRegex = /^\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2})?)?/;
+      for (const key in item) {
+        const value = item[key];
+        if (
+          dateRegex.test(key) ||
+          (typeof value === 'string' && isoDateRegex.test(value)) ||
+          (typeof value === 'number' && value > 1000000000)
+        ) {
+          if (value === null || value === undefined || value === '') {
+            parsed[key] = '';
+          } else if (value instanceof Date) {
+            parsed[key] = value;
+          } else if (typeof value === 'string' || typeof value === 'number') {
+            const d = new Date(value);
+            parsed[key] = !isNaN(d.getTime()) ? d : '';
+          } else {
+            parsed[key] = '';
+          }
+        } else if (value === null || value === undefined) {
+          parsed[key] = '';
+        }
+      }
+      return parsed;
+    }),
   };
 }
 
@@ -613,25 +618,25 @@ export function createEntitySchema<T extends z.ZodRawShape>(
   relations?: Record<string, { entity: string; displayField?: string; multiple?: boolean }>
 ) {
   const schema = z.object(fields);
-  
+
   if (relations) {
     const relatedFields: Record<string, z.ZodTypeAny> = {};
     Object.entries(relations).forEach(([key, relation]) => {
       relatedFields[key] = createField.relation(
-        relation.entity, 
-        relation.displayField, 
+        relation.entity,
+        relation.displayField,
         relation.multiple
       );
     });
-    
+
     return z.object({ ...fields, ...relatedFields });
   }
-  
+
   return schema;
 }
 
 export interface CrudService<T extends Record<string, unknown>> {
-  fetchItems: () => Promise<{ data: T[]; meta?: { total: number; totalPages: number } }>;
+  fetchItems: (filters?: Record<string, string | number | undefined>) => Promise<{ data: T[]; meta?: { total: number; totalPages: number } }>;
   createItem: (data: T) => Promise<T>;
   updateItem: (id: string, data: Partial<T>) => Promise<T>;
   deleteItem: (id: string) => Promise<void>;
@@ -656,11 +661,7 @@ export interface AdminConfigWithParent<T extends Record<string, unknown>> extend
 }
 
 export interface AdminConfigWithChild<T extends Record<string, unknown>> extends AdminConfigWithParent<T> {
-  children?: {
-    route: string;
-    label?: string;
-    icon?: string;
-  }[];
+  children?: ChildConfig[];
   bulkActions?: BulkAction[];
 }
 
@@ -668,17 +669,17 @@ export function createMockService<T extends Record<string, unknown>>(
   initialData: T[] = []
 ): CrudService<T> {
   const data: T[] = [...initialData];
-  
+
   return {
     fetchItems: async () => ({
       data: [...data],
       meta: { total: data.length, totalPages: Math.ceil(data.length / 20) }
     }),
-    
+
     createItem: async (item: T) => {
       console.log('createMockService.createItem called with:', item);
-      const newItem = { 
-        ...item, 
+      const newItem = {
+        ...item,
         id: Math.random().toString(36).substr(2, 9),
         createdAt: new Date(),
         updatedAt: new Date()
@@ -687,7 +688,7 @@ export function createMockService<T extends Record<string, unknown>>(
       data.push(newItem);
       return newItem;
     },
-    
+
     updateItem: async (id: string, updates: Partial<T>) => {
       console.log('createMockService.updateItem called with:', id, updates);
       const index = data.findIndex((item: T) => (item as Record<string, unknown>).id === id);
@@ -695,7 +696,7 @@ export function createMockService<T extends Record<string, unknown>>(
       data[index] = { ...data[index], ...updates, updatedAt: new Date() };
       return data[index];
     },
-    
+
     deleteItem: async (id: string) => {
       console.log('createMockService.deleteItem called with:', id);
       const index = data.findIndex((item: T) => (item as Record<string, unknown>).id === id);
@@ -722,19 +723,18 @@ export class AdminCrudService<T extends Record<string, unknown>> extends BaseSer
 
   protected serializeParams(filter: Filter): string {
     const params = new URLSearchParams();
-    
+
     Object.entries(filter).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         params.append(key, String(value));
       }
     });
-    
+
     return params.toString();
   }
 
- async fetchItems(filters?: Record<string, string | number | undefined>): Promise<{ data: T[]; meta?: { total: number; totalPages: number; page?: number; limit?: number } }> {
+  async fetchItems(filters?: Record<string, string | number | undefined>): Promise<{ data: T[]; meta?: { total: number; totalPages: number; page?: number; limit?: number } }> {
     try {
-      // Ajout des filtres en query params
       const response = await this.list(filters || {});
       return {
         data: response.data,
@@ -774,7 +774,7 @@ export class AdminCrudService<T extends Record<string, unknown>> extends BaseSer
   async deleteItem(id: string): Promise<void> {
     await this.fetchData(this.endpoints.delete(id), {
       method: 'DELETE',
-      credentials: 'include', 
+      credentials: 'include',
     });
   }
 }
@@ -783,9 +783,11 @@ export function createApiService<T extends Record<string, unknown>>(
   baseUrl: string
 ): CrudService<T> {
   const service = new AdminCrudService<T>(baseUrl);
-  
+
   return {
-    fetchItems: (filters?: Record<string, string | number | undefined>) => service.fetchItems(filters),
+    fetchItems: (filters?: Record<string, string | number | undefined>) => {
+      return service.fetchItems(filters);
+    },
     createItem: (data: T) => service.createItem(data),
     updateItem: (id: string, data: Partial<T>) => service.updateItem(id, data),
     deleteItem: (id: string) => service.deleteItem(id),

@@ -1,9 +1,10 @@
 'use client';
 
 import { Table } from '@tanstack/react-table';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search } from 'lucide-react';
+import { DebouncedInput } from '@/components/ui/debounced-input';
+import { useEffect } from 'react';
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -13,22 +14,30 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
   const globalFilter = table.getState().globalFilter as string;
   const setGlobalFilter = (value: string) => table.setGlobalFilter(value);
 
+  // Synchronise le champ avec la valeur externe si modifiée ailleurs (ex: reset)
+  useEffect(() => {
+    if (globalFilter === undefined || globalFilter === null) {
+      setGlobalFilter('');
+    }
+  }, [globalFilter, setGlobalFilter]);
+
   return (
     <div className="flex items-center gap-2 py-2">
       <div className="relative w-full max-w-xs">
-        <Input
+        <DebouncedInput
           type="text"
           placeholder="Rechercher..."
           value={globalFilter ?? ''}
-          onChange={(e) => setGlobalFilter(e.target.value)}
+          onChange={value => setGlobalFilter(String(value))}
           className="pl-8"
+          debounce={500}
           aria-label="Recherche globale"
         />
         <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400">
           <Search className="w-4 h-4" />
         </span>
       </div>
-      {table.getState().globalFilter && (
+      {globalFilter && (
         <Button
           variant="ghost"
           size="sm"

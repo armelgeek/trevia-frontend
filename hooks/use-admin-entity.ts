@@ -33,16 +33,27 @@ function createAdminService<T>(endpoint: string): AdminEntityService<T> {
   // Ajout d'un prefix global si défini (ex: process.env.NEXT_PUBLIC_API_URL)
   const API_PREFIX = process.env.NEXT_PUBLIC_API_URL || '';
   const fullEndpoint = endpoint.startsWith('http') ? endpoint : `${API_PREFIX}${endpoint}`;
+
   return {
     async fetchItems(filters?: Record<string, unknown>) {
-      const response = await fetch(fullEndpoint, {
+      let url = fullEndpoint;
+      console.log('url', url);
+      if (filters && Object.keys(filters).length > 0) {
+        const params = new URLSearchParams();
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== '') {
+            params.append(key, String(value));
+          }
+        });
+        url += `?${params.toString()}`;
+      }
+      const response = await fetch(url, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(filters),
         credentials: 'include',
       });
       if (!response.ok) {
-        throw new Error(`Failed to fetch ${fullEndpoint}`);
+        throw new Error(`Failed to fetch ${url}`);
       }
       return response.json();
     },
@@ -87,7 +98,7 @@ export function useAdminEntity<T extends Record<string, unknown>>(
 ) {
   const queryClient = useQueryClient();
   const service = options.customServices
-    ? wrapParentService(options.customServices, options.parentId)
+    ? wrapParentService(options.customServices, options.parentId, options.filters)
     : createAdminService<T>(options.apiEndpoint || '');
 
   // Clé de query complète avec les filtres
@@ -95,18 +106,21 @@ export function useAdminEntity<T extends Record<string, unknown>>(
     queryKey: options.filters && Object.keys(options.filters).length > 0
       ? [...options.queryKey, options.filters]
       : options.queryKey,
-    queryFn: () => service.fetchItems(options.filters),
+    queryFn: () => {
+      console.log('[useAdminEntity] filters passed to fetchItems:', options.filters);
+      return service.fetchItems(options.filters);
+    },
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     refetchOnReconnect: true,
     staleTime: 0, // Toujours stale, refetch immédiat après mutation
   });
-  
+
   const createMutation = useMutation({
     mutationFn: service.createItem,
     onSuccess: (data) => {
       // Invalider toutes les queries qui commencent par la queryKey de base
-      queryClient.invalidateQueries({ queryKey: options.queryKey});
+      queryClient.invalidateQueries({ queryKey: options.queryKey });
       toast.success(`${options.config.title} créé avec succès`);
       options.onSuccess?.create?.(data);
     },
@@ -117,7 +131,7 @@ export function useAdminEntity<T extends Record<string, unknown>>(
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<T> }) => 
+    mutationFn: ({ id, data }: { id: string; data: Partial<T> }) =>
       service.updateItem(id, data),
     onSuccess: (data) => {
       // Invalider toutes les queries qui commencent par la queryKey de base
@@ -144,7 +158,6 @@ export function useAdminEntity<T extends Record<string, unknown>>(
       options.onError?.delete?.(error);
     },
   });
-
   return {
     data: query.data?.data || [],
     meta: query.data?.meta,
@@ -168,13 +181,13 @@ export function useAdminEntity<T extends Record<string, unknown>>(
   };
 }
 
-function wrapParentService<T extends Record<string, unknown>>(service: CrudService<T>, parentId?: string): CrudService<T> {
+function wrapParentService<T extends Record<string, unknown>>(service: CrudService<T>, parentId?: string, filters?: Record<string, unknown>): CrudService<T> {
   return {
     fetchItems: () => {
       if (parentId && service.fetchItems.length > 0) {
-        return service.fetchItems();
+        return service.fetchItems({ ...filters, parentId });
       }
-      return service.fetchItems();
+      return service.fetchItems(filters);
     },
     createItem: (data: T) => {
       if (parentId && service.createItem.length > 0) {
@@ -203,7 +216,7 @@ export function useSimpleAdminEntity<T extends Record<string, unknown>>(
   config: AdminConfig
 ) {
   const kebabName = entityName.toLowerCase().replace(/([A-Z])/g, '-$1').replace(/^-/, '');
-  
+
   return useAdminEntity<T>({
     config,
     queryKey: [kebabName],

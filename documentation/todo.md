@@ -1,7 +1,8 @@
 # TODO-list API – Génération automatisée
+
 ## Tâches Admin (prioritaires)
 
-- [x] **Dashboard admin** (`GET /api/admin/dashboard`)
+- [ x] **Dashboard admin** (`GET /api/admin/dashboard`)
   - Use case : Accès aux statistiques et alertes pour l’admin
   - Scénario nominal :
     1. L’admin accède au dashboard
@@ -10,8 +11,9 @@
     - Accès non autorisé
   - Critères d’acceptation :
     - Les données sont correctes et à jour
+  - Paramètres : header (Authorization)
 
-- [x] **Lister toutes les réservations** (`GET /api/admin/bookings`)
+- [ x] **Lister toutes les réservations** (`GET /api/admin/bookings`)
   - Use case : Consultation de toutes les réservations (admin)
   - Scénario nominal :
     1. L’admin consulte la liste paginée
@@ -21,7 +23,7 @@
     - Liste paginée retournée
   - Paramètres : query (page, limit), header (Authorization)
 
-- [x] **Lister tous les voyages** (`GET /api/admin/trips`)
+- [ x] **Lister tous les voyages** (`GET /api/admin/trips`)
   - Use case : Consultation de tous les voyages (admin)
   - Scénario nominal :
     1. L’admin consulte la liste paginée
@@ -31,8 +33,8 @@
     - Liste paginée retournée
   - Paramètres : query (page, limit), header (Authorization)
 
-- [ ] **Gestion des véhicules**
-  - [ ] Lister les véhicules (`GET /api/vehicles`)
+- [ x] **Gestion des véhicules**
+  - [ x] Lister les véhicules (`GET /api/vehicles`)
     - Use case : Consultation des véhicules (admin)
     - Scénario nominal :
       1. L’admin consulte la liste paginée
@@ -41,7 +43,7 @@
     - Critères d’acceptation :
       - Liste paginée retournée
     - Paramètres : query (page, limit, sort, filter), header (Authorization)
-  - [ ] Détail d’un véhicule (`GET /api/vehicles/{id}`)
+  - [x ] Détail d’un véhicule (`GET /api/vehicles/{id}`)
     - Use case : Voir le détail d’un véhicule (admin)
     - Scénario nominal :
       1. L’admin consulte le détail
@@ -50,7 +52,7 @@
     - Critères d’acceptation :
       - Détail correct affiché
     - Paramètres : path (id), header (Authorization)
-  - [ ] Créer un véhicule (`POST /api/vehicles`)
+  - [ x] Créer un véhicule (`POST /api/vehicles`)
     - Use case : Ajouter un véhicule (admin)
     - Scénario nominal :
       1. L’admin soumet le formulaire
@@ -60,7 +62,7 @@
     - Critères d’acceptation :
       - Véhicule ajouté
     - Paramètres : body (voir schéma), header (Authorization)
-  - [ ] Mettre à jour un véhicule (`PUT /api/vehicles/{id}`)
+  - [x ] Mettre à jour un véhicule (`PUT /api/vehicles/{id}`)
     - Use case : Modifier un véhicule (admin)
     - Scénario nominal :
       1. L’admin modifie les infos
@@ -71,6 +73,178 @@
       - Modifications visibles
     - Paramètres : path (id), body (voir schéma), header (Authorization)
 
+- [ x] **Gestion des rôles et permissions**
+  - [x ] Créer un rôle (`POST /api/v1/roles`)
+    - Use case : Création d’un rôle admin
+    - Scénario nominal :
+      1. L’admin crée un rôle
+    - Scénarios d’exception :
+      - Nom déjà utilisé
+    - Critères d’acceptation :
+      - Rôle créé
+    - Paramètres : body (name, description, permissions), header (Authorization)
+  - [x ] Assigner un rôle (`POST /api/v1/users/:userId/roles/:roleId`)
+    - Use case : Attribution d’un rôle à un utilisateur
+    - Scénario nominal :
+      1. L’admin assigne un rôle
+    - Scénarios d’exception :
+      - Utilisateur ou rôle non trouvé
+    - Critères d’acceptation :
+      - Rôle assigné
+    - Paramètres : path (userId, roleId), header (Authorization)
+  - [x ] Détail des rôles (`GET /api/v1/roles/details`)
+    - Use case : Voir les rôles et permissions
+    - Scénario nominal :
+      1. L’admin consulte la liste
+    - Scénarios d’exception :
+      - Accès non autorisé
+    - Critères d’acceptation :
+      - Liste correcte
+    - Paramètres : header (Authorization)
+  - [x ] Modifier un rôle (`PUT /api/v1/roles/{roleId}`)
+    - Use case : Modifier un rôle
+    - Scénario nominal :
+      1. L’admin modifie un rôle
+    - Scénarios d’exception :
+      - Rôle non trouvé
+    - Critères d’acceptation :
+      - Rôle modifié
+    - Paramètres : path (roleId), body (name?, description?, permissions?), header (Authorization)
+  - [x ] Supprimer un rôle (`DELETE /api/v1/roles/{roleId}`)
+    - Use case : Suppression d’un rôle
+    - Scénario nominal :
+      1. L’admin supprime un rôle
+    - Scénarios d’exception :
+      - Rôle non trouvé
+    - Critères d’acceptation :
+      - Rôle supprimé
+    - Paramètres : path (roleId), header (Authorization)
+
+- [ ] **Gestion des conducteurs (drivers)**
+  - [ ] Lister les conducteurs (`GET /api/drivers`)
+    - Use case : Consultation des conducteurs (admin)
+    - Scénario nominal :
+      1. L’admin consulte la liste paginée
+    - Scénarios d’exception :
+      - Accès non autorisé
+    - Critères d’acceptation :
+      - Liste paginée retournée
+    - Paramètres : query (page, limit, sort, filter), header (Authorization)
+  - [ ] Détail d’un conducteur (`GET /api/drivers/{id}`)
+    - Use case : Voir le détail d’un conducteur (admin)
+    - Scénario nominal :
+      1. L’admin consulte le détail
+    - Scénarios d’exception :
+      - Conducteur non trouvé
+    - Critères d’acceptation :
+      - Détail correct affiché
+    - Paramètres : path (id), header (Authorization)
+  - [ ] Créer un conducteur (`POST /api/drivers`)
+    - Use case : Ajouter un conducteur (admin)
+    - Scénario nominal :
+      1. L’admin soumet le formulaire
+      2. Le conducteur est créé
+    - Scénarios d’exception :
+      - Champs manquants
+    - Critères d’acceptation :
+      - Conducteur ajouté
+    - Paramètres : body (voir schéma), header (Authorization)
+    - **Schéma (body)** :
+      ```json
+      {
+        "firstName": "string",
+        "lastName": "string",
+        "license": "string",
+        "certifications": "string[]",
+        "phone": "string",
+        "status": "string"
+      }
+      ```
+  - [ ] Mettre à jour un conducteur (`PUT /api/drivers/{id}`)
+    - Use case : Modifier un conducteur (admin)
+    - Scénario nominal :
+      1. L’admin modifie les infos
+      2. Les modifications sont enregistrées
+    - Scénarios d’exception :
+      - Conducteur non trouvé
+    - Critères d’acceptation :
+      - Modifications visibles
+    - Paramètres : path (id), body (voir schéma), header (Authorization)
+    - **Schéma (body)** :
+      ```json
+      {
+        "firstName"?: "string",
+        "lastName"?: "string",
+        "license"?: "string",
+        "certifications"?: "string[]",
+        "phone"?: "string",
+        "status"?: "string"
+      }
+      ```
+
+- [ ] **Gestion des routes**
+  - [ ] Lister les routes (`GET /api/routes`)
+    - Use case : Consultation des routes (admin)
+    - Scénario nominal :
+      1. L’admin consulte la liste paginée
+    - Scénarios d’exception :
+      - Accès non autorisé
+    - Critères d’acceptation :
+      - Liste paginée retournée
+    - Paramètres : query (page, limit, sort, filter), header (Authorization)
+  - [ ] Détail d’une route (`GET /api/routes/{id}`)
+    - Use case : Voir le détail d’une route (admin)
+    - Scénario nominal :
+      1. L’admin consulte le détail
+    - Scénarios d’exception :
+      - Route non trouvée
+    - Critères d’acceptation :
+      - Détail correct affiché
+    - Paramètres : path (id), header (Authorization)
+  - [ ] Créer une route (`POST /api/routes`)
+    - Use case : Ajouter une route (admin)
+    - Scénario nominal :
+      1. L’admin soumet le formulaire
+      2. La route est créée
+    - Scénarios d’exception :
+      - Champs manquants
+    - Critères d’acceptation :
+      - Route ajoutée
+    - Paramètres : body (voir schéma), header (Authorization)
+    - **Schéma (body)** :
+      ```json
+      {
+        "departureCity": "string",
+        "arrivalCity": "string",
+        "distanceKm": "string",
+        "duration": "string",
+        "basePrice": "string",
+        "routeType": "string",
+        "status": "string"
+      }
+      ```
+  - [ ] Mettre à jour une route (`PUT /api/routes/{id}`)
+    - Use case : Modifier une route (admin)
+    - Scénario nominal :
+      1. L’admin modifie les infos
+      2. Les modifications sont enregistrées
+    - Scénarios d’exception :
+      - Route non trouvée
+    - Critères d’acceptation :
+      - Modifications visibles
+    - Paramètres : path (id), body (voir schéma), header (Authorization)
+    - **Schéma (body)** :
+      ```json
+      {
+        "departureCity"?: "string",
+        "arrivalCity"?: "string",
+        "distanceKm"?: "string",
+        "duration"?: "string",
+        "basePrice"?: "string",
+        "routeType"?: "string",
+        "status"?: "string"
+      }
+      ```
 
 ## Tâches Frontend (utilisateur standard)
 

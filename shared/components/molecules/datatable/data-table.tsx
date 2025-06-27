@@ -224,7 +224,7 @@ export function DataTable<TData, TValue>({
                       {isBeforeActions && <TableHead className='w-[250px]'> </TableHead>}
                       <TableHead
                         colSpan={header.colSpan}
-                        style={{ width: header.getSize(),  textTransform: 'uppercase' }}
+                        style={{ width: header.getSize() }}
                       >
                         {header.isPlaceholder
                           ? null

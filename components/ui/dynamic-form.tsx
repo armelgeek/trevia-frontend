@@ -380,26 +380,28 @@ export function DynamicForm<
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
-        className={cn('space-y-6', className)}
+        className={cn('flex flex-col h-full max-h-[80vh] space-y-0', className)}
+        style={{ minHeight: 320 }}
       >
-        {renderFormSections()}
+        <div className="flex-1 overflow-auto px-1 pt-2 pb-4">
+          {renderFormSections()}
 
-        {/* Affichage global des erreurs de validation */}
-        {Object.keys(form.formState.errors).length > 0 && (
-          <div className="text-red-600 text-sm mb-2">
-            <b>Erreur(s) de validation :</b>
-            <ul className="list-disc ml-5">
-              {Object.entries(form.formState.errors).map(([key, err]) => {
-                const message = typeof err === 'object' && err && 'message' in err ? (err as { message?: string }).message : undefined;
-                return (
-                  <li key={key}>{key} : {message || 'Champ invalide'}</li>
-                );
-              })}
-            </ul>
-          </div>
-        )}
-
-        <div className="flex justify-end space-x-2">
+          {/* Affichage global des erreurs de validation */}
+          {Object.keys(form.formState.errors).length > 0 && (
+            <div className="text-red-600 text-sm mb-2">
+              <b>Erreur(s) de validation :</b>
+              <ul className="list-disc ml-5">
+                {Object.entries(form.formState.errors).map(([key, err]) => {
+                  const message = typeof err === 'object' && err && 'message' in err ? (err as { message?: string }).message : undefined;
+                  return (
+                    <li key={key}>{key} : {message || 'Champ invalide'}</li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+        </div>
+        <div className="sticky bottom-0 left-0 w-full bg-white border-t z-10 flex justify-end space-x-2 px-4 py-3">
           <Button
             type="submit"
             disabled={isSubmitting}

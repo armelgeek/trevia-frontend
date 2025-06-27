@@ -1,4 +1,4 @@
-import { Car, Plane } from 'lucide-react';
+import { Car, Plane, Route } from 'lucide-react';
 import {
   AlertTriangle,
   ArrowRight,
@@ -85,5 +85,6 @@ export const Icons = {
   twitter: Twitter,
   check: Check,
   car: Car,
-  plane: Plane
+  plane: Plane,
+  route: Route
 };

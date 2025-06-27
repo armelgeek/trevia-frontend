@@ -111,6 +111,14 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
     Object.fromEntries(fields.map((key: string | number) => [key, data[key]]));
 
 
+  const filtersFromNuqs = {
+    search,
+    sortBy,
+    sortDir,
+    page,
+    pageSize,
+    ...(filters || {})
+  };
   const {
     data: items,
     meta,
@@ -130,7 +138,7 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
       update: () => setEditingItem(null),
       delete: () => setDeletingItem(null),
     },
-    filters,
+    filters: filtersFromNuqs,
     parentId,
   });
 

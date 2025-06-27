@@ -1,5 +1,4 @@
 import React from 'react';
-
 import { Input } from '@/components/ui/input';
 
 const DebouncedInput = React.forwardRef<
@@ -12,18 +11,24 @@ const DebouncedInput = React.forwardRef<
 >((props, ref) => {
   const { value: initialValue, onChange, debounce = 500, ...rest } = props;
   const [value, setValue] = React.useState(initialValue);
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
+  // Met à jour la valeur locale si la prop change (contrôle externe)
   React.useEffect(() => {
     setValue(initialValue);
   }, [initialValue]);
 
+  // Déclenche le onChange debounced uniquement si la valeur locale change (pas lors du setValue externe)
   React.useEffect(() => {
-    const timeout = setTimeout(() => {
+    if (value === initialValue) return;
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
       onChange(value);
     }, debounce);
-
-    return () => clearTimeout(timeout);
-  }, [debounce, onChange, value]);
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [value, debounce]);
 
   return (
     <Input

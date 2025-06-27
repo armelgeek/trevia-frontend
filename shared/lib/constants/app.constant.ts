@@ -50,10 +50,26 @@ export const navItems: NavItem[] = [
     items: []
   },
   {
-    title: 'Réservations',
-    url: '/admin/bookings',
-    icon: 'page',
-    shortcut: ['r', 'r'],
+    title: 'Conducteurs',
+    url: '/admin/drivers',
+    icon: 'user',
+    shortcut: ['c', 'd'],
+    isActive: false,
+    items: []
+  },
+  {
+    title: 'Routes',
+    url: '/admin/routes',
+    icon: 'route',
+    shortcut: ['r', 't'],
+    isActive: false,
+    items: []
+  },
+  {
+    title: 'Véhicules',
+    url: '/admin/vehicle',
+    icon: 'car',
+    shortcut: ['v', 'h'],
     isActive: false,
     items: []
   },
@@ -65,11 +81,12 @@ export const navItems: NavItem[] = [
     isActive: false,
     items: []
   },
+  
   {
-    title: 'Véhicules',
-    url: '/admin/vehicle',
-    icon: 'car',
-    shortcut: ['v', 'h'],
+    title: 'Réservations',
+    url: '/admin/bookings',
+    icon: 'page',
+    shortcut: ['r', 'r'],
     isActive: false,
     items: []
   }
