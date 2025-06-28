@@ -27,7 +27,7 @@ export function TravelBreadcrumb({ items, className }: TravelBreadcrumbProps) {
       </Link>
       
       {items.map((item, index) => (
-        <React.Fragment key={index}>
+        <React.Fragment key={(item.label || '') + '-' + index}>
           <ChevronRight className="h-4 w-4" />
           {item.href && !item.current ? (
             <Link 

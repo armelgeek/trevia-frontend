@@ -1,4 +1,6 @@
+import '@/features/admin-entities';
 import { Icons } from "@/components/ui/icons";
+import { getRegisteredAdminEntities } from '@/lib/admin-generator';
 
 const kAppName = "Trevia Admin";
 const kAppAbbr = "TA";
@@ -40,56 +42,23 @@ export type MainNavItem = NavItemWithOptionalChildren;
 export type SidebarNavItem = NavItemWithChildren;
 
 
-export const navItems: NavItem[] = [
-  {
-    title: 'Dashboard',
-    url: '/admin/dashboard',
-    icon: 'dashboard',
-    isActive: false,
-    shortcut: ['d', 'd'],
-    items: []
-  },
-  {
-    title: 'Conducteurs',
-    url: '/admin/drivers',
-    icon: 'user',
-    shortcut: ['c', 'd'],
-    isActive: false,
-    items: []
-  },
-  {
-    title: 'Routes',
-    url: '/admin/routes',
-    icon: 'route',
-    shortcut: ['r', 't'],
-    isActive: false,
-    items: []
-  },
-  {
-    title: 'Véhicules',
-    url: '/admin/vehicle',
-    icon: 'car',
-    shortcut: ['v', 'h'],
-    isActive: false,
-    items: []
-  },
-  {
-    title: 'Voyages',
-    url: '/admin/trip',
-    icon: 'plane',
-    shortcut: ['v', 'v'],
-    isActive: false,
-    items: []
-  },
-  
-  {
-    title: 'Réservations',
-    url: '/admin/bookings',
-    icon: 'page',
-    shortcut: ['r', 'r'],
-    isActive: false,
-    items: []
-  }
-];
+export function getSidebarNavItems(): NavItem[] {
+  return getRegisteredAdminEntities()
+    .slice()
+    .sort((a, b) => (a.menuOrder ?? 999) - (b.menuOrder ?? 999))
+    .map(entity => {
+      const config = entity.config as { title?: string; description?: string; icon?: string };
+      // Si l'icône est un emoji, on le met dans label, sinon dans icon (clé Icons)
+      const isEmoji = typeof config.icon === 'string' && config.icon.length <= 3;
+      return {
+        title: config.title || entity.path,
+        url: entity.href,
+        icon: !isEmoji ? (config.icon as keyof typeof Icons) : undefined,
+        label: isEmoji ? config.icon : undefined,
+        description: config.description,
+        items: [],
+      };
+    });
+}
 
 export { kAppName, kAppAbbr, kAppTagline, kAppDescription };

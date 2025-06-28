@@ -29,7 +29,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import * as React from 'react';
 import { Icons } from '@/components/ui/icons';
 import { authClient } from '@/shared/lib/config/auth-client';
-import { navItems } from '@/shared/lib/constants/app.constant';
+import { getSidebarNavItems } from '@/shared/lib/constants/app.constant';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/ui/logo';
 import { cn } from '@/shared/lib/utils';
@@ -37,6 +37,7 @@ import { cn } from '@/shared/lib/utils';
 export default function AppSidebar({ session }: { session: { user?: { name?: string; email?: string; image?: string | null } } | null }) {
   const router = useRouter();
   const pathname = usePathname();
+  const navItems = getSidebarNavItems();
 
   const handleSignOut = async () => {
     await authClient.signOut({
@@ -64,7 +65,7 @@ export default function AppSidebar({ session }: { session: { user?: { name?: str
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
               {navItems.map((item) => {
-                const Icon = item.icon ? Icons[item.icon] : Icons.logo;
+                const Icon = item.icon ? Icons[item.icon] : undefined;
                 return item?.items && item?.items?.length > 0 ? (
                   <Collapsible
                     key={item.title}
@@ -85,7 +86,8 @@ export default function AppSidebar({ session }: { session: { user?: { name?: str
                           )}
                         >
                           <div className="flex items-center space-x-3">
-                            {item.icon && <Icon className="w-5 h-5" />}
+                            {item.icon && Icon && <Icon className="w-5 h-5" />}
+                            {item.label && <span className="text-lg">{item.label}</span>}
                             <span>{item.title}</span>
                           </div>
                           <ChevronRight className='ml-auto w-4 h-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
@@ -124,7 +126,8 @@ export default function AppSidebar({ session }: { session: { user?: { name?: str
                     >
                       <Link href={item.url}>
                         <div className="flex items-center space-x-3">
-                          {item.icon && <Icon className="w-5 h-5" />}
+                          {item.icon && Icon && <Icon className="w-5 h-5" />}
+                          {item.label && <span className="text-lg">{item.label}</span>}
                           <span>{item.title}</span>
                         </div>
                       </Link>

@@ -182,12 +182,31 @@ export function useAdminEntity<T extends Record<string, unknown>>(
 }
 
 function wrapParentService<T extends Record<string, unknown>>(service: CrudService<T>, parentId?: string, filters?: Record<string, unknown>): CrudService<T> {
+  function castFilters(input?: Record<string, unknown>): Record<string, string | number | undefined> | undefined {
+    if (!input) return undefined;
+    const result: Record<string, string | number | undefined> = {};
+    for (const [key, value] of Object.entries(input)) {
+      if (
+        typeof value === 'string' ||
+        typeof value === 'number' ||
+        typeof value === 'undefined'
+      ) {
+        result[key] = value;
+      } else if (value !== null && typeof value !== 'object') {
+        result[key] = String(value);
+      } else if (value === null) {
+        result[key] = undefined;
+      }
+    }
+    return result;
+  }
   return {
     fetchItems: () => {
+      const castedFilters = castFilters(filters);
       if (parentId && service.fetchItems.length > 0) {
-        return service.fetchItems({ ...filters, parentId });
+        return service.fetchItems({ ...castedFilters, parentId });
       }
-      return service.fetchItems(filters);
+      return service.fetchItems(castedFilters);
     },
     createItem: (data: T) => {
       if (parentId && service.createItem.length > 0) {

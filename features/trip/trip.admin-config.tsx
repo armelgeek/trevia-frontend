@@ -1,4 +1,4 @@
-import { createAdminEntity, createApiService } from '@/lib/admin-generator';
+import { createAdminEntity, createApiService, registerAdminEntity } from '@/lib/admin-generator';
 import { tripSchema, Trip } from './trip.schema';
 
 const tripService = createApiService<Trip>('/api/trips');
@@ -12,13 +12,12 @@ export const TripAdminConfig = createAdminEntity('Voyage', tripSchema, {
     read: true,
     update: true,
     delete: true,
-    bulk: true,
-    export: false
+    bulk: true
   },
   services: tripService,
   queryKey: ['trips'],
   parent: {
-    key: 'trip',
+    key: 'trips',
     routeParam: 'tripId',
   },
   formFields: [
@@ -31,26 +30,16 @@ export const TripAdminConfig = createAdminEntity('Voyage', tripSchema, {
   ],
   children: [
     {
-      route: '/trip/:tripId/seats',
+      route: '/trips/:tripId/seats',
       label: 'Voir les places',
       icon: '🪑',
     },
     {
-      route: '/trip/:tripId/schedule',
+      route: '/trips/:tripId/schedules',
       label: 'Ajouter un schedule',
       icon: '📅',
     },
-  ],
-  bulkActions: [
-    {
-      key: 'export',
-      label: 'Exporter',
-      icon: null,
-      variant: 'outline',
-      onClick: async (ids) => {
-        console.log('Exporting trips with IDs:', ids);
-        // votre logique d’export avec les ids sélectionnés
-      }
-    }
   ]
 });
+
+registerAdminEntity('trips', TripAdminConfig, '/admin/trips', '🧳',3);

@@ -46,5 +46,13 @@ export const API_ENDPOINTS = {
     detail: (id: string) => `/api/routes/${id}`,
     update: (id: string) => `/api/routes/${id}`,
     delete: (id: string) => `/api/routes/${id}`
+  },
+  schedule: {
+    base: '/api/schedules',
+    create: '/api/schedules',
+    list: (qs: string = '') => `/api/schedules${qs ? `?${qs}` : ''}`,
+    detail: (id: string) => `/api/schedules/${id}`,
+    update: (id: string) => `/api/schedules/${id}`,
+    delete: (id: string) => `/api/schedules/${id}`
   }
 };

@@ -120,7 +120,7 @@
       - Rôle supprimé
     - Paramètres : path (roleId), header (Authorization)
 
-- [ ] **Gestion des conducteurs (drivers)**
+- [x] **Gestion des conducteurs (drivers)**
   - [ ] Lister les conducteurs (`GET /api/drivers`)
     - Use case : Consultation des conducteurs (admin)
     - Scénario nominal :
@@ -182,7 +182,7 @@
       }
       ```
 
-- [ ] **Gestion des routes**
+- [x] **Gestion des routes**
   - [ ] Lister les routes (`GET /api/routes`)
     - Use case : Consultation des routes (admin)
     - Scénario nominal :
@@ -245,6 +245,75 @@
         "status"?: "string"
       }
       ```
+- [ ] **Gestion des horaires (schedules)**
+  - [ ] Lister les horaires (`GET /api/schedules`)
+    - Use case : Consultation des horaires d’un voyage (admin)
+    - Scénario nominal :
+      1. L’admin ou l’utilisateur consulte la liste paginée des horaires pour un voyage donné (`tripId` requis)
+    - Scénarios d’exception :
+      - Accès non autorisé
+      - `tripId` manquant ou invalide
+    - Critères d’acceptation :
+      - Liste paginée retournée, filtrée par `tripId`
+    - Paramètres : query (tripId, page, limit), header (Authorization)
+  - [ ] Détail d’un horaire (`GET /api/schedules/{id}`)
+    - Use case : Voir le détail d’un horaire
+    - Scénario nominal :
+      1. L’admin ou l’utilisateur consulte le détail d’un horaire
+    - Scénarios d’exception :
+      - Horaire non trouvé
+    - Critères d’acceptation :
+      - Détail correct affiché
+    - Paramètres : path (id), header (Authorization)
+  - [ ] Créer un horaire (`POST /api/schedules`)
+    - Use case : Ajouter un horaire à un voyage
+    - Scénario nominal :
+      1. L’admin soumet le formulaire avec un `tripId` valide
+      2. L’horaire est créé
+    - Scénarios d’exception :
+      - `tripId` manquant ou invalide
+      - Champs obligatoires manquants
+    - Critères d’acceptation :
+      - Horaire ajouté
+    - Paramètres : body (tripId, departureTime, arrivalTime, status, ...), header (Authorization)
+    - Exemple de payload :
+      ```json
+      {
+        "tripId": "string",
+        "departureTime": "2025-07-01T08:00:00Z",
+        "arrivalTime": "2025-07-01T12:00:00Z",
+        "status": "active"
+      }
+      ```
+  - [ ] Mettre à jour un horaire (`PUT /api/schedules/{id}`)
+    - Use case : Modifier un horaire
+    - Scénario nominal :
+      1. L’admin modifie les infos d’un horaire
+      2. Les modifications sont enregistrées
+    - Scénarios d’exception :
+      - Horaire non trouvé
+      - `tripId` manquant ou invalide
+    - Critères d’acceptation :
+      - Modifications visibles
+    - Paramètres : path (id), body (voir schéma), header (Authorization)
+    - Exemple de payload :
+      ```json
+      {
+        "tripId": "string",
+        "departureTime": "2025-07-01T09:00:00Z",
+        "arrivalTime": "2025-07-01T13:00:00Z",
+        "status": "inactive"
+      }
+      ```
+  - [ ] Supprimer un horaire (`DELETE /api/schedules/{id}`)
+    - Use case : Suppression d’un horaire
+    - Scénario nominal :
+      1. L’admin supprime un horaire
+    - Scénarios d’exception :
+      - Horaire non trouvé
+    - Critères d’acceptation :
+      - Horaire supprimé
+    - Paramètres : path (id), header (Authorization)
 
 ## Tâches Frontend (utilisateur standard)
 

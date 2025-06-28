@@ -9,10 +9,10 @@ import {
 import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 import RenderResults from './render-result';
-import { navItems } from '@/shared/lib/constants/app.constant';
+import { getSidebarNavItems } from '@/shared/lib/constants/app.constant';
 export default function KBar({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-
+  const sidebarItems = getSidebarNavItems();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const navigateTo = (url: string) => {
     router.push(url);
@@ -21,7 +21,7 @@ export default function KBar({ children }: { children: React.ReactNode }) {
   // These action are for the navigation
   const actions = useMemo(
     () =>
-      navItems.flatMap((navItem) => {
+      sidebarItems.flatMap((navItem) => {
         // Only include base action if the navItem has a real URL and is not just a container
         const baseAction =
           navItem.url !== '#'
@@ -51,7 +51,7 @@ export default function KBar({ children }: { children: React.ReactNode }) {
         // Return only valid actions (ignoring null base actions for containers)
         return baseAction ? [baseAction, ...childActions] : childActions;
       }),
-    [navigateTo]
+    [navigateTo, sidebarItems]
   );
 
   return (

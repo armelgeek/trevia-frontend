@@ -233,3 +233,18 @@ body, html {
     cursor: not-allowed;
   }
 }
+
+.react-time-picker, .react-time-picker__inputGroup, .react-time-picker__wrapper{
+  border: none!important;
+}
+.react-time-picker__inputGroup input {
+  border: none!important;
+  box-shadow: none!important;
+  background-color: transparent!important;
+  color: var(--foreground)!important;
+  padding-left: 0.5rem!important;
+  padding-right: 0.5rem!important;
+}
+.react-time-picker__inputGroup__hour{
+  border-color: #CC0000!important;
+}

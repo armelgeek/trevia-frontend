@@ -19,9 +19,18 @@ import { RelationField } from './relation-field';
 import type { FieldConfig, AdminConfig } from '@/lib/admin-generator';
 import { toast } from 'sonner';
 import { Icons } from '@/components/ui/icons';
+import TimePicker from 'react-time-picker';
+import 'react-time-picker/dist/TimePicker.css';
 
 interface DynamicFormProps<T = Record<string, unknown>> {
-  config: AdminConfig;
+  config: AdminConfig & {
+    ui?: {
+      form?: {
+        layout?: 'simple' | 'sections' | 'two-cols' | 'horizontal' | 'tabs';
+        sections?: { title: string; fields: string[] }[];
+      };
+    };
+  };
   schema: z.ZodSchema<T>;
   initialData?: T;
   onSuccess?: () => void;
@@ -336,6 +345,37 @@ export function DynamicForm<
         return <InputTagArray value={fieldProps.value as string[] || []} onChange={fieldProps.onChange} />;
       }
 
+      case 'time': {
+        let timeValue = '';
+        if (typeof fieldProps.value === 'number') {
+          // Si c'est un timestamp, convertir en HH:mm
+          try {
+            const date = new Date(fieldProps.value);
+            if (!isNaN(date.getTime())) {
+              timeValue = date.toTimeString().slice(0,5); // HH:mm
+            }
+          } catch {}
+        } else if (typeof fieldProps.value === 'string') {
+          // Si string déjà au format HH:mm
+          timeValue = fieldProps.value;
+        }
+        return (
+          <div className="relative w-full group bg-muted/60 rounded-md border border-input focus-within:ring-2 focus-within:ring-primary/70 shadow-sm h-10 flex items-center px-0">
+           
+            <TimePicker
+              value={timeValue}
+              onChange={val => fieldProps.onChange(val || '')}
+              disableClock
+              clearIcon={null}
+              format="HH:mm"
+              className="w-full pl-10 !border-0 !bg-transparent !px-3 !py-2 !text-sm !focus:outline-none !text-foreground !h-10"
+              clockIcon={null}
+              amPmAriaLabel={undefined}
+            />
+          </div>
+        );
+      }
+
       default:
         return (
           <Input
@@ -349,14 +389,24 @@ export function DynamicForm<
     }
   };
 
+  const getGridCols = () => {
+    const layout = config.ui?.form?.layout as string | undefined;
+    const fieldCount = config.fields.filter(f => f.display?.showInForm !== false).length;
+    if (fieldCount > 6) return 'grid-cols-1 md:grid-cols-2';
+    if (layout === 'sections') return '';
+    if (layout === 'simple') return 'grid-cols-1';
+    if (layout === 'two-cols') return 'grid-cols-1 md:grid-cols-2';
+    if (layout === 'horizontal') return 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3';
+    if (fieldCount > 4) return 'grid-cols-1 md:grid-cols-2';
+    return 'grid-cols-1';
+  };
+
   const renderFormSections = () => {
-   // console.log('Available fields:', config.fields.map(f => ({ key: f.key, showInForm: f.display?.showInForm })));
-    
     if (config.ui?.form?.layout === 'sections' && config.ui.form.sections) {
       return config.ui.form.sections.map((section) => (
         <div key={section.title} className="space-y-4">
-          <h3 className="text-lg font-medium">{section.title}</h3>
-          <div className="grid gap-4">
+          <h3 className="text-lg font-medium mb-2">{section.title}</h3>
+          <div className={`grid gap-4 ${getGridCols()}`}> {/* section grid */}
             {section.fields.map((fieldKey) => {
               const field = config.fields.find(f => f.key === fieldKey);
               return field ? renderField(field) : null;
@@ -365,9 +415,9 @@ export function DynamicForm<
         </div>
       ));
     }
-
+    // Par défaut, grid responsive
     return (
-      <div className="grid gap-4">
+      <div className={`grid gap-4 ${getGridCols()}`}>
         {config.fields
           .filter(field => field.display?.showInForm !== false)
           .sort((a, b) => (a.display?.order || 0) - (b.display?.order || 0))
@@ -477,8 +527,8 @@ function InputTagArray({ value, onChange }: { value: string[] | string; onChange
   };
   return (
     <div className="flex flex-wrap items-center gap-2 mb-2">
-      {safeValue.map((tag) => (
-        <span key={tag} className="inline-flex items-center bg-primary/10 text-primary rounded-full px-2 py-1 text-xs font-medium border border-primary/20">
+      {safeValue.map((tag, index) => (
+        <span key={tag + '-' + index} className="inline-flex items-center bg-primary/10 text-primary rounded-full px-2 py-1 text-xs font-medium border border-primary/20">
           <span className="mr-1">{tag}</span>
           <button
             type="button"

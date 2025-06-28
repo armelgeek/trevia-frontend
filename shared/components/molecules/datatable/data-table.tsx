@@ -13,6 +13,7 @@ import {
   Row,
   Table,
 } from '@tanstack/react-table';
+import { useTheme } from 'next-themes';
 
 import { DataTablePagination } from '@/shared/components/molecules/datatable/data-table-pagination';
 import {
@@ -26,6 +27,7 @@ import {
 
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -53,6 +55,7 @@ interface DataTableProps<TData, TValue> {
   rowSelection?: Record<string, boolean>;
   onRowSelectionChange?: (rowSelection: Record<string, boolean>) => void;
   toolbarActions?: React.ReactNode | ((selectedRows: TData[]) => React.ReactNode);
+  searchEnabled?: boolean;
 }
 
 function DataTableToolbar<TData>({ table, toolbarActions }: { table: Table<TData>; toolbarActions?: React.ReactNode | ((selectedRows: TData[]) => React.ReactNode) }) {
@@ -92,7 +95,9 @@ export function DataTable<TData, TValue>({
   rowSelection,
   onRowSelectionChange,
   toolbarActions,
+  searchEnabled,
 }: DataTableProps<TData, TValue>) {
+  const { theme } = useTheme();
   const sort: ColumnSort[] = sortBy && sortDir ? [{ id: sortBy, desc: sortDir === 'desc' }] : [];
 
   const safeOnSearchChange = React.useCallback(
@@ -145,12 +150,12 @@ export function DataTable<TData, TValue>({
     },
     onRowSelectionChange: onRowSelectionChange
       ? (updaterOrValue) => {
-          const value =
-            typeof updaterOrValue === 'function'
-              ? updaterOrValue(rowSelection ?? {})
-              : updaterOrValue;
-          onRowSelectionChange(value);
-        }
+        const value =
+          typeof updaterOrValue === 'function'
+            ? updaterOrValue(rowSelection ?? {})
+            : updaterOrValue;
+        onRowSelectionChange(value);
+      }
       : undefined,
     enableRowSelection: true,
     getCoreRowModel: getCoreRowModel(),
@@ -186,37 +191,46 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 py-2">
-        <div className="relative w-full max-w-xs">
-          <Input
-            type="text"
-            placeholder="Rechercher..."
-            value={table.getState().globalFilter ?? ''}
-            onChange={e => table.setGlobalFilter(e.target.value)}
-            className="pl-8"
-            aria-label="Recherche globale"
-          />
-          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          </span>
+      {searchEnabled !== false && (
+        <div className="flex items-center gap-2 py-2">
+          <div className="relative w-full max-w-xs">
+            <Input
+              type="text"
+              placeholder="Rechercher..."
+              value={table.getState().globalFilter ?? ''}
+              onChange={e => table.setGlobalFilter(e.target.value)}
+              className="pl-8"
+              aria-label="Recherche globale"
+            />
+            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+            </span>
+          </div>
+          {table.getState().globalFilter && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => table.setGlobalFilter('')}
+              aria-label="Effacer la recherche"
+            >
+              Effacer
+            </Button>
+          )}
         </div>
-        {table.getState().globalFilter && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => table.setGlobalFilter('')}
-            aria-label="Effacer la recherche"
-          >
-            Effacer
-          </Button>
-        )}
-      </div>
+      )}
       <DataTableToolbar<TData> table={table} toolbarActions={toolbarActions} />
       <div className="rounded-md border">
         <UITable>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow
+                key={headerGroup.id}
+                className={
+                  (theme === 'dark'
+                    ? 'bg-primary/30 text-white'
+                    : 'bg-primary/10 text-primary-foreground')
+                }
+              >
                 {headerGroup.headers.map((header) => {
                   const isBeforeActions = renderRowActions && header.id === 'actions';
                   return (
@@ -224,7 +238,8 @@ export function DataTable<TData, TValue>({
                       {isBeforeActions && <TableHead className='w-[250px]'> </TableHead>}
                       <TableHead
                         colSpan={header.colSpan}
-                        style={{ width: header.getSize() }}
+                        style={{ width: header.getSize(), fontWeight: 'bold', textTransform: 'uppercase' }}
+                        className={'text-primary'}
                       >
                         {header.isPlaceholder
                           ? null
@@ -239,14 +254,20 @@ export function DataTable<TData, TValue>({
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length + (renderRowActions ? 1 : 0)}
-                  className="h-24 text-center"
-                >
-                  Loading...
-                </TableCell>
-              </TableRow>
+              Array.from({ length: pageSize ?? 10 }).map((_, idx) => (
+                <TableRow key={"skeleton-" + idx}>
+                  {columns.map((col, cidx) => (
+                    <TableCell key={col.id || cidx}>
+                      <Skeleton className="h-5 w-full" />
+                    </TableCell>
+                  ))}
+                  {renderRowActions && (
+                    <TableCell>
+                      <Skeleton className="h-5 w-16" />
+                    </TableCell>
+                  )}
+                </TableRow>
+              ))
             ) : data.length === 0 ? (
               <TableRow>
                 <TableCell
@@ -281,7 +302,10 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </UITable>
       </div>
-      <DataTablePagination table={table} />
+      {meta && meta.totalPages > 1 && (
+        <DataTablePagination table={table} />
+      )}
+
     </div>
   );
 }

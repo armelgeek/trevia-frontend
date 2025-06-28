@@ -19,7 +19,8 @@
     "crud:components": "node ./generator.mjs components",
     "crud:api": "node ./generator.mjs api",
     "crud:page": "node ./generator.mjs page",
-    "crud:navigation": "node ./generator.mjs navigation"
+    "crud:navigation": "node ./generator.mjs navigation",
+    "generate:config": "node scripts/generate-admin-entities.js"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.7.4",
@@ -61,7 +62,6 @@
     "@tanstack/react-table": "^8.20.6",
     "@uploadthing/react": "^7.1.5",
     "better-auth": "^1.1.15",
-    "swagger-ui-react": "^5.21.0",
     "chalk": "^5.4.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -88,11 +88,13 @@
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
     "react-resizable-panels": "^2.1.7",
+    "react-time-picker": "^7.0.0",
     "recharts": "^2.15.1",
     "redis": "^4.7.0",
     "resend": "^4.1.2",
     "slugify": "^1.6.6",
     "sonner": "^1.7.2",
+    "swagger-ui-react": "^5.21.0",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "uploadthing": "^7.4.4",
@@ -108,6 +110,7 @@
     "@types/qs": "^6.9.18",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/swagger-ui-react": "^5.18.0",
     "babel-plugin-react-compiler": "^19.0.0-beta-27714ef-20250124",
     "drizzle-kit": "^0.30.3",
     "eslint": "^9",
@@ -116,7 +119,6 @@
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "tailwindcss": "^3.4.1",
-    "@types/swagger-ui-react": "^5.18.0",
     "tsx": "^4.19.2",
     "typescript": "^5"
   }

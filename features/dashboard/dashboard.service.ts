@@ -1,3 +1,4 @@
-import { BaseService } from '@/lib/base-service';
+import { createApiService } from '@/lib/admin-generator';
+import { Dashboard } from './dashboard.schema';
 
-export const dashboardService = new BaseService('/api/admin/dashboard');
+export const dashboardService = createApiService<Dashboard>("/api/admin/dashboard");

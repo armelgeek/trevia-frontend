@@ -29,12 +29,35 @@ export const tripSchema = z.object({
       widget: 'tag',
     }
   }),
-  departureDate: createField.date({ label: 'Date de voyage', type: 'date' }),
-  arrivalDate: createField.date({ label: 'Date d\'arrivée', type: 'date', display: {
-    showInForm: false,
-    showInTable: false,
-  }}).optional(),
-  price: createField.string({ label: 'Prix' }),
+  departureDate: createField.date({ label: 'Date de voyage', type: 'date', display:{
+    format: (value: unknown) => {
+      if (typeof value === 'string' && value !== '') {
+        const date = new Date(value);
+        if (!isNaN(date.getTime())) {
+          return date.toLocaleDateString('fr-FR', {
+            year: 'numeric',
+            month: 'long',
+            day: '2-digit',
+          });
+        }
+        return value;
+      }
+      return '';
+    }
+  } }),
+  price: createField.string({
+    label: 'Prix',
+    display: {
+      prefix: '€ ',
+      format: (value: unknown) => {
+        if (typeof value === 'string' && value !== '') {
+          const num = Number(value);
+          return isNaN(num) ? value : `€ ${num.toFixed(2)}`;
+        }
+        return '';
+      },
+    }
+  }),
   departureCity: createField.string({
     label: 'Ville de départ', display: {
       showInForm: false,

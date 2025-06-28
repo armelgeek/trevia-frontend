@@ -7,7 +7,7 @@ export const DriverSchema = z.object({
     lastName: createField.string({ label: 'Nom', placeholder: 'Nom du conducteur', display: { showInForm: true, showInTable: false } }),
     fullName: createField.string({ label: 'Nom complet', placeholder: 'Nom complet du conducteur', display: { showInForm: false, showInTable: true } }),
     license: createField.string({ label: 'Permis', placeholder: 'Numéro de permis' }),
-    certifications: createField.list({ label: 'Certifications', placeholder: 'Certifications (CSV ou liste)', display: { showInForm: true, showInTable: false } }),
+    certifications: createField.list({ label: 'Certifications', placeholder: 'Certifications (CSV ou liste)', display: { showInForm: true, showInTable: false } }).optional(),
     phone: createField.string({ label: 'Téléphone', placeholder: 'Numéro de téléphone' }),
     status: createField.select([
         { value: 'active', label: 'Actif' },

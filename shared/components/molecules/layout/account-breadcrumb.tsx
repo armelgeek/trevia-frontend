@@ -56,7 +56,7 @@ export function AccountBreadcrumb() {
             const Icon = breadcrumb.icon;
 
             return (
-              <div key={breadcrumb.label} className="flex items-center">
+              <div key={breadcrumb.label + '-' + index} className="flex items-center">
                 <BreadcrumbItem>
                   {isLast ? (
                     <BreadcrumbPage className="flex items-center gap-2 font-medium text-foreground">

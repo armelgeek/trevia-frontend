@@ -6,12 +6,13 @@ import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { DataTable } from '@/shared/components/molecules/datatable/data-table';
+import { DataTablePagination } from '@/shared/components/molecules/datatable/data-table-pagination';
 import { DynamicForm } from '@/components/ui/dynamic-form';
 import { createDynamicColumns } from '@/lib/admin-generator';
 import { useAdminEntity } from '@/hooks/use-admin-entity';
 import { Plus, EllipsisVertical } from 'lucide-react';
 import type { AdminConfigWithServices } from '@/lib/admin-generator';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import {
   Sheet,
   SheetContent,
@@ -28,6 +29,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ColumnDef, Row } from '@tanstack/react-table';
 import { ZodType } from 'zod';
+import Link from 'next/link';
 
 type ChildConfig = {
   route: string;
@@ -117,7 +119,15 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
     sortDir,
     page,
     pageSize,
-    ...(filters || {})
+    ...(filters || {}),
+    ...(
+      config.parent &&
+      typeof config.parent === 'object' &&
+      'key' in config.parent &&
+      parentId
+        ? { [config.parent.key as string]: parentId }
+        : {}
+    ),
   };
   const {
     data: items,
@@ -143,7 +153,11 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
   });
 
   const handleCreate = async (data: Record<string, unknown>) => {
-    const filtered = pickFields(data, config.formFields ?? []);
+    let filtered = pickFields(data, config.formFields ?? []);
+    // Si on est sur une entité enfant, injecter la clé du parent dans les données
+    if (config.parent && parentId && config.parent.key) {
+      filtered = { ...filtered, [config.parent.key]: parentId };
+    }
     try {
       await create(filtered as T);
     } catch (error) {
@@ -308,32 +322,28 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
         ...childrenArray.map((child: ChildConfig) => {
           let route = child.route;
           route = route.replace(paramRegex, (_: string, param: string) => {
-            const value = row.original ? (row.original as Record<string, unknown>)[param] : undefined;
+            let value = row.original ? (row.original as Record<string, unknown>)[param] : undefined;
+            // Fallback : si param absent mais id existe et param se termine par 'Id', utiliser id
+            if ((value === undefined || value === null) && param.toLowerCase().endsWith('id') && (row.original as Record<string, unknown>).id) {
+              value = (row.original as Record<string, unknown>).id;
+            }
             return value ? String(value) : param;
           });
           const href = route.startsWith('/') ? `/admin${route}` : `/admin/${route}`;
-          return React.createElement(
-            'a',
-            {
-              key: child.route,
-              href,
-              className:
-                'text-red-500 hover:underline font-medium whitespace-nowrap px-1 py-0.5 text-xs flex items-center rounded border border-red-100 bg-red-50 hover:bg-red-100 transition',
-              style: { display: 'inline-block', minWidth: 0 },
-              'aria-label': child.label || 'Gérer',
-              tabIndex: 0,
-            },
-            child.icon &&
-            React.createElement(
-              'span',
-              { className: 'text-base align-middle mr-1' },
-              child.icon
-            ),
-            React.createElement(
-              'span',
-              { className: 'align-middle truncate max-w-[80px]' },
-              child.label || 'Action'
-            )
+          return (
+            <Link
+              key={child.route}
+              href={href}
+              className="text-red-500 hover:underline font-medium whitespace-nowrap px-1 py-0.5 text-xs flex items-center rounded border border-red-100 bg-red-50 hover:bg-red-100 transition"
+              style={{ display: 'inline-block', minWidth: 0 }}
+              aria-label={child.label || 'Gérer'}
+              tabIndex={0}
+            >
+              {child.icon && (
+                <span className="text-base align-middle mr-1">{child.icon}</span>
+              )}
+              <span className="align-middle truncate max-w-[80px]">{child.label || 'Action'}</span>
+            </Link>
           );
         })
       );
@@ -379,21 +389,55 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
   ) : null;
 
 
+  // --- UI parent/enfant ---
+  const isChildPage = !!(config.parent && parentId);
+  // Déduire le chemin du parent (ex: /admin/trips)
+  let parentHref = '/admin';
+  let parentLabel = 'Retour';
+  if (config.parent && typeof config.parent === 'object') {
+    if (config.parent.parentEntity) {
+      parentHref = `/admin/${config.parent.parentEntity}`;
+      parentLabel = `Retour à la liste des ${config.parent.parentLabel || config.parent.parentEntity}`;
+    } else if (config.parent.routeParam) {
+      parentHref = typeof window !== 'undefined' && window.location && window.location.pathname ? window.location.pathname.split('/').slice(0, -1).join('/') : '/admin';
+    }
+  }
+
   return (
     <>
+      {isChildPage && (
+        <div className="flex items-center gap-4 mb-4">
+          <Link href={parentHref} className="text-sm text-muted-foreground hover:underline flex items-center gap-1">
+            ← {parentLabel}
+          </Link>
+        </div>
+      )}
       <Card>
-        <CardHeader>
-          <div className="flex items-center gap-4 justify-between">
-            <CardTitle className='text-red-500 text-lg'>{config.title}</CardTitle>
+        <CardHeader className="pb-0 border-b-0">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-6 px-2">
+            <div className="flex items-center justify-center gap-4 min-w-0">
+              {typeof config.icon === 'string' && (
+                <div className="flex items-center justify-center  rounded-full bg-muted w-12 h-12">
+                <div  className="text-3xl select-none shadow-sm" aria-hidden>{config.icon}</div>
+              </div>
+              )}
+              {typeof config.icon === 'function' && React.createElement(config.icon, { className: 'w-10 h-10 text-primary bg-muted rounded-full p-2 shadow-sm' })}
+              <div className="min-w-0">
+                <h1 className="text-3xl font-extrabold text-primary truncate leading-tight">{config.title}</h1>
+                {config.description && (
+                  <p className="text-muted-foreground text-base truncate max-w-[500px] mt-1">{config.description}</p>
+                )}
+              </div>
+            </div>
             {config.actions?.create && (
               <Sheet open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                 <SheetTrigger asChild>
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
+                  <Button size="lg" className="gap-2">
+                    <Plus className="h-5 w-5" />
                     Créer
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="w-full max-w-full sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl">
+                <SheetContent className="w-1/3 max-w-full sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl">
                   <SheetHeader>
                     <SheetTitle>Créer {config.title}</SheetTitle>
                     <SheetDescription>
@@ -412,25 +456,43 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
               </Sheet>
             )}
           </div>
-          {config.description && (
-            <CardDescription>
-              {config.description}
-            </CardDescription>
-          )}
         </CardHeader>
         <CardContent>
           {renderFilters && renderFilters()}
           {renderBulkActionsBar}
+          {/* Pagination au-dessus du tableau, masquée si une seule page */}
+          {meta && meta.totalPages > 1 && (
+            <div className="flex items-center justify-between mb-2">
+              <div />
+              <DataTablePagination
+                table={{
+                  getState: () => ({
+                    pagination: {
+                      pageIndex: (page ?? 1) - 1,
+                      pageSize: pageSize ?? 10,
+                    },
+                  }),
+                  setPageSize: (size: number) => setPageSize(size),
+                  setPageIndex: (idx: number) => setPage(idx + 1),
+                  getPageCount: () => meta ? meta.totalPages : 1,
+                  getCanPreviousPage: () => (page ?? 1) > 1,
+                  getCanNextPage: () => meta ? (page ?? 1) < meta.totalPages : false,
+                  previousPage: () => setPage(Math.max(1, (page ?? 1) - 1)),
+                  nextPage: () => meta ? setPage(Math.min(meta.totalPages, (page ?? 1) + 1)) : undefined,
+                } as unknown as any}
+              />
+            </div>
+          )}
           <DataTable
             columns={columns as ColumnDef<T, unknown>[]}
             data={itemsTyped}
             meta={meta || { total: itemsTyped.length, totalPages: 5 }}
             isLoading={isLoading}
             isError={!!error}
-            search={search}
+            search={config.ui?.searchEnabled ? search : null}
             sortBy={sortBy}
             sortDir={sortDir}
-            onSearchChange={handleSearchChange}
+            onSearchChange={config.ui?.searchEnabled ? handleSearchChange : () => {}}
             onSortByChange={handleSortByChange}
             onSortDirChange={handleSortDirChange}
             page={page}
@@ -441,11 +503,12 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
             rowSelection={rowSelection}
             renderRowActions={showRowActions ? renderChildrenActions : undefined}
             toolbarActions={config.ui?.toolbarActions}
+            searchEnabled={!!config.ui?.searchEnabled}
           />
 
           {editingItem && (
             <Sheet open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
-              <SheetContent className="w-full max-w-full sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl">
+              <SheetContent className="w-1/3 max-w-full sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl">
                 <SheetHeader>
                   <SheetTitle>Modifier {config.title}</SheetTitle>
                   <SheetDescription>
@@ -479,7 +542,7 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
                   <AlertDialogCancel>Annuler</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleDelete}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    className="bg-destructive text-white hover:bg-destructive/90"
                   >
                     Supprimer
                   </AlertDialogAction>

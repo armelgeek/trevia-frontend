@@ -3,11 +3,12 @@ import { BaseServiceImpl, ResourceEndpoints } from '@/shared/domain/base.service
 import { Filter } from '@/shared/lib/types/filter';
 import { Badge } from '@/components/ui/badge';
 import * as React from 'react';
+import { Icons } from '@/components/ui/icons';
 
 export interface FieldConfig {
   key: string;
   label: string;
-  type: 'text' | 'number' | 'boolean' | 'select' | 'textarea' | 'date' | 'email' | 'url' | 'rich-text' | 'image' | 'file' | 'relation' | 'list' | 'array';
+  type: 'text' | 'number' | 'boolean' | 'select' | 'textarea' | 'date' | 'email' | 'url' | 'rich-text' | 'image' | 'file' | 'relation' | 'list' | 'array' | 'time';
   required?: boolean;
   options?: string[] | { value: string; label: string }[];
   placeholder?: string;
@@ -17,6 +18,8 @@ export interface FieldConfig {
     max?: number;
     pattern?: string;
   };
+  readOnly?: boolean; // Champ non éditable dans le formulaire
+  computed?: (item: Record<string, unknown>) => unknown; // Valeur calculée dynamiquement
   display?: {
     showInTable?: boolean;
     showInForm?: boolean;
@@ -24,6 +27,11 @@ export interface FieldConfig {
     order?: number;
     widget?: 'select' | 'tag' | 'radio';
     arrayDisplayField?: string; // Champ à exposer pour un tableau d'objets
+    prefix?: string;
+    suffix?: string;
+    format?: (value: unknown) => string;
+    visibleIf?: (item: Record<string, unknown>) => boolean; // Visibilité conditionnelle
+    customComponent?: React.ComponentType<Record<string, unknown>>;
   };
   relation?: {
     entity: string;
@@ -51,12 +59,7 @@ export interface AdminConfig<T = Record<string, unknown>> {
     update?: boolean;
     delete?: boolean;
     bulk?: boolean;
-    export?: boolean;
-    import?: boolean;
-  };
-  permissions?: {
-    roles: string[];
-    conditions?: Record<string, unknown>;
+  
   };
   ui?: {
     table?: {
@@ -65,13 +68,18 @@ export interface AdminConfig<T = Record<string, unknown>> {
       pageSize?: number;
     };
     form?: {
-      layout?: 'tabs' | 'sections' | 'simple';
+      layout?: 'sections' | 'simple'| 'two-cols' | 'horizontal';
       sections?: {
         title: string;
         fields: string[];
       }[];
+      createTitle?: string;
+      createSubtitle?: string;
+      editTitle?: string;
+      editSubtitle?: string;
     };
     toolbarActions?: React.ReactNode | ((selectedRows: T[]) => React.ReactNode);
+    searchEnabled?: boolean;
   };
   bulkActions?: BulkAction[];
 }
@@ -89,12 +97,13 @@ export type ChildConfig = {
 };
 
 export interface AdminConfigWithServices<T extends Record<string, unknown>> extends AdminConfigWithAccessor {
+  parent: any | undefined;
   services?: CrudService<T>;
   queryKey?: string[];
   parseEditItem?: (item: Partial<T>) => Partial<T> | T;
   formFields?: string[];
   bulkActions?: BulkAction[];
-  children?: ChildConfig[]; // Ajouté pour compatibilité typage
+  children?: ChildConfig[];
 }
 
 export interface AdminConfigWithParent<T extends Record<string, unknown>> extends AdminConfigWithServices<T> {
@@ -120,9 +129,10 @@ interface ZodMetadata {
   display?: FieldConfig['display'];
   relation?: FieldConfig['relation'];
   options?: string[] | { value: string; label: string }[];
+  readOnly?: boolean;
+  computed?: (item: Record<string, unknown>) => unknown;
 }
 
-// Fonction utilitaire pour accéder dynamiquement aux propriétés
 export function getNestedProperty<T = unknown>(obj: Record<string, unknown>, path: string): T | undefined {
   return path.split('.').reduce<Record<string, unknown> | undefined>((current, key) => {
     if (current && typeof current === 'object' && key in current) {
@@ -135,7 +145,6 @@ export function getNestedProperty<T = unknown>(obj: Record<string, unknown>, pat
   }, obj) as T | undefined;
 }
 
-// Fonction pour définir une propriété dynamiquement
 export function setNestedProperty(obj: Record<string, unknown>, path: string, value: unknown): void {
   const keys = path.split('.');
   const lastKey = keys.pop();
@@ -152,23 +161,19 @@ export function setNestedProperty(obj: Record<string, unknown>, path: string, va
   target[lastKey] = value;
 }
 
-// Fonction pour vérifier si une propriété existe
 export function hasNestedProperty(obj: Record<string, unknown>, path: string): boolean {
   return getNestedProperty(obj, path) !== undefined;
 }
 
-// Interface pour l'accès dynamique
 export interface DynamicFieldAccess {
   getValue: <T = unknown>(obj: Record<string, unknown>, field: string) => T | undefined;
   setValue: (obj: Record<string, unknown>, field: string, value: unknown) => void;
   hasValue: (obj: Record<string, unknown>, field: string) => boolean;
 }
 
-// Implémentation pour l'accès dynamique
 export function createDynamicAccessor(): DynamicFieldAccess {
   return {
     getValue: <T = unknown>(obj: Record<string, unknown>, field: string): T | undefined => {
-      // Support pour les chemins simples et imbriqués
       if (field.includes('.')) {
         return getNestedProperty<T>(obj, field);
       }
@@ -192,7 +197,6 @@ export function createDynamicAccessor(): DynamicFieldAccess {
   };
 }
 
-// Extension de AdminConfig avec l'accessor dynamique
 export interface AdminConfigWithAccessor extends AdminConfig {
   accessor: DynamicFieldAccess;
 }
@@ -273,43 +277,30 @@ export function generateAdminConfig(schema: ZodObject<z.ZodRawShape>, title: str
   if (!(schema instanceof z.ZodObject)) {
     throw new Error('[generateAdminConfig] Le schéma fourni n\'est pas un ZodObject.');
   }
-  // Compatibilité Zod v3/v4 : shape peut être une fonction ou un objet
+
   let shape: Record<string, z.ZodTypeAny>;
-  if (typeof (schema as any).shape === 'function') {
-    shape = (schema as any).shape();
-  } else if ((schema as any)._def?.shape) {
-    shape = (schema as any)._def.shape();
-  } else if ((schema as any)._def?.shape instanceof Object) {
-    shape = (schema as any)._def.shape;
+  const s = schema as unknown as { shape?: () => Record<string, z.ZodTypeAny>; _def?: { shape?: () => Record<string, z.ZodTypeAny> | Record<string, z.ZodTypeAny> } };
+  if (typeof s.shape === 'function') {
+    shape = s.shape();
+  } else if (typeof s._def?.shape === 'function') {
+    shape = s._def.shape();
+  } else if (s._def?.shape && typeof s._def.shape === 'object') {
+    shape = s._def.shape;
   } else {
     throw new Error('[generateAdminConfig] Impossible de récupérer la shape du schéma ZodObject.');
   }
 
   Object.entries(shape).forEach(([key, zodField]) => {
-    // Pour les champs optionnels, récupérer les métadonnées du champ interne
     let metadata: ZodMetadata = {};
     let actualField = zodField;
-
-    // Si c'est un champ optionnel, récupérer le champ interne
     if (zodField instanceof z.ZodOptional) {
       actualField = zodField._def.innerType;
     }
-
-    // Récupérer les métadonnées
     if ((actualField as { _metadata?: ZodMetadata })._metadata) {
       metadata = (actualField as { _metadata?: ZodMetadata })._metadata || {};
     } else if ((zodField as { _metadata?: ZodMetadata })._metadata) {
       metadata = (zodField as { _metadata?: ZodMetadata })._metadata || {};
     }
-
-    console.log(`[generateAdminConfig] Processing field ${key}:`, {
-      metadata,
-      zodFieldType: zodField.constructor.name,
-      actualFieldType: actualField.constructor.name,
-      hasMetadata: !!metadata,
-      metadataType: metadata.type,
-      isOptional: zodField instanceof z.ZodOptional
-    });
 
     const field: FieldConfig = {
       key,
@@ -318,6 +309,8 @@ export function generateAdminConfig(schema: ZodObject<z.ZodRawShape>, title: str
       required: !zodField.isOptional(),
       placeholder: metadata.placeholder,
       description: metadata.description,
+      readOnly: metadata.readOnly,
+      computed: metadata.computed,
       display: {
         showInTable: !['textarea', 'rich-text', 'image', 'file'].includes(metadata.type || 'text'),
         showInForm: true,
@@ -327,9 +320,6 @@ export function generateAdminConfig(schema: ZodObject<z.ZodRawShape>, title: str
       relation: metadata.relation,
     };
 
-    console.log(`[generateAdminConfig] Generated field config for ${key}:`, field);
-
-    // Auto-détection du type si pas de métadonnées
     if (!metadata.type) {
       if (actualField instanceof z.ZodString) {
         if (key.toLowerCase().includes('email')) field.type = 'email';
@@ -339,7 +329,6 @@ export function generateAdminConfig(schema: ZodObject<z.ZodRawShape>, title: str
         else if (key.toLowerCase().includes('date') || key.toLowerCase().includes('time') || key === 'createdAt' || key === 'updatedAt') field.type = 'date';
         else if (key.toLowerCase().includes('status') || key.toLowerCase().includes('type') || key.toLowerCase().includes('state')) {
           field.type = 'select';
-          // Si options dans metadata, on les prend, sinon on laisse undefined
           if (metadata.options) field.options = metadata.options;
         }
         else field.type = 'text';
@@ -355,12 +344,10 @@ export function generateAdminConfig(schema: ZodObject<z.ZodRawShape>, title: str
       }
     }
 
-    // Ajouter les options si c'est un select
     if (metadata.options) {
       field.options = metadata.options;
     }
 
-    // Spécial: le champ 'id' n'est jamais affiché dans le formulaire par défaut, mais oui dans le tableau et le détail
     if (key === 'id') {
       field.display = {
         ...field.display,
@@ -369,7 +356,6 @@ export function generateAdminConfig(schema: ZodObject<z.ZodRawShape>, title: str
         showInDetail: true,
       };
     }
-    // Spécial: masquer updatedAt par défaut dans le tableau et le formulaire
     if (key === 'updatedAt') {
       field.display = {
         ...field.display,
@@ -391,9 +377,7 @@ export function generateAdminConfig(schema: ZodObject<z.ZodRawShape>, title: str
       read: true,
       update: true,
       delete: true,
-      bulk: true,
-      export: false,
-      import: false,
+      bulk: true
     },
     ui: {
       table: {
@@ -403,11 +387,10 @@ export function generateAdminConfig(schema: ZodObject<z.ZodRawShape>, title: str
       form: {
         layout: 'simple',
       },
-    },
+    }
   };
 }
 
-// Détection dynamique du type de contenu via regex
 export function detectContentType(value: unknown): 'number' | 'date' | 'boolean' | 'string' {
   if (typeof value === 'number') return 'number';
   if (typeof value === 'boolean') return 'boolean';
@@ -430,9 +413,17 @@ export function createDynamicColumns(fields: FieldConfig[], accessor: DynamicFie
         cell: ({ row }: { row: { original: Record<string, unknown> } }) => {
           const value = accessor.getValue(row.original, field.key);
           const detected = detectContentType(value);
-          // Affichage dynamique selon le type détecté
+
+          if (field.display?.format) {
+            return field.display.format(value);
+          }
+
           if (detected === 'number') {
-            return value !== undefined && value !== null ? String(value) : '';
+            if (value !== undefined && value !== null) {
+              const str = String(value);
+              return `${field.display?.prefix ?? ''}${str}${field.display?.suffix ?? ''}`;
+            }
+            return '';
           }
           if (detected === 'date') {
             if (!value) return '';
@@ -448,7 +439,7 @@ export function createDynamicColumns(fields: FieldConfig[], accessor: DynamicFie
             }
             return String(value);
           }
-          // Affichage spécial pour les listes de tags (type list)
+
           if (field.type === 'list') {
             if (!value) return '';
             const tags = String(value)
@@ -462,7 +453,7 @@ export function createDynamicColumns(fields: FieldConfig[], accessor: DynamicFie
               tags.map((tag, i) =>
                 React.createElement(
                   Badge,
-                  { variant: 'secondary', key: i },
+                  { variant: 'secondary', key: tag ? `${tag}-${i}` : `${i}` },
                   tag
                 )
               )
@@ -498,7 +489,6 @@ export function createDynamicColumns(fields: FieldConfig[], accessor: DynamicFie
     });
 }
 
-// Fonction utilitaire pour créer des accesseurs de formulaire dynamiques
 export function createFormAccessors<T extends Record<string, unknown>>(
   data: T,
   fields: FieldConfig[]
@@ -506,17 +496,15 @@ export function createFormAccessors<T extends Record<string, unknown>>(
   const accessor = createDynamicAccessor();
 
   return {
-    // Obtenir la valeur d'un champ
+
     getFieldValue: (fieldKey: string) => {
       return accessor.getValue(data, fieldKey);
     },
 
-    // Définir la valeur d'un champ
     setFieldValue: (fieldKey: string, value: unknown) => {
       accessor.setValue(data, fieldKey, value);
     },
 
-    // Obtenir toutes les valeurs des champs visibles dans le formulaire
     getFormValues: () => {
       const values: Record<string, unknown> = {};
       fields
@@ -583,29 +571,29 @@ export function createAdminEntity<T extends Record<string, unknown>>(
     parent: config?.parent,
     children: config?.children,
     formFields: config?.formFields,
-    parseEditItem: config?.parseEditItem || ((item: Record<string, unknown>) => {
-      const parsed: Record<string, unknown> = { ...item };
+    parseEditItem: config?.parseEditItem || ((item: Partial<T>) => {
+      const parsed: Partial<T> = { ...item };
       const dateRegex = /date|at$/i;
       const isoDateRegex = /^\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2})?)?/;
       for (const key in item) {
-        const value = item[key];
+        const value = item[key as keyof T];
         if (
           dateRegex.test(key) ||
           (typeof value === 'string' && isoDateRegex.test(value)) ||
           (typeof value === 'number' && value > 1000000000)
         ) {
           if (value === null || value === undefined || value === '') {
-            parsed[key] = '';
+            parsed[key as keyof T] = '' as unknown as T[keyof T];
           } else if (value instanceof Date) {
-            parsed[key] = value;
+            parsed[key as keyof T] = value as T[keyof T];
           } else if (typeof value === 'string' || typeof value === 'number') {
             const d = new Date(value);
-            parsed[key] = !isNaN(d.getTime()) ? d : '';
+            parsed[key as keyof T] = !isNaN(d.getTime()) ? (d as unknown as T[keyof T]) : ('' as unknown as T[keyof T]);
           } else {
-            parsed[key] = '';
+            parsed[key as keyof T] = '' as unknown as T[keyof T];
           }
         } else if (value === null || value === undefined) {
-          parsed[key] = '';
+          parsed[key as keyof T] = '' as unknown as T[keyof T];
         }
       }
       return parsed;
@@ -792,4 +780,83 @@ export function createApiService<T extends Record<string, unknown>>(
     updateItem: (id: string, data: Partial<T>) => service.updateItem(id, data),
     deleteItem: (id: string) => service.deleteItem(id),
   };
+}
+
+// --- BREADCRUMB ADMIN CENTRAL ---
+export interface AdminBreadcrumbItem {
+  label: string;
+  href?: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  emoji?: string;
+}
+
+const adminRoot = { label: 'Tableau de bord', href: '/admin', icon: Icons.dashboard };
+
+function getEntityFromPath(segments: string[]) {
+  return getRegisteredAdminEntities().find(e => segments.includes(e.path));
+}
+
+function getSubPageLabel(segment: string) {
+  if (segment === 'create') return 'Créer';
+  if (segment === 'edit') return 'Modifier';
+  return segment.charAt(0).toUpperCase() + segment.slice(1);
+}
+
+/**
+ * Génère la config du breadcrumb admin à partir du pathname
+ */
+export function getAdminBreadcrumbConfig(pathname: string): AdminBreadcrumbItem[] {
+  const segments = pathname.split('/').filter(Boolean);
+  const breadcrumbs: AdminBreadcrumbItem[] = [];
+
+  // Racine admin
+  breadcrumbs.push({ label: adminRoot.label, href: adminRoot.href, icon: adminRoot.icon });
+
+  // Entité admin (ex: categories, routes...)
+  const entity = getEntityFromPath(segments);
+  if (entity) {
+    const config = entity.config as { title?: string; icon?: unknown };
+    breadcrumbs.push({
+      label: config.title || entity.path,
+      href: entity.href,
+      icon: (typeof config.icon === 'function' && (config.icon.prototype?.isReactComponent || String(config.icon).includes('return React.createElement'))) ? config.icon as React.ComponentType<{ className?: string }> : undefined,
+      emoji: typeof config.icon === 'string' ? config.icon : undefined,
+    });
+  }
+
+  // Sous-page (ex: /admin/categories/create)
+  const last = segments[segments.length - 1];
+  if (last && entity && last !== entity.path) {
+    // Si c'est un id (UUID ou nombre), on affiche "Détail" ou rien
+    if (/^\d+$/.test(last) || /^[0-9a-fA-F-]{8,}$/.test(last)) {
+      breadcrumbs.push({ label: 'Détail' });
+    } else if (['create', 'edit'].includes(last)) {
+      breadcrumbs.push({ label: getSubPageLabel(last) });
+    } else {
+      breadcrumbs.push({ label: getSubPageLabel(last) });
+    }
+  }
+
+  return breadcrumbs;
+}
+
+// --- REGISTRE GLOBAL DES ENTITÉS ADMIN ---
+export interface RegisteredAdminEntity {
+  path: string;
+  config: unknown;
+  href: string;
+  icon?: string;
+  menuOrder?: number;
+}
+
+const AdminEntityRegistry: RegisteredAdminEntity[] = [];
+
+export function registerAdminEntity(path: string, config: unknown, href: string, icon?: string, menuOrder?: number) {
+  if (!AdminEntityRegistry.some(e => e.path === path)) {
+    AdminEntityRegistry.push({ path, config, href, icon, menuOrder });
+  }
+}
+
+export function getRegisteredAdminEntities() {
+  return AdminEntityRegistry;
 }

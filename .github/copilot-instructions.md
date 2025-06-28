@@ -558,72 +558,27 @@ export const [Entity]AdminConfig = createAdminEntity('[Nom]', [Entity]Schema, {
 
 ---
 
-**Tous les retours d’API sont normalisés sous la forme :
+## Gestion avancée des validations et messages d’erreur
 
-{
-  "data": [...],
-  "page": 1,
-  "limit": 20,
-  "total": 130
-}
+- **Support des messages d’erreur personnalisés** dans le schéma Zod :
+  - Utilisez la syntaxe : `z.string().min(1, 'Ce champ est requis')` ou `z.number().min(0, 'Le prix doit être positif')`.
+  - Les messages d’erreur sont automatiquement affichés dans les formulaires admin.
 
-Les hooks et services doivent toujours consommer la propriété `data` du retour API pour lister les entités, et non le retour brut.**
+- **Affichage automatique des erreurs de validation** dans les formulaires :
+  - Les erreurs sont affichées sous chaque champ concerné.
+  - Le focus est automatiquement mis sur le premier champ en erreur lors de la soumission.
 
-- Pour la lecture (list), utiliser `response.data`.
-- Pour la création, modification, suppression, utiliser la propriété `data` du retour si présente.
-- Adapter les hooks et composants pour ne jamais supposer un tableau brut, mais toujours un objet avec une clé `data`.
+- **Gestion centralisée des messages d’erreur API** :
+  - Toute erreur serveur (validation, droits, etc.) est affichée via un toast ou une alerte globale.
+  - Les hooks et services doivent propager les erreurs pour affichage global (ex : `toast.error(error.message)`).
 
----
-
-# Copilot Instructions: Gestion des relations parent/enfant (module/lesson) avec API réelle
-
-## Pattern recommandé
-
-- Pour une relation parent/enfant (ex: module/lesson), l’ID du parent (ex: moduleId) est transmis via l’URL et injecté dans les hooks/services, jamais via un champ dropdown dans le formulaire enfant.
-- Le champ de relation (ex: moduleId) doit être présent dans le schéma Zod, mais masqué dans le formulaire (`showInForm: false`).
-- Lors de la création/mise à jour, le parentId est injecté côté service/hook, pas par l’utilisateur.
-- Le service enfant doit exposer une méthode `listByParent` (ex: `listByModule(moduleId)`), qui filtre côté API (`/api/lessons?moduleId=...`).
-- Le composant admin enfant doit passer le filtre parentId/moduleId à la page via la prop `filters`.
-- La config admin doit propager ce filtre jusqu’au service/hook, sans modifier la signature standard des méthodes CRUD.
-
-## Exemple de service enfant
+**Exemple :**
 ```ts
-export const lessonService = {
-  listByModule: (moduleId: string) => service.get<Lesson[]>('', { moduleId }),
-  create: (data: Partial<Lesson>) => service.post<Lesson>('', data),
-  // ...
-};
+const schema = z.object({
+  name: z.string().min(1, 'Le nom est requis'),
+  price: z.number().min(0, 'Le prix doit être positif'),
+});
 ```
-
-## Exemple de hook enfant
-```ts
-export function useModuleLessons(moduleId: string) {
-  const query = useQuery({
-    queryKey: ['lessons', moduleId],
-    queryFn: () => lessonService.listByModule(moduleId),
-  });
-  // ...
-}
-```
-
-## Exemple de config admin enfant
-```ts
-services: {
-  fetchItems: async (filters) => {
-    const moduleId = filters?.moduleId || filters?.parentId || '';
-    return LessonAdminAdapter.fetchItems({ parentId: moduleId });
-  },
-  createItem: async (data, filters) => {
-    const moduleId = filters?.moduleId || filters?.parentId || '';
-    return LessonAdminAdapter.createItem({ ...data, parentId: moduleId });
-  },
-  // ...
-}
-```
-
-## À ne jamais faire
-- Ne jamais afficher un dropdown de sélection du parent dans le formulaire enfant si la navigation est parent/enfant.
-- Ne jamais faire d’appel direct à fetch/axios dans un composant React.
 
 ---
 
@@ -700,4 +655,32 @@ Pour gérer les actions bulk (actions sur plusieurs lignes sélectionnées) dans
   - Ces actions peuvent aussi exploiter les lignes sélectionnées si besoin.
 
 ---
-````
+
+## Formatage et affichage avancé des champs (prix, devise, etc.)
+
+Pour personnaliser l’affichage d’un champ (ex : prix, devise, format custom), chaque champ de la config ou du schéma Zod accepte dans `display` :
+
+- `prefix` : préfixe affiché avant la valeur (ex : `€ `, `$`, etc.)
+- `suffix` : suffixe affiché après la valeur (ex : ` €`, ` km`, etc.)
+- `format` : fonction de formatage custom `(value) => string` (**si défini, il écrase tout le formattage par défaut, y compris prefix/suffix**)
+
+**Exemple :**
+```ts
+{
+  key: 'price',
+  label: 'Prix',
+  type: 'number',
+  display: {
+    prefix: '€ ',
+    // ou suffix: ' €'
+    // ou format: (v) => v ? `€ ${Number(v).toFixed(2)}` : '' // prioritaire sur prefix/suffix
+  }
+}
+```
+
+- Si `format` est défini, il est utilisé pour afficher la valeur dans le tableau admin (aucun prefix/suffix n’est appliqué).
+- Sinon, le préfixe et/ou le suffixe sont ajoutés autour de la valeur.
+- Fonctionne pour tous les champs (tableau, formulaire, etc.).
+
+---
+`````

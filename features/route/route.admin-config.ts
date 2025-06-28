@@ -1,10 +1,10 @@
-import { createAdminEntity } from '@/lib/admin-generator';
+import { createAdminEntity, registerAdminEntity } from '@/lib/admin-generator';
 import { RouteSchema } from './route.schema';
 import { routeService } from './route.service';
 export const RouteAdminConfig = createAdminEntity('Route', RouteSchema, {
     description: 'Gérez vos routes',
     icon: '🛣️',
-    actions: { create: true, read: true, update: true, delete: true, bulk: false, export: false },
+    actions: { create: true, read: true, update: true, delete: true, bulk: false},
     services: routeService,
     formFields: [
         'departureCity',
@@ -18,3 +18,5 @@ export const RouteAdminConfig = createAdminEntity('Route', RouteSchema, {
     ],
     queryKey: ['routes'],
 });
+
+registerAdminEntity('routes', RouteAdminConfig, '/admin/routes', '🛣️');

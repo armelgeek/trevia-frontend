@@ -14,7 +14,6 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
   const globalFilter = table.getState().globalFilter as string;
   const setGlobalFilter = (value: string) => table.setGlobalFilter(value);
 
-  // Synchronise le champ avec la valeur externe si modifiée ailleurs (ex: reset)
   useEffect(() => {
     if (globalFilter === undefined || globalFilter === null) {
       setGlobalFilter('');
