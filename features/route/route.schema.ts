@@ -4,10 +4,29 @@ import { createField } from '@/lib/admin-generator';
 export const RouteSchema = z.object({
     departureCity: createField.string({ label: 'Ville de départ', display: { showInForm: true, showInTable: false } }),
     arrivalCity: createField.string({ label: "Ville d'arrivée", display: { showInForm: true, showInTable: false } }),
-    routeLabel: createField.string({ label: 'Label de la route', placeholder: 'Ex: Paris - Lyon', display: { showInForm: false, showInTable: true } }),
-    distanceKm: createField.string({ label: 'Distance (km)', display: { showInForm: true, showInTable: true } }),
+    routeLabel: createField.string({ label: 'Route', placeholder: 'Ex: Paris - Lyon', display: { showInForm: false, showInTable: true } }),
+    distanceKm: createField.string({
+        label: 'Distance', display: {
+            showInForm: true,
+            showInTable: true,
+            suffix: ' KM'
+        }
+    }),
     duration: createField.string({ label: 'Durée', display: { showInForm: true, showInTable: true } }),
-    basePrice: createField.string({ label: 'Frais', display: { showInForm: true, showInTable: true } }),
+    basePrice: createField.string({
+        label: 'Frais', display: {
+            showInForm: true,
+            showInTable: true,
+            prefix: '€ ',
+            format: (value: unknown) => {
+                if (typeof value === 'string' && value !== '') {
+                    const num = Number(value);
+                    return isNaN(num) ? value : `€ ${num.toFixed(2)}`;
+                }
+                return '';
+            }
+        }
+    }),
     routeType: createField.select([
         { value: 'national', label: 'Nationale' },
         { value: 'regional', label: 'Régionale' },

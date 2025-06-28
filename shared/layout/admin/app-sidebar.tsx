@@ -36,8 +36,14 @@ import { cn } from '@/shared/lib/utils';
 
 export default function AppSidebar({ session }: { session: { user?: { name?: string; email?: string; image?: string | null } } | null }) {
   const router = useRouter();
-  const pathname = usePathname();
   const navItems = getSidebarNavItems();
+  const pathname = usePathname();
+
+  // Marquer actif si l'URL commence par l'item (pour /admin/trips et /admin/trips/[id]/seats)
+  const isActive = (url: string) => {
+    if (url === '/') return pathname === '/';
+    return pathname === url || pathname.startsWith(url + '/') || (url !== '/' && pathname.startsWith(url));
+  };
 
   const handleSignOut = async () => {
     await authClient.signOut({
@@ -70,14 +76,14 @@ export default function AppSidebar({ session }: { session: { user?: { name?: str
                   <Collapsible
                     key={item.title}
                     asChild
-                    defaultOpen={item.isActive}
+                    defaultOpen={isActive(item.url)}
                     className='group/collapsible'
                   >
                     <SidebarMenuItem>
                       <CollapsibleTrigger asChild>
                         <SidebarMenuButton
                           tooltip={item.title}
-                          isActive={pathname === item.url}
+                          isActive={isActive(item.url)}
                           className={cn(
                             "w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-all",
                             "hover:bg-gray-100 hover:text-primary",
@@ -116,7 +122,7 @@ export default function AppSidebar({ session }: { session: { user?: { name?: str
                     <SidebarMenuButton
                       asChild
                       tooltip={item.title}
-                      isActive={pathname === item.url}
+                      isActive={isActive(item.url)}
                       className={cn(
                         "w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-all",
                         "hover:bg-gray-100 hover:text-primary",
