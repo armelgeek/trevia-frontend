@@ -8,10 +8,10 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { DataTable } from '@/shared/components/molecules/datatable/data-table';
 import { DataTablePagination } from '@/shared/components/molecules/datatable/data-table-pagination';
 import { DynamicForm } from '@/components/ui/dynamic-form';
-import { createDynamicColumns } from '@/lib/admin-generator';
-import { useAdminEntity } from '@/hooks/use-admin-entity';
+import { createDynamicColumns } from '@/shared/lib/admin/admin-generator';
+import { useAdminEntity } from '@/shared/hooks/use-admin-entity';
 import { Plus, EllipsisVertical } from 'lucide-react';
-import type { AdminConfigWithServices } from '@/lib/admin-generator';
+import type { AdminConfigWithServices } from '@/shared/lib/admin/admin-generator';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import {
   Sheet,

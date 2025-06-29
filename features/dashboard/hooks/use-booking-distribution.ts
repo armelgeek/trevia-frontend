@@ -1,5 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
-import { API_URL } from '@/shared/lib/config/api';
+import { useEntityQuery } from '@/shared/hooks/use-entity-query';
+import { BaseService } from '@/shared/lib/services/base-service';
+import { API_ENDPOINTS } from '@/shared/config/api';
 
 export interface BookingDistribution {
   type: string;
@@ -8,18 +9,12 @@ export interface BookingDistribution {
   count: number;
 }
 
-export function useBookingDistribution() {
-  return useQuery<{
-    bookingDistribution: BookingDistribution[];
-  }>({
+export const bookingDistributionService = new BaseService(API_ENDPOINTS.dashboard.bookingDistribution);
+
+export function useBookingDistribution(params?: Record<string, unknown>) {
+  return useEntityQuery<BookingDistribution[]>({
+    service: bookingDistributionService,
     queryKey: ['booking-distribution'],
-    queryFn: async () => {
-      const res = await fetch(`${API_URL}/api/admin/dashboard/booking-distribution`, {
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (!res.ok) throw new Error('Erreur lors du chargement de la répartition des réservations');
-      return res.json();
-    },
+    params,
   });
 }

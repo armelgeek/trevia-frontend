@@ -56,7 +56,17 @@ export const API_ENDPOINTS = {
     delete: (id: string) => `/api/schedules/${id}`
   },
   dashboard: {
-    base: '/api/admin/dashboard'
+    base: '/api/admin/dashboard',
+    bookingDistribution: '/api/admin/dashboard/booking-distribution',
+    cancelledTrips: '/api/admin/dashboard/cancelled-trips',
+    upcomingDepartures: '/api/admin/dashboard/upcoming-departures',
+    topDestinations: '/api/admin/dashboard/top-destinations',
+    cancelledDepartures: '/api/admin/dashboard/cancelled-departures',
+    lowOccupancyTrips: '/api/admin/dashboard/low-occupancy-trips',
+    cancelledBookings: '/api/admin/dashboard/cancelled-bookings',
+    recentBookings: '/api/admin/dashboard/recent-bookings',
+    kpis: '/api/admin/dashboard',
+    alerts: '/api/admin/dashboard/alerts',
     // Ajoutez d'autres endpoints dashboard ici si besoin
   }
 };

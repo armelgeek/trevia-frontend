@@ -1,6 +1,6 @@
 "use client";
 import { BookingAdminConfig } from '@/features/booking/booking.admin-config';
-import { useAdminEntity } from '@/hooks/use-admin-entity';
+import { useAdminEntity } from '@/shared/hooks/use-admin-entity';
 import type { Booking } from '@/features/booking/booking.schema';
 import { useQueryState, parseAsString, parseAsJson } from 'nuqs';
 import { BookingFilters, BookingCard } from '@/features/booking/components';

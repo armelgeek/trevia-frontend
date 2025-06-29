@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { FieldConfig } from "@/lib/admin-generator";
+import { FieldConfig } from "@/shared/lib/admin/admin-generator";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 

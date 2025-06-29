@@ -1,3 +1,4 @@
+````````instructions
 ``instructions
 
 # Copilot Instructions: Générer une Simple Admin Page
@@ -622,7 +623,6 @@ Pour ajouter des actions personnalisées dans la barre d’outils (toolbar) du t
   }
   ```
 - Si vous fournissez une fonction, elle reçoit le tableau des lignes sélectionnées (pour actions bulk/contextuelles).
-- Ces actions apparaîtront dans la barre d’outils du DataTable, à droite du compteur de sélection.
 
 **Pour les actions bulk natives** (supprimer, exporter, etc.), continuez d’utiliser la config `actions.bulk` et/ou `bulkActions`.
 
@@ -683,4 +683,49 @@ Pour personnaliser l’affichage d’un champ (ex : prix, devise, format custom
 - Fonctionne pour tous les champs (tableau, formulaire, etc.).
 
 ---
-`````
+
+## hook générique useEntityQuery
+
+- **Tout nouvel endpoint doit obligatoirement être ajouté dans le registre centralisé `API_ENDPOINTS` (`shared/config/api.ts`) sous la clé `dashboard` ou une clé dédiée.**
+- N’utilise jamais de string littérale d’URL dans les services ou hooks : importe toujours l’URL depuis `API_ENDPOINTS.dashboard` ou une clé dédiée.
+- Pour toute nouvelle feature dashboard/statistiques, crée un service qui hérite de `BaseService` et utilise le hook générique `useEntityQuery` pour la gestion des requêtes (lecture, params, mutations CRUD si besoin).
+- **Pattern recommandé :**
+  1. Ajoute l’endpoint dans `API_ENDPOINTS.dashboard` :
+     ```ts
+     export const API_ENDPOINTS = {
+       // ...existing code...
+       dashboard: {
+         base: '/api/admin/dashboard',
+         bookingDistribution: '/api/admin/dashboard/booking-distribution',
+         // autres endpoints dashboard...
+       }
+     }
+     ```
+  2. Crée le service :
+     ```ts
+     import { BaseService } from '@/lib/base-service';
+     import { API_ENDPOINTS } from '@/shared/config/api';
+     export const bookingDistributionService = new BaseService(API_ENDPOINTS.dashboard.bookingDistribution);
+     ```
+  3. Utilise le hook générique :
+     ```ts
+     import { useEntityQuery } from '@/lib/use-entity-query';
+     export function useBookingDistribution(params?: Record<string, unknown>) {
+       return useEntityQuery({
+         service: bookingDistributionService,
+         queryKey: ['booking-distribution'],
+         params,
+       });
+     }
+     ```
+- **Toujours utiliser `useEntityQuery` pour la gestion des données côté client (lecture, params dynamiques, mutations CRUD si besoin) pour toute nouvelle feature nécessitant un accès API factorisé (dashboard, statistiques, entités, etc.).**
+- Ce pattern s’applique aussi bien pour les endpoints publics que privés, et pour toute ressource paginée ou filtrable.
+- Pour les mutations (create, update, delete), utilisez le service passé à `useEntityQuery` ou un hook compagnon (ex : `useEntityMutations` si existant) pour garantir la cohérence et la factorisation.
+- Les noms de `queryKey` doivent être cohérents et idéalement centralisés dans un fichier de config (ex : `entityKeys`).
+- Toute logique de transformation/adaptation des données (mapping, formatage, adaptation) doit être faite dans le hook ou un utilitaire dédié, jamais dans le composant React.
+
+---
+
+- **Toujours utiliser un composant `Skeleton` (ou équivalent) pour l’affichage du chargement dans les pages et composants admin/factorisés.**
+  - Le Skeleton doit être visible tant que les données sont en cours de chargement (`isLoading`, `isFetching`, etc.).
+  - Ne jamais afficher un écran vide ou un simple "Loading..." : le Skeleton doit donner un feedback visuel cohérent avec l’UI admin.

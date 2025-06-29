@@ -11,7 +11,7 @@ import { useTableParams } from '@/shared/hooks/use-table-params';
 import { DynamicForm } from '@/components/ui/dynamic-form';
 import { generateTableColumns } from '@/components/ui/dynamic-table';
 import { toast } from 'sonner';
-import type { AdminConfig } from '@/lib/admin-generator';
+import type { AdminConfig } from '@/shared/lib/admin/admin-generator';
 import { z } from 'zod';
 import {
   Sheet,

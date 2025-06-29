@@ -47,7 +47,12 @@ export class BaseService {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
-    const url = `${this.baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+    let url: string;
+    if (!endpoint) {
+      url = this.baseUrl;
+    } else {
+      url = `${this.baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+    }
     
     const config: RequestInit = {
       ...options,
@@ -132,15 +137,13 @@ export class BaseService {
       });
       const searchParams = new URLSearchParams(filteredParams);
       if (searchParams.toString()) {
+        // Si endpoint est vide, ne pas ajouter de /, juste le ?
         url += `?${searchParams.toString()}`;
       }
     }
-    const response = await this.request<T>(url, { method: 'GET' });
-    // Toujours retourner un objet avec la clé data (jamais un tableau brut)
-    if (!('data' in response)) {
-      return { data: response as unknown as T };
-    }
-    return response;
+    // Si url commence par ?, endpoint était vide, donc on passe '' à request
+    const finalUrl = url.startsWith('?') ? '' : url;
+    return this.request<T>(finalUrl, { method: 'GET' });
   }
 
   /**

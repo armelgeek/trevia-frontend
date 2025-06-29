@@ -1,4 +1,4 @@
-import { createAdminEntity, registerAdminEntity } from '@/lib/admin-generator';
+import { createAdminEntity, registerAdminEntity } from '@/shared/lib/admin/admin-generator';
 import { BookingSchema } from './booking.schema';
 import { bookingService } from './booking.service';
 

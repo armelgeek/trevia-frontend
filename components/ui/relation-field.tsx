@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/shared/lib/utils';
-import type { FieldConfig } from '@/lib/admin-generator';
+import type { FieldConfig } from '@/shared/lib/admin/admin-generator';
 import { API_URL } from '@/shared/lib/config/api';
 
 // Type pour les éléments de relation

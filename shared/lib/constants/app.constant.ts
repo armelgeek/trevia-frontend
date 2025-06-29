@@ -1,6 +1,6 @@
 import '@/features/admin-entities';
 import { Icons } from "@/components/ui/icons";
-import { getRegisteredAdminEntities } from '@/lib/admin-generator';
+import { getRegisteredAdminEntities } from '@/shared/lib/admin/admin-generator';
 
 const kAppName = "Trevia Admin";
 const kAppAbbr = "TA";

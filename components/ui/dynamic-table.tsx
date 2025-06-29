@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
-import type { FieldConfig, AdminConfig } from '@/lib/admin-generator';
+import type { FieldConfig, AdminConfig } from '@/shared/lib/admin/admin-generator';
 import { toast } from 'sonner';
 
 export interface AdminConfigWithParseEdit<T = Record<string, unknown>> extends AdminConfig {

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createField } from '@/lib/admin-generator';
+import { createField } from '@/shared/lib/admin/admin-generator';
 
 export const RouteSchema = z.object({
     departureCity: createField.string({ label: 'Ville de départ', display: { showInForm: true, showInTable: false } }),

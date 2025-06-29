@@ -1,18 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
-import { API_URL } from '@/shared/lib/config/api';
+import { useEntityQuery } from '@/shared/hooks/use-entity-query';
+import { dashboardAlertsService } from '../dashboard.services';
 
-export function useDashboardAlerts() {
-  return useQuery<{
-    alerts: string[];
-  }>({
+export function useDashboardAlerts(params?: Record<string, unknown>) {
+  return useEntityQuery({
+    service: dashboardAlertsService,
     queryKey: ['dashboard-alerts'],
-    queryFn: async () => {
-      const res = await fetch(`${API_URL}/api/admin/dashboard/alerts`, {
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (!res.ok) throw new Error('Erreur lors du chargement des alertes');
-      return res.json();
-    },
+    params,
   });
 }

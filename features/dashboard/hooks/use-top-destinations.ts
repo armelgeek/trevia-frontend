@@ -1,18 +1,20 @@
-import { API_URL } from '@/shared/lib/config/api';
-import { useQuery } from '@tanstack/react-query';
+import { useEntityQuery } from '@/shared/hooks/use-entity-query';
+import { topDestinationsService } from '../dashboard.services';
 
-export function useTopDestinations(period: 'day' | 'month' | 'year') {
-  return useQuery({
-    queryKey: ['dashboard', 'top-destinations', period],
-    queryFn: async () => {
-      const res = await fetch(`${API_URL}/api/admin/dashboard/top-destinations?period=${period}`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      });
-      if (!res.ok) throw new Error('Erreur chargement top destinations');
-      return res.json();
-    },
+export interface TopDestination {
+  routeId: string;
+  routeLabel: string;
+  bookings: number;
+}
+
+export interface TopDestinationsResult {
+  topDestinations: TopDestination[];
+}
+
+export function useTopDestinations(params?: Record<string, unknown>) {
+  return useEntityQuery<TopDestinationsResult>({
+    service: topDestinationsService,
+    queryKey: ['dashboard', 'top-destinations', params?.period],
+    params,
   });
 }

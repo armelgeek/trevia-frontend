@@ -11,10 +11,10 @@ import { useState } from 'react';
 
 export default function AdminDashboardPage() {
   const [period, setPeriod] = useState<'day' | 'month' | 'year'>('day');
-  const { data: kpis, isLoading: loadingKpis } = useKpis(period);
-  const { data: topDest, isLoading: loadingTopDest } = useTopDestinations(period);
-  const { data: upcoming, isLoading: loadingUpcoming } = useUpcomingDepartures(period);
-  const { data: recentBookings, isLoading: loadingRecent } = useRecentBookings(period);
+  const { data: kpis, isLoading: loadingKpis } = useKpis({ period });
+  const { data: topDest, isLoading: loadingTopDest } = useTopDestinations({ period });
+  const { data: upcoming, isLoading: loadingUpcoming } = useUpcomingDepartures({ period });
+  const { data: recentBookings, isLoading: loadingRecent } = useRecentBookings({ period });
 
   if (loadingKpis || loadingTopDest || loadingUpcoming || loadingRecent) {
     return (

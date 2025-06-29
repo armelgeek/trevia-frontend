@@ -16,7 +16,7 @@ import { CalendarIcon, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/shared/lib/utils';
 import { RelationField } from './relation-field';
-import type { FieldConfig, AdminConfig } from '@/lib/admin-generator';
+import type { FieldConfig, AdminConfig } from '@/shared/lib/admin/admin-generator';
 import { toast } from 'sonner';
 import { Icons } from '@/components/ui/icons';
 import TimePicker from 'react-time-picker';

@@ -1,18 +1,23 @@
-import { API_URL } from '@/shared/lib/config/api';
-import { useQuery } from '@tanstack/react-query';
+import { useEntityQuery } from '@/shared/hooks/use-entity-query';
+import { upcomingDeparturesService } from '../dashboard.services';
 
-export function useUpcomingDepartures(period: 'day' | 'month' | 'year') {
-  return useQuery({
-    queryKey: ['dashboard', 'upcoming-departures', period],
-    queryFn: async () => {
-      const res = await fetch(`${API_URL}/api/admin/dashboard/upcoming-departures?period=${period}`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      });
-      if (!res.ok) throw new Error('Erreur chargement départs');
-      return res.json();
-    },
+export interface Departure {
+  scheduleId: string;
+  tripId: string;
+  routeLabel: string;
+  departureTime: string;
+  occupancy: number;
+  status: string;
+}
+
+export interface UpcomingDeparturesResult {
+  upcomingDepartures: Departure[];
+}
+
+export function useUpcomingDepartures(params?: Record<string, unknown>) {
+  return useEntityQuery<UpcomingDeparturesResult>({
+    service: upcomingDeparturesService,
+    queryKey: ['dashboard', 'upcoming-departures', params?.period],
+    params,
   });
 }

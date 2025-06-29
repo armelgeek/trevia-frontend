@@ -1,6 +1,6 @@
 import { dashboardSchema } from '@/features/dashboard/dashboard.schema';
 import { dashboardService } from '@/features/dashboard/dashboard.service';
-import { createAdminEntity, registerAdminEntity } from '@/lib/admin-generator';
+import { createAdminEntity, registerAdminEntity } from '@/shared/lib/admin/admin-generator';
 
 export const DashboardAdminConfig = createAdminEntity('Dashboard', dashboardSchema, {
   description: 'Accédez aux statistiques et alertes administrateur',

@@ -4,6 +4,6 @@ import { vehicleService } from '../vehicle.service';
 export function useVehicle() {
   return useQuery({
     queryKey: ['vehicles'],
-    queryFn: () => vehicleService.list(),
+    queryFn: () => vehicleService.fetchItems(),
   });
 }

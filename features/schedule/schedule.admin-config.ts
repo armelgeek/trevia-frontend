@@ -1,4 +1,4 @@
-import { createAdminEntity } from '@/lib/admin-generator';
+import { createAdminEntity } from '@/shared/lib/admin/admin-generator';
 import { scheduleSchema } from './schedule.schema';
 import { scheduleService } from './schedule.service';
 

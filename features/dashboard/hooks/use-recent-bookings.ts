@@ -1,18 +1,23 @@
-import { API_URL } from '@/shared/lib/config/api';
-import { useQuery } from '@tanstack/react-query';
+import { useEntityQuery } from '@/shared/hooks/use-entity-query';
+import { recentBookingsService } from '../dashboard.services';
 
-export function useRecentBookings(period: 'day' | 'month' | 'year') {
-  return useQuery({
-    queryKey: ['dashboard', 'recent-bookings', period],
-    queryFn: async () => {
-      const res = await fetch(`${API_URL}/api/admin/dashboard/recent-bookings?period=${period}`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      });
-      if (!res.ok) throw new Error('Erreur chargement réservations');
-      return res.json();
-    },
+export interface RecentBooking {
+  bookingId: string;
+  userName: string;
+  tripId: string;
+  routeLabel: string;
+  bookedAt: string;
+  status: string;
+}
+
+export interface RecentBookingsResult {
+  recentBookings: RecentBooking[];
+}
+
+export function useRecentBookings(params?: Record<string, unknown>) {
+  return useEntityQuery<RecentBookingsResult>({
+    service: recentBookingsService,
+    queryKey: ['dashboard', 'recent-bookings', params?.period],
+    params,
   });
 }

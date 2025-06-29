@@ -1,4 +1,4 @@
-import { createApiService } from '@/lib/admin-generator';
+import { createApiService } from '@/shared/lib/admin/admin-generator';
 import type { Booking } from './booking.schema';
 import { API_ENDPOINTS } from '@/shared/lib/config/api';
 

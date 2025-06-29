@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { getAdminBreadcrumbConfig } from '@/lib/admin-generator';
+import { getAdminBreadcrumbConfig } from '@/shared/lib/admin/admin-generator';
 
 export function AdminBreadcrumb() {
 	const pathname = usePathname();

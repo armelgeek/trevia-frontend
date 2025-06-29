@@ -1,4 +1,4 @@
-import { createAdminEntity, registerAdminEntity } from '@/lib/admin-generator';
+import { createAdminEntity, registerAdminEntity } from '@/shared/lib/admin/admin-generator';
 import { RouteSchema } from './route.schema';
 import { routeService } from './route.service';
 export const RouteAdminConfig = createAdminEntity('Route', RouteSchema, {

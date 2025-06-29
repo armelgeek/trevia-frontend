@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import type { AdminConfig, CrudService } from '@/lib/admin-generator';
+import type { AdminConfig, CrudService } from '@/shared/lib/admin/admin-generator';
 
 interface UseAdminEntityOptions<T extends Record<string, unknown>> {
   config: AdminConfig;

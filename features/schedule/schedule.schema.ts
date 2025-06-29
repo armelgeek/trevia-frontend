@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createField } from '@/lib/admin-generator';
+import { createField } from '@/shared/lib/admin/admin-generator';
 
 export const scheduleSchema = z.object({
   id: createField.string({ label: 'ID' }).optional(),

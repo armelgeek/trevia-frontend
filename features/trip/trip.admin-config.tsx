@@ -1,4 +1,4 @@
-import { createAdminEntity, createApiService, registerAdminEntity } from '@/lib/admin-generator';
+import { createAdminEntity, createApiService, registerAdminEntity } from '@/shared/lib/admin/admin-generator';
 import { tripSchema, Trip } from './trip.schema';
 
 const tripService = createApiService<Trip>('/api/trips');
