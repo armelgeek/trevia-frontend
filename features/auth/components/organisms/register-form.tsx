@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 import { authClient } from '@/shared/lib/config/auth-client';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/components/atoms/ui/button';
 import {
   Form,
   FormControl,
@@ -17,11 +17,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+} from '@/shared/components/atoms/ui/form';
+import { Input } from '@/shared/components/atoms/ui/input';
 import { cn } from '@/shared/lib/utils';
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/atoms/ui/card';
 import { RegisterPayload } from '../../config/auth.type';
 import { RegisterFormSchema } from '../../config/auth.schema';
 

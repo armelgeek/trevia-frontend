@@ -2,7 +2,7 @@
 
 import { Table } from '@tanstack/react-table';
 
-import { DebouncedInput } from '@/components/ui/debounced-input';
+import { DebouncedInput } from '@/shared/components/atoms/ui/debounced-input';
 
 interface DataTableToolbarProps<TData> {
   data: Table<TData>;

@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/atoms/ui/card";
 import { DeleteAccount } from "@/features/auth/components/organisms/delete-account-form";
 import { AlertTriangle } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/shared/components/atoms/ui/alert";
+import { Separator } from "@/shared/components/atoms/ui/separator";
 import { authClient } from '@/shared/lib/config/auth-client';
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/shared/components/atoms/ui/skeleton";
 
 type SessionType = {
   user?: {

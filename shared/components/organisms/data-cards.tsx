@@ -2,12 +2,12 @@
 
 import React from 'react';
 import { useList } from '@/shared/hooks/useList';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/shared/components/atoms/ui/button';
+import { Input } from '@/shared/components/atoms/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/atoms/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/atoms/ui/card';
+import { Badge } from '@/shared/components/atoms/ui/badge';
+import { Checkbox } from '@/shared/components/atoms/ui/checkbox';
 import { 
   ChevronLeft, 
   ChevronRight, 

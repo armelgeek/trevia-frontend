@@ -2,7 +2,7 @@ import React from 'react';
 
 import "@uploadthing/react/styles.css";
 import '@/shared/styles/globals.css';
-import { Footer } from '@/components/ui/footer';
+import { Footer } from '@/shared/components/atoms/ui/footer';
 import AppClientMenu from '@/shared/components/molecules/layout/app-client-menu';
 
 interface RootLayoutProps {

@@ -1,5 +1,5 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card } from "@/shared/components/atoms/ui/card";
+import { Button } from "@/shared/components/atoms/ui/button";
 
 const resources = [
   { id: 1, name: "Minibus 14 places", status: "Disponible" },

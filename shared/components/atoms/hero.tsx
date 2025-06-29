@@ -1,4 +1,4 @@
-import { HeroSection } from "@/components/ui/hero-section";
+import { HeroSection } from "@/shared/components/atoms/ui/hero-section";
 
 const hero = {
   id: "hero-white",

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Toaster } from '@/components/ui/sonner';
+import { Toaster } from '@/shared/components/atoms/ui/sonner';
 import { Provider } from '@/shared/providers';
 import NextTopLoader from 'nextjs-toploader';
 import { Space_Grotesk } from 'next/font/google';

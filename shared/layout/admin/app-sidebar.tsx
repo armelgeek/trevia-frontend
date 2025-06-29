@@ -1,10 +1,10 @@
 'use client';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/atoms/ui/avatar';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger
-} from '@/components/ui/collapsible';
+} from '@/shared/components/atoms/ui/collapsible';
 import {
   Sidebar,
   SidebarContent,
@@ -19,7 +19,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarRail
-} from '@/components/ui/sidebar';
+} from '@/shared/components/atoms/ui/sidebar';
 import {
   ChevronRight,
   LogOut
@@ -27,11 +27,11 @@ import {
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import * as React from 'react';
-import { Icons } from '@/components/ui/icons';
+import { Icons } from '@/shared/components/atoms/ui/icons';
 import { authClient } from '@/shared/lib/config/auth-client';
 import { getSidebarNavItems } from '@/shared/lib/constants/app.constant';
-import { Button } from '@/components/ui/button';
-import { Logo } from '@/components/ui/logo';
+import { Button } from '@/shared/components/atoms/ui/button';
+import { Logo } from '@/shared/components/atoms/ui/logo';
 import { cn } from '@/shared/lib/utils';
 
 export default function AppSidebar({ session }: { session: { user?: { name?: string; email?: string; image?: string | null } } | null }) {

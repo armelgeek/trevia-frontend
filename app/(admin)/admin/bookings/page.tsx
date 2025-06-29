@@ -5,7 +5,7 @@ import type { Booking } from '@/features/booking/booking.schema';
 import { useQueryState, parseAsString, parseAsJson } from 'nuqs';
 import { BookingFilters, BookingCard } from '@/features/booking/components';
 import { CalendarCheck } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@/shared/components/atoms/ui/skeleton';
 
 export default function BookingAdminPage() {
   const [status, setStatus] = useQueryState('status', parseAsString.withDefault(''));

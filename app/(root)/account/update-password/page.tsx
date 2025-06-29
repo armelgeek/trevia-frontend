@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/atoms/ui/card";
 import { ChangePassword } from "@/features/auth/components/organisms/change-password-form";
 import { Metadata } from "next";
 export const metadata: Metadata = { title: "Update Password" };

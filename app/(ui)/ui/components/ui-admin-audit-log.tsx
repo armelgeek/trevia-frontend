@@ -1,4 +1,4 @@
-import { Card } from "@/components/ui/card";
+import { Card } from "@/shared/components/atoms/ui/card";
 
 const logs = [
   { date: "2025-06-22", user: "admin", action: "Connexion réussie" },

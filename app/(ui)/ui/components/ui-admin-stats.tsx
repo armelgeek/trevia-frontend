@@ -1,7 +1,7 @@
 "use client";
 import { LabeledSection } from "./ui-section";
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/atoms/ui/card';
+import { Badge } from '@/shared/components/atoms/ui/badge';
 import { 
   Users, 
   ShoppingCart, 

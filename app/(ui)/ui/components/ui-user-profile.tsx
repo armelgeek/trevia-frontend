@@ -1,13 +1,13 @@
 "use client";
 
 import { LabeledSection } from "./ui-section";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@/shared/components/atoms/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/atoms/ui/card";
+import { Input } from "@/shared/components/atoms/ui/input";
+import { Label } from "@/shared/components/atoms/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/atoms/ui/avatar";
+import { Badge } from "@/shared/components/atoms/ui/badge";
+import { Separator } from "@/shared/components/atoms/ui/separator";
 import { 
   User, 
   Mail, 
@@ -24,7 +24,7 @@ import {
   Settings
 } from "lucide-react";
 import { useState } from "react";
-import { Switch } from "@/components/ui/switch";
+import { Switch } from "@/shared/components/atoms/ui/switch";
 
 interface UserProfile {
   id: string;

@@ -2,8 +2,8 @@
 import { LabeledSection } from "./ui-section";
 import { DataTable } from '@/shared/components/molecules/datatable/data-table';
 import { ColumnDef } from '@tanstack/react-table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Badge } from '@/shared/components/atoms/ui/badge';
+import { Button } from '@/shared/components/atoms/ui/button';
 import { 
   MoreHorizontal, 
   Edit, 
@@ -18,7 +18,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/shared/components/atoms/ui/dropdown-menu';
 import { useState } from 'react';
 
 interface SampleUser {

@@ -1,6 +1,6 @@
 import React, { FormEvent } from 'react';
 import { UseFormReturn, SubmitHandler } from "react-hook-form";
-import { Form } from "@/components/ui/form";
+import { Form } from "@/shared/components/atoms/ui/form";
 
 interface FormWrapperProps<T extends object> {
   form: UseFormReturn<T>;

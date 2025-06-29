@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/components/atoms/ui/button';
 import { CalendarDays } from 'lucide-react';
 
 const FILTERS = [

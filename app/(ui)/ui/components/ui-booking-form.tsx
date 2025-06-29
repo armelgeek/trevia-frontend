@@ -1,12 +1,12 @@
 "use client";
 
 import { LabeledSection } from "./ui-section";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/shared/components/atoms/ui/button";
+import { Label } from "@/shared/components/atoms/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/atoms/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/atoms/ui/card";
+import { Calendar } from "@/shared/components/atoms/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/atoms/ui/popover";
 import { MapPin, Calendar as CalendarIcon, Users, Search, ArrowLeftRight } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";

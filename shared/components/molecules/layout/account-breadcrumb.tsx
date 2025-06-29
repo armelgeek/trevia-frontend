@@ -10,7 +10,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+} from "@/shared/components/atoms/ui/breadcrumb";
 
 interface BreadcrumbConfig {
   label: string;

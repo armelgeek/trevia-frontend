@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/atoms/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,13 +20,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
+} from '@/shared/components/atoms/ui/dropdown-menu';
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar
-} from '@/components/ui/sidebar';
+} from '@/shared/components/atoms/ui/sidebar';
 import { authClient } from '@/shared/lib/config/auth-client';
 
 export function NavUser({

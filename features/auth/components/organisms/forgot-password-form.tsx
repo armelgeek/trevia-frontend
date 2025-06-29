@@ -6,7 +6,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/shared/components/atoms/ui/card";
 import {
   Form,
   FormControl,
@@ -14,12 +14,12 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/shared/components/atoms/ui/form";
 import { useFormHandler } from "@/shared/hooks/use-form-handler";
 import { cn } from '@/shared/lib/utils';
 import useForgotPassword from '@/features/auth/hooks/useForgotPassword';
-import { LoadingButton } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { LoadingButton } from '@/shared/components/atoms/ui/button';
+import { Input } from '@/shared/components/atoms/ui/input';
 import { ForgotPasswordPayload } from "../../config/forgot-password.type";
 import { forgotPasswordSchema } from "../../config/forgot-password.schema";
 

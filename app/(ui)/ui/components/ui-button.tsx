@@ -1,5 +1,5 @@
 import { LabeledSection } from "./ui-section";
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/components/atoms/ui/button';
 
 export function ButtonSample() {
     return (

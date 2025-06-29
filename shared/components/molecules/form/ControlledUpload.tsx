@@ -9,8 +9,8 @@ import {
   FormLabel,
   FormDescription,
   FormMessage
-} from '@/components/ui/form';
-import { Button } from '@/components/ui/button';
+} from '@/shared/components/atoms/ui/form';
+import { Button } from '@/shared/components/atoms/ui/button';
 import { OurFileRouter } from '@/app/api/uploadthing/core';
 
 type ControlledUploadProps<T extends FieldValues> = UseControllerProps<T> & {

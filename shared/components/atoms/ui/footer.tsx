@@ -1,8 +1,8 @@
 "use client";
 
-import { Logo } from "@/components/ui/logo";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { Logo } from "@/shared/components/atoms/ui/logo";
+import { Button } from "@/shared/components/atoms/ui/button";
+import { Separator } from "@/shared/components/atoms/ui/separator";
 import {
   Facebook,
   Twitter,

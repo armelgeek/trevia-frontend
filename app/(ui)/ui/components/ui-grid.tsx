@@ -1,5 +1,5 @@
 import { LabeledSection } from "./ui-section";
-import { Grid } from '@/components/ui/grid';
+import { Grid } from '@/shared/components/atoms/ui/grid';
 
 export function GridSample() {
     return (

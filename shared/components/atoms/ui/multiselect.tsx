@@ -6,7 +6,7 @@ import { forwardRef, useEffect } from 'react';
 import { Command as CommandPrimitive, useCommandState } from 'cmdk';
 import { X } from 'lucide-react';
 
-import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
+import { Command, CommandGroup, CommandItem, CommandList } from '@/shared/components/atoms/ui/command';
 import { cn } from '@/shared/lib/utils';
 
 export interface Option {

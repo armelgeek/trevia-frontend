@@ -1,3 +1,4 @@
+`````````instructions
 ````````instructions
 ``instructions
 
@@ -129,7 +130,7 @@ export const [Entity]AdminConfig = createAdminEntity('[Nom]', [Entity]Schema, {
 ```tsx
 import { [Entity]Schema } from '@/features/[entity]/[entity].schema';
 import { [Entity]AdminConfig } from '@/features/[entity]/[entity].admin-config';
-import { SimpleAdminPage } from '@/components/ui/simple-admin-page';
+import { SimpleAdminPage } from '@/shared/components/atoms/ui/simple-admin-page';
 
 export default function [Entity]AdminPage() {
   return (
@@ -142,7 +143,7 @@ export default function [Entity]AdminPage() {
 ```
 
 7. **Vérifie que le composant `SimpleAdminPage` est bien utilisé**  
-   - Import depuis `@/components/ui/simple-admin-page`.
+   - Import depuis `@/shared/components/atoms/ui/simple-admin-page`.
 
 **À chaque fois qu’une nouvelle fonctionnalité admin est générée, ajoute automatiquement une entrée correspondante dans le menu sidebar admin.**
 - La liste des menus sidebar se trouve dans `shared/lib/constants/app.constant.ts`.

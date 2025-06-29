@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/shared/components/atoms/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/atoms/ui/avatar';
 import { Camera, Upload, X } from 'lucide-react';
 import { useUpdateProfile } from '@/features/auth/hooks/useUpdateProfile';
 import { cn } from '@/shared/lib/utils';

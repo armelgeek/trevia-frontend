@@ -8,15 +8,15 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/shared/components/atoms/ui/dialog";
 import { Loader2, AlertTriangle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { authClient } from '@/shared/lib/config/auth-client';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/shared/components/atoms/ui/button';
+import { Label } from '@/shared/components/atoms/ui/label';
+import { Input } from '@/shared/components/atoms/ui/input';
+import { Alert, AlertDescription } from '@/shared/components/atoms/ui/alert';
 import { useRouter } from 'next/navigation';
 
 type Props = { className?: string };

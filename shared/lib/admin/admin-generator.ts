@@ -1,9 +1,9 @@
 import { z, ZodSchema, ZodObject } from 'zod';
 import { BaseServiceImpl, ResourceEndpoints } from '@/shared/domain/base.service';
 import { Filter } from '@/shared/lib/types/filter';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/shared/components/atoms/ui/badge';
 import * as React from 'react';
-import { Icons } from '@/components/ui/icons';
+import { Icons } from '@/shared/components/atoms/ui/icons';
 
 export interface FieldConfig {
   key: string;
@@ -59,7 +59,7 @@ export interface AdminConfig<T = Record<string, unknown>> {
     update?: boolean;
     delete?: boolean;
     bulk?: boolean;
-  
+
   };
   ui?: {
     table?: {
@@ -68,7 +68,7 @@ export interface AdminConfig<T = Record<string, unknown>> {
       pageSize?: number;
     };
     form?: {
-      layout?: 'sections' | 'simple'| 'two-cols' | 'horizontal';
+      layout?: 'sections' | 'simple' | 'two-cols' | 'horizontal';
       sections?: {
         title: string;
         fields: string[];
@@ -97,7 +97,12 @@ export type ChildConfig = {
 };
 
 export interface AdminConfigWithServices<T extends Record<string, unknown>> extends AdminConfigWithAccessor {
-  parent: any | undefined;
+  parent?: {
+    key: string;
+    routeParam: string;
+    parentEntity?: string;
+    parentLabel?: string;
+  };
   services?: CrudService<T>;
   queryKey?: string[];
   parseEditItem?: (item: Partial<T>) => Partial<T> | T;

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Plus, Edit } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/components/atoms/ui/button';
 import {
   Sheet,
   SheetContent,
@@ -11,7 +11,7 @@ import {
   SheetTitle,
   SheetDescription,
   SheetTrigger,
-} from '@/components/ui/sheet';
+} from '@/shared/components/atoms/ui/sheet';
 
 interface ModalFormProps<T> {
 

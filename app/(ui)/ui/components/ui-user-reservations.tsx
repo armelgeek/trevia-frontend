@@ -1,9 +1,9 @@
 "use client";
 
 import { LabeledSection } from "./ui-section";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/shared/components/atoms/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/atoms/ui/card";
+import { Badge } from "@/shared/components/atoms/ui/badge";
 import { 
   Calendar, 
   Clock, 
@@ -16,7 +16,7 @@ import {
   CheckCircle,
   XCircle
 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@/shared/components/atoms/ui/separator";
 
 interface Reservation {
   id: string;

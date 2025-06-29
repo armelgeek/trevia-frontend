@@ -1,9 +1,9 @@
 "use client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/atoms/ui/card";
+import { Badge } from "@/shared/components/atoms/ui/badge";
 import { Calendar, Clock, Users, CreditCard, MapPin, Eye, Download, XCircle, CheckCircle, AlertCircle, User } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@/shared/components/atoms/ui/button";
+import { Separator } from "@/shared/components/atoms/ui/separator";
 import type { Booking } from '@/features/booking/booking.schema';
 
 function getStatusColor(status: Booking["status"]) {

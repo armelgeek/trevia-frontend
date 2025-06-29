@@ -1,5 +1,5 @@
 import { LabeledSection } from "./ui-section";
-import { StatCard, StatsContainer } from '@/components/ui/stat-card';
+import { StatCard, StatsContainer } from '@/shared/components/atoms/ui/stat-card';
 
 export function StatsSample() {
     return (

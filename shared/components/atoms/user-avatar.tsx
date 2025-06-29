@@ -6,7 +6,7 @@ import {
   User2Icon,
   UserIcon,
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/atoms/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +15,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/shared/components/atoms/ui/dropdown-menu";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -28,10 +28,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from "@/shared/components/atoms/ui/alert-dialog";
 import { authClient } from '@/shared/lib/config/auth-client';
 import { cn } from '@/shared/lib/utils';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/components/atoms/ui/button';
 
 type Props = {
   isAnonymous: boolean;

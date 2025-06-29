@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/shared/components/atoms/ui/dialog";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -19,11 +19,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/shared/components/atoms/ui/form";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/shared/components/atoms/ui/button';
+import { Input } from '@/shared/components/atoms/ui/input';
 import { authClient } from '@/shared/lib/config/auth-client';
 import { updatePasswordSchema } from "../../config/update-password.schema";
 import { UpdatePasswordPayload } from "../../config/update-password.type";

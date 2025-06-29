@@ -1,14 +1,14 @@
 import { LabeledSection } from "./ui-section";
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@/shared/components/atoms/ui/button';
+import { Input } from '@/shared/components/atoms/ui/input';
+import { Label } from '@/shared/components/atoms/ui/label';
+import { Textarea } from '@/shared/components/atoms/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/atoms/ui/select';
+import { Switch } from '@/shared/components/atoms/ui/switch';
+import { Checkbox } from '@/shared/components/atoms/ui/checkbox';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/atoms/ui/card';
+import { Separator } from '@/shared/components/atoms/ui/separator';
+import { Badge } from '@/shared/components/atoms/ui/badge';
 import { 
   Save, 
   X, 

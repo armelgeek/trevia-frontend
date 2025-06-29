@@ -1,7 +1,7 @@
 "use client";
 
 import { LabeledSection } from "./ui-section";
-import { Seat } from "@/components/ui/seat";
+import { Seat } from "@/shared/components/atoms/ui/seat";
 import { useTripSeats } from "@/features/trip/hooks/use-trip-seats";
 
 export function TripSeatsGrid({ tripId }: { tripId: string }) {

@@ -1,5 +1,5 @@
-import { Card } from '@/components/ui/card';
-import { ChartContainer, ChartLegend, ChartTooltip } from '@/components/ui/chart';
+import { Card } from '@/shared/components/atoms/ui/card';
+import { ChartContainer, ChartLegend, ChartTooltip } from '@/shared/components/atoms/ui/chart';
 import * as RechartsPrimitive from 'recharts';
 
 interface TopDestination {

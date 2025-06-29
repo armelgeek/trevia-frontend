@@ -11,9 +11,9 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
-} from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+} from '@/shared/components/atoms/ui/select';
+import { Input } from '@/shared/components/atoms/ui/input';
+import { Popover, PopoverTrigger, PopoverContent } from '@/shared/components/atoms/ui/popover';
 
 
 // ---------- utils start ----------

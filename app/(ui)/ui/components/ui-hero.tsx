@@ -1,5 +1,5 @@
 import { LabeledSection } from "./ui-section";
-import { HeroSection } from '@/components/ui/hero-section';
+import { HeroSection } from '@/shared/components/atoms/ui/hero-section';
 
 export function HeroSample() {
     return (

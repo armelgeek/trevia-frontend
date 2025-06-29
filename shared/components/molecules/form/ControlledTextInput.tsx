@@ -6,8 +6,8 @@ import { FieldValues, useController, UseControllerProps } from 'react-hook-form'
 
 
 
-import { FormControl, FormItem, FormLabel } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { FormControl, FormItem, FormLabel } from '@/shared/components/atoms/ui/form';
+import { Input } from '@/shared/components/atoms/ui/input';
 
 
 

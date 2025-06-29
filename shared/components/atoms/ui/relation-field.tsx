@@ -2,10 +2,10 @@
 
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/atoms/ui/select';
+import { Badge } from '@/shared/components/atoms/ui/badge';
 import { X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/components/atoms/ui/button';
 import { cn } from '@/shared/lib/utils';
 import type { FieldConfig } from '@/shared/lib/admin/admin-generator';
 import { API_URL } from '@/shared/lib/config/api';

@@ -1,8 +1,7 @@
 "use client";
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@/shared/components/atoms/ui/skeleton';
 import { useKpis, useTopDestinations, useUpcomingDepartures, useRecentBookings } from '@/features/dashboard/hooks';
 import { KpiStats } from '@/features/dashboard/components/KpiStats';
-import CancelledDeparturesSection from '@/features/dashboard/components/CancelledDeparturesSection';
 import TopDestinationsSection from '@/features/dashboard/components/TopDestinationsSection';
 import UpcomingDeparturesSection from '@/features/dashboard/components/UpcomingDeparturesSection';
 import RecentBookingsSection from '@/features/dashboard/components/RecentBookingsSection';
@@ -38,7 +37,6 @@ export default function AdminDashboardPage() {
         <UpcomingDeparturesSection upcoming={upcoming} />
         <RecentBookingsSection recentBookings={recentBookings} />
       </div>
-      <CancelledDeparturesSection />
     </div>
   );
 }

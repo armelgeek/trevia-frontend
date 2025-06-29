@@ -1,11 +1,11 @@
 "use client";
 
 import { LabeledSection } from "./ui-section";
-import { Logo } from "@/components/ui/logo";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { Logo } from "@/shared/components/atoms/ui/logo";
+import { Button } from "@/shared/components/atoms/ui/button";
+import { Input } from "@/shared/components/atoms/ui/input";
+import { Badge } from "@/shared/components/atoms/ui/badge";
+import { Separator } from "@/shared/components/atoms/ui/separator";
 import { 
   Facebook, 
   Twitter, 

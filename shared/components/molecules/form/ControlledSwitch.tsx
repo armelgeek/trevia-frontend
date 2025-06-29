@@ -1,7 +1,7 @@
 import React, { ComponentProps } from 'react';
 import { FieldValues, useController, UseControllerProps } from 'react-hook-form';
-import { FormControl, FormItem, FormLabel } from '@/components/ui/form';
-import { Switch } from '@/components/ui/switch';
+import { FormControl, FormItem, FormLabel } from '@/shared/components/atoms/ui/form';
+import { Switch } from '@/shared/components/atoms/ui/switch';
 
 type ControlledSwitchProps<T extends FieldValues> = UseControllerProps<T> & {
   label?: string;

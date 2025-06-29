@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import Link from "next/link";
 import { CheckCircle, ArrowRight } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/shared/components/atoms/ui/button";
+import { Card, CardContent } from "@/shared/components/atoms/ui/card";
 import { FadeIn, ScaleIn } from "@/shared/components/atoms/animated-elements";
 
 export const metadata: Metadata = {

@@ -2,8 +2,8 @@
 
 import { cn } from "@/shared/lib/utils";
 import { ReactNode, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { ButtonProps } from "@/components/ui/button";
+import { Button } from "@/shared/components/atoms/ui/button";
+import { ButtonProps } from "@/shared/components/atoms/ui/button";
 import { Loader2 } from "lucide-react";
 
 interface AnimatedButtonProps extends ButtonProps {

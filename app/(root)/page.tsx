@@ -1,8 +1,8 @@
-import { Section } from '@/components/ui/section';
+import { Section } from '@/shared/components/atoms/ui/section';
 import Hero from '@/shared/components/atoms/hero';
 import type { Metadata } from 'next';
 import { DestinationCard } from '../(ui)/ui/components/ui-destination-card';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/components/atoms/ui/button';
 
 export const metadata: Metadata = {
   title: 'Create Next App',

@@ -1,7 +1,7 @@
 "use client";
 
-import { Navigation, NavLink } from "@/components/ui/navigation";
-import { Button } from "@/components/ui/button";
+import { Navigation, NavLink } from "@/shared/components/atoms/ui/navigation";
+import { Button } from "@/shared/components/atoms/ui/button";
 import { UserNav } from "./user-nav";
 import { useAuth } from "@/shared/providers/auth-provider";
 import Link from "next/link";

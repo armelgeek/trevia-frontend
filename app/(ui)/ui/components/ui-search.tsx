@@ -1,11 +1,11 @@
 "use client";
 
 import { LabeledSection } from "./ui-section";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/shared/components/atoms/ui/button";
+import { Label } from "@/shared/components/atoms/ui/label";
+import { Badge } from "@/shared/components/atoms/ui/badge";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/shared/components/atoms/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/atoms/ui/popover";
 import { Search, MapPin, Clock, Users, X, Filter } from "lucide-react";
 import { useState } from "react";
 

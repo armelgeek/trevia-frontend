@@ -1,9 +1,9 @@
 "use client";
 
 import { LabeledSection } from "./ui-section";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Seat, DriverSeat, BusLayout, BusRow, BusAisle, EmptySpace } from "@/components/ui/seat";
+import { Badge } from "@/shared/components/atoms/ui/badge";
+import { Button } from "@/shared/components/atoms/ui/button";
+import { Seat, DriverSeat, BusLayout, BusRow, BusAisle, EmptySpace } from "@/shared/components/atoms/ui/seat";
 import { useState } from "react";
 import { useTripSeats } from "@/features/trip/hooks/use-trip-seats";
 

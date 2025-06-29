@@ -6,8 +6,8 @@ import { FieldValues, useController, UseControllerProps } from 'react-hook-form'
 
 
 
-import { FormControl, FormItem, FormLabel } from '@/components/ui/form';
-import { Textarea } from '@/components/ui/textarea';
+import { FormControl, FormItem, FormLabel } from '@/shared/components/atoms/ui/form';
+import { Textarea } from '@/shared/components/atoms/ui/textarea';
 
 
 

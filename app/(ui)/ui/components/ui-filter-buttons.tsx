@@ -1,8 +1,8 @@
 "use client";
 
 import { LabeledSection } from "./ui-section";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/shared/components/atoms/ui/button";
+import { Badge } from "@/shared/components/atoms/ui/badge";
 import { useState } from "react";
 
 interface FilterOption {

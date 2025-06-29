@@ -426,8 +426,8 @@ const generateFormComponent = async (name, schema, outputDir) => {
   const camelName = formatName(name, 'camel');
 
   const formContent = `import { Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Form } from '@/components/ui/form';
+import { Button } from '@/shared/components/atoms/ui/button';
+import { Form } from '@/shared/components/atoms/ui/form';
 import { ControlledTextInput } from '@/shared/components/molecules/form/ControlledTextInput';
 import { useFormHandler } from '@/shared/hooks/use-form-handler';
 
@@ -491,12 +491,12 @@ import { useState } from 'react';
 import { Row } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/components/atoms/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/shared/components/atoms/ui/dropdown-menu';
 
 import { Delete } from './delete';
 import { Edit } from './edit';
@@ -1103,7 +1103,7 @@ const generateFormWithRelationships = async (name, schema, relationships, output
   let relationFields = '';
 
   if (relationships.length > 0) {
-    relationImports = `import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';\n`;
+    relationImports = `import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/atoms/ui/select';\n`;
 
     for (const relation of relationships) {
       const relatedEntityPascal = formatName(relation.referencedTable, 'pascal');
@@ -1161,8 +1161,8 @@ const generateFormWithRelationships = async (name, schema, relationships, output
 
   // Form template with relationship fields
   const formContent = `import { Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Button } from '@/shared/components/atoms/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/components/atoms/ui/form';
 import { ControlledTextInput } from '@/shared/components/molecules/form/ControlledTextInput';
 import { useFormHandler } from '@/shared/hooks/use-form-handler';${relationships.length > 0 ? '\n' + relationImports : ''}
 

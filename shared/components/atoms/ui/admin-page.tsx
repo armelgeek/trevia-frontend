@@ -3,13 +3,13 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Button } from '@/shared/components/atoms/ui/button';
+import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/shared/components/atoms/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/shared/components/atoms/ui/alert-dialog';
 import { DataTable } from '@/shared/components/molecules/datatable/data-table';
 import { useTableParams } from '@/shared/hooks/use-table-params';
-import { DynamicForm } from '@/components/ui/dynamic-form';
-import { generateTableColumns } from '@/components/ui/dynamic-table';
+import { DynamicForm } from '@/shared/components/atoms/ui/dynamic-form';
+import { generateTableColumns } from '@/shared/components/atoms/ui/dynamic-table';
 import { toast } from 'sonner';
 import type { AdminConfig } from '@/shared/lib/admin/admin-generator';
 import { z } from 'zod';
@@ -20,7 +20,7 @@ import {
   SheetTitle,
   SheetDescription,
   SheetTrigger,
-} from '@/components/ui/sheet';
+} from '@/shared/components/atoms/ui/sheet';
 
 interface AdminPageProps<T extends Record<string, unknown>> {
   config: AdminConfig;

@@ -1,16 +1,16 @@
 "use client";
 
 import { LabeledSection } from "./ui-section";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/shared/components/atoms/ui/card";
+import { Input } from "@/shared/components/atoms/ui/input";
+import { Badge } from "@/shared/components/atoms/ui/badge";
+import { Button } from "@/shared/components/atoms/ui/button";
 import { 
   Accordion, 
   AccordionContent, 
   AccordionItem, 
   AccordionTrigger 
-} from "@/components/ui/accordion";
+} from "@/shared/components/atoms/ui/accordion";
 import { 
   Search, 
   MessageCircle, 

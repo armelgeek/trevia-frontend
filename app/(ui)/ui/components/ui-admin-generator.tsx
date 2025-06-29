@@ -1,7 +1,7 @@
 import { LabeledSection } from "./ui-section";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/atoms/ui/card';
+import { Badge } from '@/shared/components/atoms/ui/badge';
+import { Button } from '@/shared/components/atoms/ui/button';
 import { Code, Zap, Type, RefreshCw } from 'lucide-react';
 
 export function UiAdminGeneratorSample() {

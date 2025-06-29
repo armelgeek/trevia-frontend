@@ -1,9 +1,9 @@
 "use client";
 
 import { LabeledSection } from "./ui-section";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/shared/components/atoms/ui/button";
+import { Badge } from "@/shared/components/atoms/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/atoms/ui/card";
 import { Clock, MapPin, Euro, Calendar, Users } from "lucide-react";
 import { useState } from "react";
 

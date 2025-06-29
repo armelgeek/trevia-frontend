@@ -2,8 +2,8 @@
 
 import React from "react";
 import { FieldConfig } from "@/shared/lib/admin/admin-generator";
-import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { Input } from "@/shared/components/atoms/ui/input";
+import { Select } from "@/shared/components/atoms/ui/select";
 
 export type AdminTableFiltersProps = {
   fields: FieldConfig[];

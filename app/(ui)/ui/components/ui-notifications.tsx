@@ -1,10 +1,10 @@
 "use client";
 
 import { LabeledSection } from "./ui-section";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/shared/components/atoms/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/shared/components/atoms/ui/alert";
+import { Badge } from "@/shared/components/atoms/ui/badge";
+import { Card, CardContent } from "@/shared/components/atoms/ui/card";
 import { 
   CheckCircle, 
   XCircle, 

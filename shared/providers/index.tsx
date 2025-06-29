@@ -1,6 +1,6 @@
 'use client';
 
-import KBar from '@/components/ui/kbar';
+import KBar from '@/shared/components/atoms/ui/kbar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ThemeProvider } from 'next-themes';

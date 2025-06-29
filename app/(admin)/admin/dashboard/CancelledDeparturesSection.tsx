@@ -1,6 +1,6 @@
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
-import { Table, TableHeader, TableBody } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardHeader, CardContent } from '@/shared/components/atoms/ui/card';
+import { Table, TableHeader, TableBody } from '@/shared/components/atoms/ui/table';
+import { Badge } from '@/shared/components/atoms/ui/badge';
 import { useCancelledDepartures } from '@/features/dashboard/hooks';
 
 export default function CancelledDeparturesSection() {

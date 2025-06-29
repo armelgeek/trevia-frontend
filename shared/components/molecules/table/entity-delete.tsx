@@ -13,8 +13,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
+} from '@/shared/components/atoms/ui/alert-dialog';
+import { DropdownMenuItem } from '@/shared/components/atoms/ui/dropdown-menu';
 
 interface EntityDeleteProps {
   entityId: string;

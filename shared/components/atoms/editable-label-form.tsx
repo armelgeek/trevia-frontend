@@ -1,11 +1,11 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/shared/components/atoms/ui/button";
+import { Input } from "@/shared/components/atoms/ui/input";
 import { CheckIcon, EditIcon, XIcon } from "lucide-react";
 import { useState } from "react";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/shared/components/atoms/ui/label";
+import { Textarea } from "@/shared/components/atoms/ui/textarea";
 import { cn } from '@/shared/lib/utils';
 
 type Props = React.DetailedHTMLProps<

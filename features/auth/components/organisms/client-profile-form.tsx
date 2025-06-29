@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/shared/components/atoms/ui/button';
+import { Input } from '@/shared/components/atoms/ui/input';
+import { Label } from '@/shared/components/atoms/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/atoms/ui/card';
 import { EditIcon, CheckIcon, XIcon, Loader2 } from 'lucide-react';
 import { useUpdateProfile } from '@/features/auth/hooks/useUpdateProfile';
 import { authClient } from '@/shared/lib/config/auth-client';

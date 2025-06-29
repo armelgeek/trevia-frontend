@@ -4,7 +4,7 @@ import * as React from 'react';
 
 import * as SliderPrimitive from '@radix-ui/react-slider';
 
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/components/atoms/ui/tooltip';
 import { cn } from '@/shared/lib/utils';
 
 const Slider = React.forwardRef<

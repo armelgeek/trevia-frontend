@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import AppSidebar from '@/shared/layout/admin/app-sidebar';
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { Separator } from '@/components/ui/separator';
+import { SidebarInset, SidebarProvider } from '@/shared/components/atoms/ui/sidebar';
+import { Separator } from '@/shared/components/atoms/ui/separator';
 import { AdminBreadcrumb } from '@/shared/components/molecules/layout/admin-breadcrumb';
 import { HeaderUserProfile } from '@/shared/components/molecules/layout/header-user-profile';
 import { authClient } from '@/shared/lib/config/auth-client';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@/shared/components/atoms/ui/skeleton';
 
 type SessionType = {
   user?: {

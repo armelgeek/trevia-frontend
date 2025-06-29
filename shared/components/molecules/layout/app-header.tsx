@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { SidebarTrigger } from '@/components/ui/sidebar';
-import SearchInput from '@/components/ui/search-input';
-import ThemeToggle from '@/components/ui/theme-toggle';
+import { SidebarTrigger } from '@/shared/components/atoms/ui/sidebar';
+import SearchInput from '@/shared/components/atoms/ui/search-input';
+import ThemeToggle from '@/shared/components/atoms/ui/theme-toggle';
 import { UserNav } from './user-nav';
-import { Separator } from '@/components/ui/separator';
+import { Separator } from '@/shared/components/atoms/ui/separator';
 import { authClient } from '@/shared/lib/config/auth-client';
 
 type SessionType = {

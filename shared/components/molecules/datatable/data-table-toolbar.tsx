@@ -1,9 +1,9 @@
 'use client';
 
 import { Table } from '@tanstack/react-table';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/components/atoms/ui/button';
 import { Search } from 'lucide-react';
-import { DebouncedInput } from '@/components/ui/debounced-input';
+import { DebouncedInput } from '@/shared/components/atoms/ui/debounced-input';
 import { useEffect } from 'react';
 
 interface DataTableToolbarProps<TData> {

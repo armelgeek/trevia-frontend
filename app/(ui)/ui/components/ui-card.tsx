@@ -1,5 +1,5 @@
 import { LabeledSection } from "./ui-section";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/atoms/ui/card';
 
 export function CardSample() {
     return (

@@ -1,7 +1,7 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/atoms/ui/avatar";
+import { Button } from "@/shared/components/atoms/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,7 +9,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/shared/components/atoms/ui/dropdown-menu";
 import { User, Settings, LogOut } from "lucide-react";
 import { authClient } from "@/shared/lib/config/auth-client";
 import { useRouter } from "next/navigation";

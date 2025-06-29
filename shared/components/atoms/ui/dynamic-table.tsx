@@ -3,9 +3,9 @@
 import React from 'react';
 import Image from 'next/image';
 import { ColumnDef } from '@tanstack/react-table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Badge } from '@/shared/components/atoms/ui/badge';
+import { Button } from '@/shared/components/atoms/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/components/atoms/ui/dropdown-menu';
 import { MoreHorizontal, Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import type { FieldConfig, AdminConfig } from '@/shared/lib/admin/admin-generator';

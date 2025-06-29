@@ -1,7 +1,7 @@
 'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/atoms/ui/avatar';
+import { Button } from '@/shared/components/atoms/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
+} from '@/shared/components/atoms/ui/dropdown-menu';
 import { User2Icon, LogOut, Settings, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';

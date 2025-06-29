@@ -5,20 +5,20 @@ import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { Button, LoadingButton } from '@/components/ui/button';
+import { Button, LoadingButton } from '@/shared/components/atoms/ui/button';
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+} from '@/shared/components/atoms/ui/form';
+import { Input } from '@/shared/components/atoms/ui/input';
 import { cn } from '@/shared/lib/utils';
 import useLogin from '../../hooks/useLogin';
 import FormWrapper from '@/shared/components/molecules/form/FormWrapper';
 import { ControlledTextInput } from '@/shared/components/molecules/form/ControlledTextInput';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/atoms/ui/card';
 import Link from 'next/link';
 import { LoginFormSchema } from '../../config/auth.schema';
 import { LoginPayload } from '../../config/auth.type';

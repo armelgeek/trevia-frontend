@@ -6,9 +6,9 @@ import AppProfileNav from './app-profile-nav';
 import SignOutButton from '../../atoms/signout-button';
 import { authClient } from '@/shared/lib/config/auth-client';
 import { AccountBreadcrumb } from './account-breadcrumb';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Skeleton } from '@/shared/components/atoms/ui/skeleton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/atoms/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/atoms/ui/avatar';
 import { Settings } from "lucide-react";
 
 type SessionType = {

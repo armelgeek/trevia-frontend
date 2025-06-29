@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { ReactNode } from "react";
 import AppProfileClient from "@/shared/components/molecules/layout/app-profile-client";
-import { Footer } from "@/components/ui/footer";
+import { Footer } from "@/shared/components/atoms/ui/footer";
 import { kAppName } from "@/shared/lib/constants/app.constant";
 
 type Props = { children: ReactNode };

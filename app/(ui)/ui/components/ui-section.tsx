@@ -1,4 +1,4 @@
-import { Typography } from "@/components/ui/typography";
+import { Typography } from "@/shared/components/atoms/ui/typography";
 import { PropsWithChildren, ReactNode } from "react";
 
 /**

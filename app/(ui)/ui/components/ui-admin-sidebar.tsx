@@ -15,7 +15,7 @@ import {
   SidebarProvider,
   SidebarRail,
   SidebarTrigger,
-} from "@/components/ui/sidebar";
+} from "@/shared/components/atoms/ui/sidebar";
 import { 
   Home,
   Users,
@@ -27,10 +27,10 @@ import {
   Bus,
   Route
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Logo } from "@/components/ui/logo";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/atoms/ui/avatar";
+import { Button } from "@/shared/components/atoms/ui/button";
+import { Badge } from "@/shared/components/atoms/ui/badge";
+import { Logo } from "@/shared/components/atoms/ui/logo";
 
 const menuItems = [
   {

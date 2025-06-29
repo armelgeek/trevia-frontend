@@ -1,10 +1,10 @@
 "use client";
 
 import { authClient } from "@/shared/lib/config/auth-client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/atoms/ui/card";
 import { EditableProfilePhotoForm } from "@/shared/components/atoms/editable-profile-photo-form";
 import { ClientProfileForm } from '@/features/auth/components/organisms/client-profile-form';
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/shared/components/atoms/ui/skeleton";
 import { useEffect, useState } from "react";
 
 interface User {

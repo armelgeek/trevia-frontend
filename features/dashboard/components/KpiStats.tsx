@@ -1,4 +1,4 @@
-import { StatsContainer } from "@/components/ui/stat-card";
+import { StatsContainer } from "@/shared/components/atoms/ui/stat-card";
 import { StatsCard } from '@/shared/components/molecules/dashboard';
 import { BadgeDollarSign, Book, Bus, Star } from 'lucide-react';
 

@@ -1,10 +1,10 @@
 "use client";
 
 import { LabeledSection } from "./ui-section";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/shared/components/atoms/ui/button";
+import { Progress } from "@/shared/components/atoms/ui/progress";
+import { Skeleton } from "@/shared/components/atoms/ui/skeleton";
+import { Card, CardContent, CardHeader } from "@/shared/components/atoms/ui/card";
 import { Loader2, Download, Upload, Search } from "lucide-react";
 import { useState } from "react";
 

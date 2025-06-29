@@ -1,10 +1,10 @@
 "use client";
 
 import { LabeledSection } from "./ui-section";
-import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/shared/components/atoms/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/atoms/ui/avatar";
+import { Badge } from "@/shared/components/atoms/ui/badge";
+import { Button } from "@/shared/components/atoms/ui/button";
 import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 

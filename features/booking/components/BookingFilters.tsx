@@ -1,5 +1,5 @@
 "use client";
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/components/atoms/ui/button';
 import { DateRangePicker } from '@/features/booking/components/DateRangePicker';
 import type { Booking } from '@/features/booking/booking.schema';
 

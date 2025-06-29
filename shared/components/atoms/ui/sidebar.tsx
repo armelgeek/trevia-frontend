@@ -5,17 +5,17 @@ import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
 import { useIsMobile } from "@/shared/hooks/use-mobile"
 import { cn } from "@/shared/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
-import { Sheet, SheetContent } from "@/components/ui/sheet"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Button } from "@/shared/components/atoms/ui/button"
+import { Input } from "@/shared/components/atoms/ui/input"
+import { Separator } from "@/shared/components/atoms/ui/separator"
+import { Sheet, SheetContent } from "@/shared/components/atoms/ui/sheet"
+import { Skeleton } from "@/shared/components/atoms/ui/skeleton"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/shared/components/atoms/ui/tooltip"
 import { ViewVerticalIcon } from "@radix-ui/react-icons"
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state"

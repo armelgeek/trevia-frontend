@@ -2,10 +2,10 @@
 
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { LoadingButton } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { LoadingButton } from "@/shared/components/atoms/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/atoms/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/components/atoms/ui/form";
+import { Input } from "@/shared/components/atoms/ui/input";
 import { useFormHandler } from '@/shared/hooks/use-form-handler';
 import useResetPassword from '@/features/auth/hooks/useResetPassword';
 import { cn } from '@/shared/lib/utils';

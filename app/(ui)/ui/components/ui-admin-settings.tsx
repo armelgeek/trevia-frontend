@@ -1,11 +1,11 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
+import { Card } from "@/shared/components/atoms/ui/card";
+import { Button } from "@/shared/components/atoms/ui/button";
+import { Input } from "@/shared/components/atoms/ui/input";
+import { Label } from "@/shared/components/atoms/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/atoms/ui/select";
+import { Switch } from "@/shared/components/atoms/ui/switch";
+import { Separator } from "@/shared/components/atoms/ui/separator";
+import { Badge } from "@/shared/components/atoms/ui/badge";
 import { Settings, Save, Bell, Shield, Globe, Mail, Phone, MapPin } from "lucide-react";
 
 export function AdminSettingsSample() {

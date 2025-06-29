@@ -23,11 +23,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from '@/shared/components/atoms/ui/table';
 
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/shared/components/atoms/ui/input';
+import { Button } from '@/shared/components/atoms/ui/button';
+import { Skeleton } from '@/shared/components/atoms/ui/skeleton';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];

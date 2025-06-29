@@ -1,12 +1,12 @@
 "use client";
 
 import { LabeledSection } from "./ui-section";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/shared/components/atoms/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/atoms/ui/card";
+import { Input } from "@/shared/components/atoms/ui/input";
+import { Label } from "@/shared/components/atoms/ui/label";
+import { Separator } from "@/shared/components/atoms/ui/separator";
+import { Badge } from "@/shared/components/atoms/ui/badge";
 import { 
   CreditCard, 
   Shield, 
@@ -19,7 +19,7 @@ import {
   Info
 } from "lucide-react";
 import { useState } from "react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/shared/components/atoms/ui/alert";
 
 interface BookingDetails {
   tripId: string;

@@ -1,11 +1,11 @@
 import { LabeledSection } from "./ui-section";
-import { Navigation, NavLink } from '@/components/ui/navigation';
-import { HeroSection } from '@/components/ui/hero-section';
-import { Section } from '@/components/ui/section';
-import { ServiceCard } from '@/components/ui/service-card';
-import { StatCard, StatsContainer } from '@/components/ui/stat-card';
-import { Grid } from '@/components/ui/grid';
-import { Button } from '@/components/ui/button';
+import { Navigation, NavLink } from '@/shared/components/atoms/ui/navigation';
+import { HeroSection } from '@/shared/components/atoms/ui/hero-section';
+import { Section } from '@/shared/components/atoms/ui/section';
+import { ServiceCard } from '@/shared/components/atoms/ui/service-card';
+import { StatCard, StatsContainer } from '@/shared/components/atoms/ui/stat-card';
+import { Grid } from '@/shared/components/atoms/ui/grid';
+import { Button } from '@/shared/components/atoms/ui/button';
 
 export function TransportPageSample() {
     return (

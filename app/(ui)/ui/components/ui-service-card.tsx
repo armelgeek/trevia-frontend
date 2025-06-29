@@ -1,5 +1,5 @@
 import { LabeledSection } from "./ui-section";
-import { ServiceCard } from '@/components/ui/service-card';
+import { ServiceCard } from '@/shared/components/atoms/ui/service-card';
 
 export function ServiceCardSample() {
     return (

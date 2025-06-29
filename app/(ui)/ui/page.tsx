@@ -1,4 +1,4 @@
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@/shared/components/atoms/ui/typography'
 import React from 'react'
 import { Section } from './components/ui-section'
 import { Sample } from './components/ui-sample';

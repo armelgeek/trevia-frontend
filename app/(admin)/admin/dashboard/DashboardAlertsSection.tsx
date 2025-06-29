@@ -1,4 +1,4 @@
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardContent } from '@/shared/components/atoms/ui/card';
 import { useDashboardAlerts } from '@/features/dashboard/hooks';
 
 export default function DashboardAlertsSection() {

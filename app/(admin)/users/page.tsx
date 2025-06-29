@@ -1,10 +1,10 @@
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/atoms/ui/card';
+import { Button } from '@/shared/components/atoms/ui/button';
+import { Badge } from '@/shared/components/atoms/ui/badge';
 import { Users, Plus, Search, MoreHorizontal } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/shared/components/atoms/ui/input';
 
 const mockUsers = [
   {
