@@ -4,6 +4,7 @@ import { createField } from '@/lib/admin-generator';
 export const BookingSchema = z.object({
 
   id: createField.string({ label: 'ID', display: { showInForm: false } }),
+
   userFullName: createField.string({ label: 'Nom du client', display: { showInForm: false } }),
   userId: createField.relation('users', 'email', false, { label: 'Utilisateur', display: { showInForm: false, showInTable: false } }),
   routeLabel: createField.string({ label: 'Voyage', display: { showInForm: false } }),

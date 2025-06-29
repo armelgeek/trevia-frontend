@@ -12,7 +12,7 @@ export const RouteSchema = z.object({
             suffix: ' KM'
         }
     }),
-    duration: createField.string({ label: 'Durée', display: { showInForm: true, showInTable: true } }),
+    duration: createField.string({ label: 'Durée', type: 'time', display: { showInForm: true, showInTable: true } }),
     basePrice: createField.string({
         label: 'Frais', display: {
             showInForm: true,

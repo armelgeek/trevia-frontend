@@ -1,9 +1,1 @@
-import { useQuery } from '@tanstack/react-query';
-import { dashboardService } from '../dashboard.service';
-
-export function useDashboard() {
-  return useQuery({
-    queryKey: ['dashboard'],
-    queryFn: () => dashboardService.get(''),
-  });
-}
+// Ce fichier ne fait plus rien, les hooks sont séparés dans des fichiers dédiés.

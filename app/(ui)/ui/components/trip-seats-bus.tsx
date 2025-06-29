@@ -15,7 +15,6 @@ export function TripSeatsBus({ tripId }: { tripId: string }) {
   if (error) return <div>Erreur lors du chargement des sièges</div>;
   if (!data || data.length === 0) return <div>Aucun horaire trouvé pour ce voyage.</div>;
 
-  // Layout bus simple (14 places, identique à SeatSample)
   const generateSimpleBusLayout = (occupiedSeats: string[]) => {
     const rows = [];
     const getSeatStatus = (seatNumber: string) => {
@@ -25,9 +24,7 @@ export function TripSeatsBus({ tripId }: { tripId: string }) {
     };
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const handleSeatClick = (seatNumber: string) => {
-      // future: gestion de la sélection admin
     };
-    // Rangée du chauffeur avec 2 sièges à côté
     rows.push(
       <BusRow key="driver" rowNumber={0}>
         <DriverSeat />
@@ -47,7 +44,7 @@ export function TripSeatsBus({ tripId }: { tripId: string }) {
         />
       </BusRow>
     );
-    // 3 rangées de 4 sièges (2+2 configuration)
+
     for (let row = 1; row <= 3; row++) {
       const seatBase = (row - 1) * 4 + 3;
       const leftWindow = String(seatBase).padStart(2, '0');
@@ -111,7 +108,6 @@ export function TripSeatsBus({ tripId }: { tripId: string }) {
       </div>
       <div className="flex flex-wrap gap-12 justify-center py-6">
         {data.map(schedule => {
-          // Les places occupées pour cet horaire
           const occupiedSeats = schedule.seats.filter(s => s.status === 'unavailable' || s.status === 'reserved').map(s => s.seatNumber);
           return (
             <div key={schedule.scheduleId} className="w-[340px]">

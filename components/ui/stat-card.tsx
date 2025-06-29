@@ -38,7 +38,7 @@ interface StatsContainerProps extends React.HTMLAttributes<HTMLDivElement> {
 const StatsContainer = React.forwardRef<HTMLDivElement, StatsContainerProps>(
   ({ className, title, subtitle, backgroundVariant = 'gradient', children, ...props }, ref) => {
     const backgroundClasses = {
-      white: 'bg-white text-gray-800',
+      white: 'text-gray-800',
       gradient: 'bg-gradient-to-r from-primary to-accent text-white'
     };
 
@@ -46,17 +46,17 @@ const StatsContainer = React.forwardRef<HTMLDivElement, StatsContainerProps>(
       <section
         ref={ref}
         className={cn(
-          "py-16",
+          "pb-4",
           backgroundClasses[backgroundVariant],
           className
         )}
         {...props}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl">
           {(title || subtitle) && (
-            <div className="text-center mb-12">
+            <div className="">
               {title && (
-                <h2 className="text-3xl font-bold mb-4 font-saira">{title}</h2>
+                <h2 className="text-3xl font-bold mb-4 font-saira text-red-500">{title}</h2>
               )}
               {subtitle && (
                 <p className={cn(

@@ -31,11 +31,11 @@ export const StatsCard: React.FC<StatsCardProps> = ({
     )}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-gray-600">{title}</p>
+          <p className="text-xs font-bold text-gray-600">{title}</p>
           <p className="text-2xl font-semibold mt-1">{value}</p>
         </div>
         <div className="p-3 bg-primary-50 rounded-lg">
-          <Icon className="w-6 h-6 text-primary-500" />
+          <Icon className="w-6 h-6 text-primary" />
         </div>
       </div>
 

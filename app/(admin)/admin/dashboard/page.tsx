@@ -1,53 +1,44 @@
 "use client";
-import { Calendar, Plane } from 'lucide-react';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useDashboard } from '@/features/dashboard/hooks/use-dashboard';
-import { StatsCard } from '@/shared/components/molecules/dashboard';
+import { useKpis, useTopDestinations, useUpcomingDepartures, useRecentBookings } from '@/features/dashboard/hooks';
+import { KpiStats } from '@/features/dashboard/components/KpiStats';
+import CancelledDeparturesSection from '@/features/dashboard/components/CancelledDeparturesSection';
+import TopDestinationsSection from '@/features/dashboard/components/TopDestinationsSection';
+import UpcomingDeparturesSection from '@/features/dashboard/components/UpcomingDeparturesSection';
+import RecentBookingsSection from '@/features/dashboard/components/RecentBookingsSection';
+import DashboardPeriodFilter from '@/features/dashboard/components/DashboardPeriodFilter';
+import { useState } from 'react';
 
-export default function DashboardAdminPage() {
-  const { data, isLoading, error } = useDashboard();
-  const dashboard = data?.data as { totalBookings: number; totalTrips: number; alerts: { title: string; description: string }[] } | undefined;
+export default function AdminDashboardPage() {
+  const [period, setPeriod] = useState<'day' | 'month' | 'year'>('day');
+  const { data: kpis, isLoading: loadingKpis } = useKpis(period);
+  const { data: topDest, isLoading: loadingTopDest } = useTopDestinations(period);
+  const { data: upcoming, isLoading: loadingUpcoming } = useUpcomingDepartures(period);
+  const { data: recentBookings, isLoading: loadingRecent } = useRecentBookings(period);
 
-  if (isLoading) {
+  if (loadingKpis || loadingTopDest || loadingUpcoming || loadingRecent) {
     return (
-      <div className="grid gap-4">
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-12 w-full" />
+      <div className="flex flex-col gap-6 p-8">
+        <Skeleton className="h-24 w-full rounded-xl" />
+        <Skeleton className="h-80 w-full rounded-xl" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <Skeleton className="h-64 w-full rounded-xl" />
+          <Skeleton className="h-64 w-full rounded-xl" />
+        </div>
       </div>
     );
   }
-
-  if (error) {
-    return (
-      <Alert variant="destructive">
-        <AlertTitle>Erreur</AlertTitle>
-        <AlertDescription>{error.message}</AlertDescription>
-      </Alert>
-    );
-  }
-
-  const stats = [
-    { title: 'Réservations', value: dashboard?.totalBookings ?? 0, icon: Calendar },
-    { title: 'Voyages', value: dashboard?.totalTrips ?? 0, icon: Plane },
-  ];
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-3xl font-bold mb-6">Tableau de bord</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        {stats.map((stat) => (
-          <StatsCard key={stat.title} value={String(stat.value)} title={stat.title} icon={stat.icon} />
-        ))}
+    <div className="flex flex-col gap-10 px-4 py-2 md:p-8 min-h-screen">
+      <DashboardPeriodFilter value={period} onChange={setPeriod} />
+      <KpiStats kpis={kpis} />
+      <TopDestinationsSection topDest={topDest} />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <UpcomingDeparturesSection upcoming={upcoming} />
+        <RecentBookingsSection recentBookings={recentBookings} />
       </div>
-      <div className="grid gap-2">
-        {dashboard?.alerts?.map((alert, i) => (
-          <Alert key={i} variant="default">
-            <AlertTitle>{alert.title}</AlertTitle>
-            <AlertDescription>{alert.description}</AlertDescription>
-          </Alert>
-        ))}
-      </div>
+      <CancelledDeparturesSection />
     </div>
   );
 }

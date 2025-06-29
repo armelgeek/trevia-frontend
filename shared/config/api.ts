@@ -54,5 +54,9 @@ export const API_ENDPOINTS = {
     detail: (id: string) => `/api/schedules/${id}`,
     update: (id: string) => `/api/schedules/${id}`,
     delete: (id: string) => `/api/schedules/${id}`
+  },
+  dashboard: {
+    base: '/api/admin/dashboard'
+    // Ajoutez d'autres endpoints dashboard ici si besoin
   }
 };

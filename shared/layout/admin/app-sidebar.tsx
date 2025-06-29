@@ -53,7 +53,7 @@ export default function AppSidebar({ session }: { session: { user?: { name?: str
 
   return (
     <Sidebar className="border-r border-gray-200 bg-white" collapsible='icon'>
-      <SidebarHeader className="border-b border-gray-200 p-6">
+      <SidebarHeader className="border-b border-gray-200 p-3">
         <div className="flex items-center space-x-3">
           <Logo variant="compact" size="md" />
           <div>
