@@ -111,7 +111,7 @@ function BookingSummary({ booking }: { booking: BookingDetails }) {
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
-            Annulation gratuite jusqu'à 24h avant le départ
+            {"Annulation gratuite jusqu'à 24h avant le départ"}
           </AlertDescription>
         </Alert>
       </CardContent>
@@ -153,7 +153,7 @@ function PassengerInfoForm({ booking, onUpdate }: { booking: BookingDetails; onU
         <div className="space-y-2">
           <Label htmlFor="phone">Téléphone *</Label>
           <Input id="phone" value={passengerInfo.phone} onChange={(e) => handleChange("phone", e.target.value)} placeholder="06 12 34 56 78" required />
-          <p className="text-xs text-gray-500">Pour vous contacter en cas de changement ou d'urgence</p>
+          <p className="text-xs text-gray-500">{"Pour vous contacter en cas de changement ou d'urgence"}</p>
         </div>
       </CardContent>
     </Card>
@@ -216,7 +216,7 @@ function PaymentForm({ onPaymentUpdate }: { onPaymentUpdate: (payment: PaymentIn
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="expiryDate">Date d'expiration *</Label>
+                <Label htmlFor="expiryDate">{"Date d'expiration *"}</Label>
                 <Input id="expiryDate" value={paymentInfo.expiryDate} onChange={(e) => handlePaymentChange("expiryDate", e.target.value)} placeholder="MM/AA" maxLength={5} required />
               </div>
               <div className="space-y-2">
