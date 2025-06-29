@@ -1,5 +1,7 @@
 import * as React from 'react';
 import { cn } from '@/shared/lib/utils';
+import { Typography } from "@/shared/components/atoms/ui/typography";
+import { PropsWithChildren, ReactNode } from "react";
 
 interface SectionProps extends React.HTMLAttributes<HTMLElement> {
   title?: string;
@@ -89,4 +91,42 @@ const Section = React.forwardRef<HTMLElement, SectionProps>(
 );
 Section.displayName = "Section";
 
+/**
+ * @deprecated
+ */
+export function DeprecatedSection({
+    title,
+    children,
+}: {
+    title: string;
+    children: ReactNode;
+}) {
+    return (
+        <div className="grid grid-cols-6 lg:grid-cols-12">
+            <div className="col-span-3 mb-12 px-8">
+                <Typography as="h3">{title}</Typography>
+            </div>
+            <div className="col-span-9">{children}</div>
+        </div>
+    );
+}
+
+/**
+ * @deprecated
+ */
+export function DeprecatedLabeledSection({
+    label,
+    children,
+}: PropsWithChildren<{ label: string }>) {
+    return (
+        <div className="relative my-4 group">
+            <div className="opacity-20 group-hover:opacity-100 absolute -top-8 left-0 text-slate-700 underline whitespace-nowrap">
+                {label}
+            </div>
+            {children}
+        </div>
+    );
+}
+
 export { Section };
+export { DeprecatedLabeledSection as LabeledSection };

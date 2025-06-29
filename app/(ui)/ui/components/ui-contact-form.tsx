@@ -365,3 +365,5 @@ export function ContactFormSample() {
     </div>
   );
 }
+
+export { default as Contact } from '@/shared/components/molecules/contact-us';

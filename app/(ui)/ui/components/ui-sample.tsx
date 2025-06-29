@@ -12,18 +12,16 @@ import { AdminStatsSample } from "./ui-admin-stats";
 import { AdminTableSample } from "./ui-admin-table";
 import { AdminFormsSample } from "./ui-admin-forms";
 import { AdminDashboardSample } from "./ui-admin-dashboard";
-import { AdminSidebarSample } from "./ui-admin-sidebar";
 import { DestinationCardSample } from "./ui-destination-card";
-import { FilterButtonsSample } from "./ui-filter-buttons";
+import { FilterButtons } from "./ui-filter-buttons";
 import { ScheduleTableSample } from "./ui-schedule-table";
-import { BookingFormSample } from "./ui-booking-form";
 import { ContactFormSample } from "./ui-contact-form";
 import { TestimonialsSample } from "./ui-testimonials";
-import { FAQSample } from "./ui-faq";
-import { FooterSample } from "./ui-footer";
+import { FAQ } from "./ui-faq";
+import {Footer}  from "./ui-footer";
 import { UserReservationSample } from "./ui-user-reservations";
 import { UserProfileSample } from "./ui-user-profile";
-import { CheckoutSample } from "./ui-checkout";
+import CheckoutForm from "./ui-checkout";
 import { NotificationsSample } from "./ui-notifications";
 import { LoadingStatesSample } from "./ui-loading-states";
 import { SearchSample } from "./ui-search";
@@ -44,16 +42,15 @@ export const Sample = {
     Grid: GridSample,
     TransportPage: TransportPageSample,
     DestinationCard: DestinationCardSample,
-    FilterButtons: FilterButtonsSample,
+    FilterButtons: FilterButtons,
     ScheduleTable: ScheduleTableSample,
-    BookingForm: BookingFormSample,
     ContactForm: ContactFormSample,
     Testimonials: TestimonialsSample,
-    FAQ: FAQSample,
-    Footer: FooterSample,
+    FAQ: FAQ,
+    Footer: Footer,
     UserReservations: UserReservationSample,
     UserProfile: UserProfileSample,
-    Checkout: CheckoutSample,
+    Checkout: CheckoutForm,
     Notifications: NotificationsSample,
     LoadingStates: LoadingStatesSample,
     Search: SearchSample,
@@ -61,7 +58,6 @@ export const Sample = {
     AdminTable: AdminTableSample,
     AdminForms: AdminFormsSample,
     AdminDashboard: AdminDashboardSample,
-    AdminSidebar: AdminSidebarSample,
     AdminSettings: AdminSettingsSample,
     AdminAuditLog: AdminAuditLogSample,
     AdminResourceList: AdminResourceListSample,

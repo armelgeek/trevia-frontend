@@ -325,3 +325,5 @@ export function TestimonialsSample() {
     </div>
   );
 }
+
+export { Testimonials as default } from '@/shared/components/organisms/testimonials';

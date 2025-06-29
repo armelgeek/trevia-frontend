@@ -1,8 +1,10 @@
 "use client";
 
 import { LabeledSection } from "./ui-section";
-import { Logo } from "@/shared/components/atoms/ui/logo";
 import { Card, CardContent } from "@/shared/components/atoms/ui/card";
+import { Logo } from '@/shared/components/atoms/ui/logo';
+
+export { Logo as default } from '@/shared/components/atoms/ui/logo';
 
 export function LogoSample() {
   return (

@@ -53,17 +53,10 @@ export default function Page() {
                    <Sample.DestinationCard />
                 </Section>
 
-                <Section title="Filter Buttons">
-                   <Sample.FilterButtons />
-                </Section>
-
                 <Section title="Schedule Tables">
                    <Sample.ScheduleTable />
                 </Section>
 
-                <Section title="Booking Forms">
-                   <Sample.BookingForm />
-                </Section>
 
                 <Section title="Contact Forms">
                    <Sample.ContactForm />
@@ -71,10 +64,6 @@ export default function Page() {
 
                 <Section title="Testimonials">
                    <Sample.Testimonials />
-                </Section>
-
-                <Section title="FAQ">
-                   <Sample.FAQ />
                 </Section>
 
                 <Section title="Footer">
