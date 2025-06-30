@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/shared/components/atoms/ui/card";
 import { Button } from "@/shared/components/atoms/ui/button";
 import { Clock, MapPin, Euro } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export interface DestinationCardHorizontalProps {
   tripId: string;
@@ -41,18 +42,13 @@ export function DestinationCardHorizontal({
   vehicleEquipment = [],
   vehicleType,
 }: DestinationCardHorizontalProps) {
-  // Format date départ (juste la date)
+  const router = useRouter();
   const formattedDate = dateDeparture ? new Date(dateDeparture).toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' }) : '--';
-  // Format heure départ
+
   const formattedTime = departure ? departure : '--:--';
 
   const handleBook = () => {
-    // Ici, vous pouvez router, ouvrir un modal, ou lancer une mutation de réservation
-    // Exemple :
-    // router.push(`/booking?tripId=${tripId}&scheduleId=${scheduleId}`);
-    // ou
-    // openBookingModal({ tripId, scheduleId });
-    alert(`Réserver trajet ${tripId} - horaire ${scheduleId}`);
+    router.push(`/booking?tripId=${tripId}&scheduleId=${scheduleId}`)
   };
 
   return (

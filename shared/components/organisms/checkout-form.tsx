@@ -1,5 +1,4 @@
 "use client";
-import { useState } from "react";
 import { Button } from "@/shared/components/atoms/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/atoms/ui/card";
 import { Separator } from "@/shared/components/atoms/ui/separator";
@@ -18,19 +17,8 @@ interface BookingDetails {
   vehicle: string;
 }
 
-const sampleBooking: BookingDetails = {
-  tripId: "TR-001",
-  from: "Paris",
-  to: "Lyon",
-  date: "2024-06-25",
-  time: "08:15",
-  duration: "4h30",
-  seats: ["12", "13"],
-  pricePerSeat: 35,
-  vehicle: "Minibus Standard - AB-456-EF"
-};
-
 function BookingSummary({ booking }: { booking: BookingDetails }) {
+  if (!booking || !booking.seats) return null;
   const totalPrice = booking.seats.length * booking.pricePerSeat;
   const serviceFee = Math.round(totalPrice * 0.05 * 100) / 100;
   const finalTotal = totalPrice + serviceFee;
@@ -97,20 +85,14 @@ function BookingSummary({ booking }: { booking: BookingDetails }) {
 }
 
 interface CheckoutFormProps {
-  selectedSeats?: string[];
+  booking: BookingDetails;
+  onPay?: () => void;
+  loading?: boolean;
 }
 
-export function CheckoutForm({ selectedSeats }: CheckoutFormProps) {
-  const [booking] = useState(sampleBooking);
-
-  // Synchronise les sièges sélectionnés si fournis en props
-  const seats = selectedSeats !== undefined ? selectedSeats : booking.seats;
-  const bookingWithSeats = { ...booking, seats };
-
-  const handlePayment = () => {
-    // ...
-  };
-
+export function CheckoutForm({ booking, onPay, loading }: CheckoutFormProps) {
+  if (!booking) return null;
+  const seats = booking.seats;
   return (
     <div className="gap-8">
       <div className="space-y-6">
@@ -121,15 +103,14 @@ export function CheckoutForm({ selectedSeats }: CheckoutFormProps) {
             <div className="text-xs text-muted-foreground">Paiement sécurisé, données cryptées, support client 7j/7.</div>
           </div>
         </div>
-        
       </div>
       <div className="space-y-6 mt-6">
-        <BookingSummary booking={bookingWithSeats} />
+        <BookingSummary booking={booking} />
         <Button 
           className="w-full" 
           size="lg"
-          onClick={handlePayment}
-          disabled={false}
+          onClick={onPay}
+          disabled={loading}
         >
           <Lock className="w-4 h-4 mr-2" />
           Confirmer et payer

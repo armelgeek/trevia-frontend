@@ -50,6 +50,10 @@ export class BaseService {
     let url = `${this.baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
     // Corrige tout '/?' par '?' dans l'URL, même si ce n'est pas à la fin
     url = url.replace('/?', '?');
+    // Supprime le slash final si l'URL ne contient pas de query string ni de sous-ressource
+    if (url.endsWith('/') && !url.includes('?', url.length - 2) && !/\/.+\//.test(endpoint)) {
+      url = url.slice(0, -1);
+    }
     const config: RequestInit = {
       ...options,
       credentials: 'include',

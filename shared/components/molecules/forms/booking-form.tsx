@@ -11,10 +11,10 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useDepartureCities, useDestinations } from '@/features/location/hooks/use-location';
 import type { City } from '@/features/location/location.schema';
+import { useRouter } from "next/navigation";
 
 export interface BookingFormProps {
   variant?: "simple" | "detailed" | "inline";
-  onSearch?: (data: BookingData) => void;
 }
 
 export interface BookingData {
@@ -26,7 +26,7 @@ export interface BookingData {
   tripType: "one-way" | "round-trip";
 }
 
-export function BookingForm({ variant = "detailed", onSearch }: BookingFormProps) {
+export function BookingForm({ variant = "detailed" }: BookingFormProps) {
   const [formData, setFormData] = useState<BookingData>({
     from: "",
     to: "",
@@ -36,13 +36,21 @@ export function BookingForm({ variant = "detailed", onSearch }: BookingFormProps
     tripType: "one-way"
   });
   const [isDateOpen, setIsDateOpen] = useState(false);
+  const router = useRouter();
   
   const { data: departureCities = [] } = useDepartureCities();
   const { data: destinationCities = [] } = useDestinations(formData.from);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch?.(formData);
+    const params = new URLSearchParams();
+    if (formData.from) params.set("departureCity", formData.from);
+    if (formData.to) params.set("arrivalCity", formData.to);
+    if (formData.date) params.set("date", formData.date.toISOString().split("T")[0]);
+    if (formData.passengers) params.set("passengers", formData.passengers.toString());
+    if (formData.tripType) params.set("tripType", formData.tripType);
+    if (formData.returnDate) params.set("returnDate", formData.returnDate.toISOString().split("T")[0]);
+    router.push(`/destinations?${params.toString()}`);
   };
 
   const swapCities = () => {

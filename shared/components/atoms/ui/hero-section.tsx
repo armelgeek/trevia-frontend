@@ -97,7 +97,6 @@ const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
             </div>
             <BookingForm
               variant="detailed"
-              onSearch={(data) => console.log("Search data:", data)}
             />
           </div>
         </div>

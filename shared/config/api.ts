@@ -7,7 +7,8 @@ export const API_ENDPOINTS = {
     update: (id: string) => `/api/trips/${id}`,
     delete: (id: string) => `/api/trips/${id}`,
     popular: () => `/api/trips/popular`,
-    byDate: '/api/trips/by-date'
+    byDate: '/api/trips/by-date',
+    seats: '/api/schedules/seats',
   },
   lesson: {
     base: '/api/lessons',
@@ -23,7 +24,8 @@ export const API_ENDPOINTS = {
     list: (qs: string = '') => `/api/admin/bookings${qs ? `?${qs}` : ''}`,
     detail: (id: string) => `/api/admin/bookings/${id}`,
     update: (id: string) => `/api/admin/bookings/${id}`,
-    delete: (id: string) => `/api/admin/bookings/${id}`
+    delete: (id: string) => `/api/admin/bookings/${id}`,
+    reservation: '/api/reservation',
   },
   vehicle: {
     base: '/api/vehicles',

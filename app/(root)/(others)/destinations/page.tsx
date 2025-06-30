@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { parseAsString, useQueryState } from 'nuqs';
 
@@ -129,6 +129,28 @@ export default function DestinationsPage() {
       setPassengersQ(String(params.passengers));
    
     };
+
+    const didInitRef = useRef(false);
+
+    // Synchronisation initiale de l’état local avec les query params nuqs
+    useEffect(() => {
+      if (didInitRef.current) return;
+      didInitRef.current = true;
+      setForm(f => ({
+        ...f,
+        from: departureCity || "",
+        to: arrivalCity || "",
+        dateStart: date ? new Date(date) : undefined,
+        passengers: passengersQ ? Number(passengersQ) : 1,
+        search: f.search // conserve la recherche locale
+      }));
+      setSelectedVehicleType(vehicleTypeQ || "");
+      setPriceRange([
+        minPriceQ ? Number(minPriceQ) : 0,
+        maxPriceQ ? Number(maxPriceQ) : 200
+      ]);
+      setSort(sortQ || "");
+    }, [departureCity, arrivalCity, date, passengersQ, vehicleTypeQ, minPriceQ, maxPriceQ, sortQ]);
 
     // Pagination calculée à partir du résultat API (adapter selon le backend)
     const total = searchResult?.total ?? 0;
