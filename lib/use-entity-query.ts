@@ -7,7 +7,8 @@ export function useEntityQuery<T, TVariables = unknown>({
   params,
   enabled = true,
   mutationFn,
-  mutationOptions
+  mutationOptions,
+  select,
 }: {
   service: BaseService;
   queryKey: QueryKey;
@@ -15,11 +16,13 @@ export function useEntityQuery<T, TVariables = unknown>({
   enabled?: boolean;
   mutationFn?: (variables: TVariables) => Promise<unknown>;
   mutationOptions?: Record<string, unknown>;
+  select?: (data: any) => any;
 }) {
   const query = useQuery<T>({
     queryKey: [queryKey, params],
     queryFn: () => service.get<T>('', params as Record<string, string> | undefined).then(r => r.data),
     enabled,
+    select,
   });
   const mutation = useMutation({
     mutationFn: mutationFn ?? ((variables: TVariables) => service.post('', variables)),

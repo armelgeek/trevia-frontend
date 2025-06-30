@@ -10,6 +10,7 @@ import { Bus, Clock, Leaf, Wifi, Shield, Euro } from "lucide-react";
 import { StatCard, StatsContainer } from '@/shared/components/atoms/ui/stat-card';
 import { FAQ } from '@/shared/components/organisms/faq';
 import ScheduleTableMultiDestinationAccordion from '@/app/(ui)/ui/components/ui-schedule-table-multi';
+import PopularDestinationsSection from '@/shared/components/organisms/popular-destinations-section';
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -17,57 +18,6 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
-  const destinations = [
-    {
-      from: "Paris",
-      to: "Lyon",
-      duration: "4h30",
-      price: 35,
-      isPopular: true,
-      horaires: ["08:00", "10:30", "14:00", "17:45"]
-    },
-    {
-      from: "Lyon",
-      to: "Marseille",
-      duration: "3h15",
-      price: 28,
-      isPopular: false,
-      horaires: ["09:00", "13:30", "18:00"]
-    },
-    {
-      from: "Paris",
-      to: "Bordeaux",
-      duration: "5h45",
-      price: 42,
-      isPopular: true,
-      horaires: ["07:15", "12:00", "16:30"]
-    },
-    {
-      from: "Lille",
-      to: "Paris",
-      duration: "2h30",
-      price: 25,
-      isPopular: false,
-      horaires: ["06:30", "11:00", "15:30"]
-    },
-    {
-      from: "Toulouse",
-      to: "Montpellier",
-      duration: "2h15",
-      price: 22,
-      isPopular: false,
-      horaires: ["08:45", "13:15", "19:00"]
-    },
-    {
-      from: "Paris",
-      to: "Nice",
-      duration: "8h30",
-      price: 65,
-      isPopular: true,
-      isDirect: false,
-      horaires: ["05:00", "09:30", "21:00"]
-    }
-  ];
 
   const services = [
     {
@@ -197,29 +147,12 @@ export default function Home() {
           </div>
         </Section>
 
-        <Section
-          title="NOS DESTINATIONS POPULAIRES"
-          subtitle="Découvrez nos principales destinations avec des départs fréquents."
-          spacing='sm'
-          backgroundVariant="white"
-        />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {destinations.map((dest, index) => (
-            <DestinationCard
-              key={index}
-              from={dest.from}
-              to={dest.to}
-              duration={dest.duration}
-              price={dest.price}
-              isPopular={dest.isPopular}
-              isDirect={dest.isDirect}
-              horaires={dest.horaires}
-            />
-          ))}
-        </div>
+          <PopularDestinationsSection />
+
         <div className='flex flex-row justify-center py-8'>
           <Button>Afficher tous les destinations {">>"}</Button>
         </div>
+
 
         <Section
           id="voyages-semaine"
@@ -239,6 +172,7 @@ export default function Home() {
           <Testimonials testimonials={testimonials} variant="grid" showRating showRoute />
         </Section>
 
+      
         <StatsContainer
           title="Pourquoi choisir Trevia Transport ?"
           subtitle="Des chiffres qui parlent d’eux-mêmes."

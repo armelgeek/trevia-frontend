@@ -1,104 +1,107 @@
 "use client";
 import { useState } from "react";
 import { ScheduleTable, Schedule } from '@/shared/components/atoms/ui/schedule-table';
-
-export function ScheduleTableMultiDestinationSample() {
-  const destinations: { label: string; schedules: Schedule[] }[] = [
-    {
-      label: 'Paris → Lyon',
-      schedules: [
-        {
-          id: '1', departure: '08:00', arrival: '12:30', duration: '4h30', price: 35, availableSeats: 12, totalSeats: 50, vehicleType: 'Standard', stops: ['Lyon Part-Dieu']
-        },
-        {
-          id: '2', departure: '14:30', arrival: '19:00', duration: '4h30', price: 42, availableSeats: 8, totalSeats: 40, vehicleType: 'Premium', stops: ['Lyon Part-Dieu', 'Mâcon']
-        }
-      ]
-    },
-    {
-      label: 'Paris → Bordeaux',
-      schedules: [
-        {
-          id: '3', departure: '09:00', arrival: '14:45', duration: '5h45', price: 55, availableSeats: 20, totalSeats: 50, vehicleType: 'VIP', stops: ['Bordeaux St-Jean']
-        },
-        {
-          id: '4', departure: '16:00', arrival: '21:45', duration: '5h45', price: 49, availableSeats: 0, totalSeats: 50, vehicleType: 'Standard', stops: ['Bordeaux St-Jean']
-        }
-      ]
-    }
-  ];
-
-  return (
-    <div className="space-y-10">
-      {destinations.map((dest) => (
-        <div key={dest.label}>
-          <h3 className="text-lg font-bold mb-2">{dest.label}</h3>
-          <ScheduleTable schedules={dest.schedules} />
-        </div>
-      ))}
-    </div>
-  );
-}
+import { useSchedulesByDate } from '@/features/location/hooks/use-schedule-by-date';
+import { addDays, format, isBefore, isSameDay, startOfToday, endOfWeek } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Tabs, TabsList, TabsTrigger } from "@/shared/components/atoms/ui/tabs";
+import { Skeleton } from '@/shared/components/atoms/ui/skeleton';
 
 export function ScheduleTableMultiDestinationAccordion() {
-  const destinations: { label: string; schedules: Schedule[] }[] = [
-    {
-      label: 'Paris → Lyon',
-      schedules: [
-        {
-          id: '1', departure: '08:00', arrival: '12:30', duration: '4h30', price: 35, availableSeats: 12, totalSeats: 50, vehicleType: 'Standard', stops: ['Lyon Part-Dieu']
-        },
-        {
-          id: '2', departure: '14:30', arrival: '19:00', duration: '4h30', price: 42, availableSeats: 8, totalSeats: 40, vehicleType: 'Premium', stops: ['Lyon Part-Dieu', 'Mâcon']
-        }
-      ]
-    },
-    {
-      label: 'Paris → Bordeaux',
-      schedules: [
-        {
-          id: '3', departure: '09:00', arrival: '14:45', duration: '5h45', price: 55, availableSeats: 20, totalSeats: 50, vehicleType: 'VIP', stops: ['Bordeaux St-Jean']
-        },
-        {
-          id: '4', departure: '16:00', arrival: '21:45', duration: '5h45', price: 49, availableSeats: 0, totalSeats: 50, vehicleType: 'Standard', stops: ['Bordeaux St-Jean']
-        }
-      ]
+
+    const today = startOfToday();
+    const lastDay = endOfWeek(today, { weekStartsOn: 1 }); // dimanche
+    const days = [];
+    let d = today;
+    while (d <= lastDay) {
+        days.push({
+            value: format(d, "yyyy-MM-dd"),
+            label: format(d, "EEEE", { locale: fr }),
+            date: format(d, "d MMM", { locale: fr }),
+            isToday: isSameDay(d, today),
+            isPast: isBefore(d, today)
+        });
+        d = addDays(d, 1);
     }
-  ];
 
-  // Ouvre la première destination par défaut
-  const [open, setOpen] = useState<string | null>(destinations.length > 0 ? destinations[0].label : null);
+    const [selectedDay, setSelectedDay] = useState(() => format(today, "yyyy-MM-dd"));
+    const { data, isLoading } = useSchedulesByDate(selectedDay);
+    const destinations: { label: string; schedules: Schedule[] }[] = asDestinations(data);
+    const [open, setOpen] = useState<string | null>(destinations.length > 0 ? destinations[0].label : null);
 
-  // Helper pour infos synthétiques
-  const getSummary = (schedules: Schedule[]) => {
-    const total = schedules.length;
-    const totalSeats = schedules.reduce((acc, s) => acc + s.totalSeats, 0);
-    const available = schedules.reduce((acc, s) => acc + s.availableSeats, 0);
-    const minPrice = Math.min(...schedules.map(s => s.price));
-    return `${total} départ${total > 1 ? 's' : ''} • dès ${minPrice}€ • ${available}/${totalSeats} places`;
-  };
+    const getSummary = (schedules: Schedule[]) => {
+        const total = schedules.length;
+        const totalSeats = schedules.reduce((acc, s) => acc + s.totalSeats, 0);
+        const available = schedules.reduce((acc, s) => acc + s.availableSeats, 0);
+        const minPrice = Math.min(...schedules.map(s => s.price));
+        return `${total} départ${total > 1 ? 's' : ''} • dès ${minPrice}€ • ${available}/${totalSeats} places`;
+    };
 
-  return (
-    <div className="space-y-2">
-      {destinations.map((dest) => (
-        <div key={dest.label} className="border rounded">
-          <button
-            className="w-full text-left px-4 py-2 font-semibold bg-gray-50 hover:bg-gray-100 flex items-center justify-between"
-            onClick={() => setOpen(open === dest.label ? null : dest.label)}
-          >
-            <span>{dest.label}</span>
-            <span className="text-xs text-gray-500 ml-2">{getSummary(dest.schedules)}</span>
-          </button>
-          {open === dest.label && (
-            <div className="p-4">
-              <ScheduleTable schedules={dest.schedules} />
-            </div>
-          )}
+    return (
+        <div>
+            <Tabs value={selectedDay} onValueChange={setSelectedDay} className="w-full mb-5">
+                <TabsList className="flex flex-wrap justify-center gap-2 bg-transparent p-0">
+                    {days.map((day) => (
+                        <TabsTrigger
+                            key={day.value}
+                            value={day.value}
+                            disabled={day.isPast}
+                            className={`flex flex-col items-center px-4 py-2 h-auto rounded-lg transition-all border border-transparent
+                  ${selectedDay === day.value ? 'bg-primary text-white shadow ring-2 ring-primary' : 'bg-gray-100 text-gray-800 hover:bg-primary/10'}
+                  ${day.isPast ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                            <span className="text-xs font-semibold">{day.label.charAt(0).toUpperCase() + day.label.slice(1)}</span>
+                            <span className="text-xs opacity-75">{day.date}</span>
+                            {day.isToday && <span className="text-[10px] text-primary font-bold mt-1">Aujourd&apos;hui</span>}
+                        </TabsTrigger>
+                    ))}
+                </TabsList>
+            </Tabs>
+            {isLoading ? (
+                <div className="space-y-2 mt-6">
+                  {[1,2,3].map((i) => (
+                    <div key={i} className="border rounded bg-gray-100">
+                      <div className="h-12 flex items-center px-4">
+                        <Skeleton className="w-32 h-4 mr-4" />
+                        <Skeleton className="w-24 h-4 mr-4" />
+                        <Skeleton className="w-16 h-4 mr-4" />
+                        <Skeleton className="w-20 h-4" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+            ) : destinations.length === 0 ? (
+                <div className="text-center text-muted-foreground py-8">Aucun horaire trouvé pour cette date.</div>
+            ) : (
+                <div className="space-y-2">
+                    {destinations.map((dest) => (
+                        <div key={dest.label} className="border rounded">
+                            <button
+                                className="w-full text-left px-4 py-2 font-semibold bg-gray-50 hover:bg-gray-100 flex items-center justify-between"
+                                onClick={() => setOpen(open === dest.label ? null : dest.label)}
+                                aria-expanded={open === dest.label}
+                                aria-controls={`panel-${dest.label}`}
+                            >
+                                <span>{dest.label}</span>
+                                <span className="text-xs text-gray-500 ml-2">{getSummary(dest.schedules)}</span>
+                            </button>
+                            {open === dest.label && (
+                                <div className="p-4" id={`panel-${dest.label}`}>
+                                    <ScheduleTable schedules={dest.schedules} />
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
-      ))}
-    </div>
-  );
+    );
 }
 
-// Ajout d'un export par défaut pour l'accordéon multi-destinations
 export default ScheduleTableMultiDestinationAccordion;
+
+// Ajout du typage explicite et correction de l'appel à asDestinations
+function asDestinations(data: unknown): { label: string; schedules: Schedule[] }[] {
+    if (!Array.isArray(data)) return [];
+    return data as { label: string; schedules: Schedule[] }[];
+}

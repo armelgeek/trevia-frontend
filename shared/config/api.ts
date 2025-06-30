@@ -5,7 +5,9 @@ export const API_ENDPOINTS = {
     list: (qs: string = '') => `/api/trips${qs ? `?${qs}` : ''}`,
     detail: (id: string) => `/api/trips/${id}`,
     update: (id: string) => `/api/trips/${id}`,
-    delete: (id: string) => `/api/trips/${id}`
+    delete: (id: string) => `/api/trips/${id}`,
+    popular: () => `/api/trips/popular`,
+    byDate: '/api/trips/by-date'
   },
   lesson: {
     base: '/api/lessons',

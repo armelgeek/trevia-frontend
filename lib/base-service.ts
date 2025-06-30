@@ -47,8 +47,9 @@ export class BaseService {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
-    const url = `${this.baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
-    
+    let url = `${this.baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+    // Corrige tout '/?' par '?' dans l'URL, même si ce n'est pas à la fin
+    url = url.replace('/?', '?');
     const config: RequestInit = {
       ...options,
       credentials: 'include',
@@ -132,7 +133,7 @@ export class BaseService {
       });
       const searchParams = new URLSearchParams(filteredParams);
       if (searchParams.toString()) {
-        url += `?${searchParams.toString()}`;
+        url += (url.includes('?') ? '&' : '?') + searchParams.toString();
       }
     }
     const response = await this.request<T>(url, { method: 'GET' });

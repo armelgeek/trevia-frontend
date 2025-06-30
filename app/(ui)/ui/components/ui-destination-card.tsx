@@ -1,13 +1,12 @@
 "use client";
 
 import React from "react";
-import { LabeledSection } from "./ui-section";
 import { Card, CardContent } from "@/shared/components/atoms/ui/card";
-import { Badge } from "@/shared/components/atoms/ui/badge";
-import { Clock, MapPin, Euro, Star } from "lucide-react";
+import { Clock, MapPin, Euro } from "lucide-react";
 import Image from "next/image";
 
 interface DestinationCardProps {
+  routeLabel: string;
   from: string;
   to: string;
   duration: string;
@@ -17,18 +16,19 @@ interface DestinationCardProps {
   image?: string;
   className?: string;
   horaires?: string[];
+  distanceKm: string;
 }
 
 export function DestinationCard({ 
+  routeLabel,
   from, 
   to, 
   duration, 
   price, 
-  isPopular = false, 
-  isDirect = true,
   image,
   className,
-  horaires
+  horaires,
+  distanceKm,
 }: DestinationCardProps) {
   return (
     <Card className={`overflow-hidden group cursor-pointer transition-all duration-300 hover:-translate-y-2 hover:shadow-xl ${className}`}>
@@ -43,27 +43,16 @@ export function DestinationCard({
         )}
         <div className="absolute inset-0 bg-black bg-opacity-20"></div>
         
-        {isPopular && (
-          <div className="absolute top-4 left-4">
-            <Badge className="bg-green-500 text-white hover:bg-green-600">
-              <Star className="w-3 h-3 mr-1" />
-              POPULAIRE
-            </Badge>
-          </div>
-        )}
+        
         
         <div className="absolute bottom-4 left-4 text-white">
-          <h3 className="text-2xl font-bold mb-1">{from} → {to}</h3>
+          <h3 className="text-2xl font-bold mb-1">{routeLabel}</h3>
           <div className="flex items-center space-x-3 text-sm opacity-90">
             <div className="flex items-center space-x-1">
               <Clock className="w-4 h-4" />
               <span>{duration}</span>
             </div>
-            {isDirect && (
-              <span className="bg-white bg-opacity-20 px-2 py-1 rounded text-xs">
-                Direct
-              </span>
-            )}
+           
           </div>
         </div>
         
@@ -99,7 +88,7 @@ export function DestinationCard({
             <div className="h-0.5 bg-gradient-to-r from-primary to-highlight"></div>
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="bg-white border border-gray-200 px-2 py-1 rounded text-xs text-gray-600">
-                {duration}
+                {distanceKm}km
               </div>
             </div>
           </div>
@@ -121,89 +110,5 @@ export function DestinationCard({
         )}
       </CardContent>
     </Card>
-  );
-}
-
-export function DestinationCardSample() {
-  const destinations = [
-    {
-      from: "Paris",
-      to: "Lyon",
-      duration: "4h30",
-      price: 35,
-      isPopular: true,
-      horaires: ["08:00", "10:30", "14:00", "17:45"]
-    },
-    {
-      from: "Lyon",
-      to: "Marseille",
-      duration: "3h15",
-      price: 28,
-      isPopular: false,
-      horaires: ["09:00", "13:30", "18:00"]
-    },
-    {
-      from: "Paris",
-      to: "Bordeaux",
-      duration: "5h45",
-      price: 42,
-      isPopular: true,
-      horaires: ["07:15", "12:00", "16:30"]
-    },
-    {
-      from: "Lille",
-      to: "Paris",
-      duration: "2h30",
-      price: 25,
-      isPopular: false,
-    },
-    {
-      from: "Toulouse",
-      to: "Montpellier",
-      duration: "2h15",
-      price: 22,
-      isPopular: false,
-    },
-    {
-      from: "Paris",
-      to: "Nice",
-      duration: "8h30",
-      price: 65,
-      isPopular: true,
-      isDirect: false,
-    }
-  ];
-
-  return (
-    <div className="space-y-8">
-      <LabeledSection label="Cartes de Destination">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {destinations.map((dest, index) => (
-            <DestinationCard
-              key={index}
-              from={dest.from}
-              to={dest.to}
-              duration={dest.duration}
-              price={dest.price}
-              isPopular={dest.isPopular}
-              isDirect={dest.isDirect}
-              horaires={dest.horaires}
-            />
-          ))}
-        </div>
-      </LabeledSection>
-
-      <LabeledSection label="Carte de Destination Simple">
-        <div className="max-w-md">
-          <DestinationCard
-            from="Paris"
-            to="Lyon"
-            duration="4h30"
-            price={35}
-            isPopular={true}
-          />
-        </div>
-      </LabeledSection>
-    </div>
   );
 }
