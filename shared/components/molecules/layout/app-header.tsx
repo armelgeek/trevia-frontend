@@ -8,27 +8,15 @@ import { UserNav } from './user-nav';
 import { Separator } from '@/shared/components/atoms/ui/separator';
 import { authClient } from '@/shared/lib/config/auth-client';
 
-type SessionType = {
-  user?: {
-    name?: string;
-    email?: string;
-    image?: string | null;
-    role?: string;
-  };
-} | null;
-
 export default function Header() {
-  const [session, setSession] = useState<SessionType>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getSession = async () => {
       try {
-        const sessionData = await authClient.getSession();
-        setSession(sessionData.data);
+        await authClient.getSession();
       } catch (error) {
         console.error('Failed to get session:', error);
-        setSession(null);
       } finally {
         setLoading(false);
       }

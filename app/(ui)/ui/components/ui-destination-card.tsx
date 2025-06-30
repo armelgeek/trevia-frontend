@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/shared/components/atoms/ui/card";
 import { Clock, MapPin, Euro } from "lucide-react";
 import Image from "next/image";
 
-interface DestinationCardProps {
+export interface DestinationCardProps {
   routeLabel: string;
   from: string;
   to: string;
@@ -97,7 +97,6 @@ export function DestinationCard({
             <span className="text-xs font-medium mt-2 text-gray-700">{to}</span>
           </div>
         </div>
-        {/* Horaires sous forme de badges, toujours visibles */}
         {Array.isArray(horaires) && horaires.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-4 justify-center">
             {horaires.map((h, idx) => (

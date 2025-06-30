@@ -673,7 +673,7 @@ type DateTimePickerRef = {
 const DateTimePicker = React.forwardRef<Partial<DateTimePickerRef>, DateTimePickerProps>(
   (
     {
-      defaultPopupValue = new Date(2000, 0, 1, 0, 0, 0, 0),
+      defaultPopupValue = new Date(),
       value,
       onChange,
       onMonthChange,

@@ -36,8 +36,7 @@ export function BookingForm({ variant = "detailed", onSearch }: BookingFormProps
     tripType: "one-way"
   });
   const [isDateOpen, setIsDateOpen] = useState(false);
-  const [isReturnDateOpen, setIsReturnDateOpen] = useState(false);
-
+  
   const { data: departureCities = [] } = useDepartureCities();
   const { data: destinationCities = [] } = useDestinations(formData.from);
 
@@ -293,33 +292,7 @@ export function BookingForm({ variant = "detailed", onSearch }: BookingFormProps
                 </PopoverContent>
               </Popover>
             </div>
-            {formData.tripType === "round-trip" && (
-              <div className="space-y-2">
-                <Label className="flex items-center space-x-1 text-white">
-                  <CalendarIcon className="w-4 h-4" />
-                  <span>Date de retour</span>
-                </Label>
-                <Popover open={isReturnDateOpen} onOpenChange={setIsReturnDateOpen}>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full border-white justify-start text-left font-normal">
-                      <CalendarIcon className="mr-2 h-4 w-4 text-white" />
-                      {formData.returnDate ? format(formData.returnDate, "PPP", { locale: fr }) : "Sélectionnez une date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={formData.returnDate}
-                      onSelect={(date) => {
-                        setFormData(prev => ({ ...prev, returnDate: date }));
-                        setIsReturnDateOpen(false);
-                      }}
-                      disabled={(date) => date < (formData.date || new Date())}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            )}
+            
           </div>
           {/* Passengers */}
           <div className="space-y-2">
