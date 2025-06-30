@@ -2,15 +2,16 @@ import React from 'react';
 import { Toaster } from '@/shared/components/atoms/ui/sonner';
 import { Provider } from '@/shared/providers';
 import NextTopLoader from 'nextjs-toploader';
-import { Space_Grotesk } from 'next/font/google';
+import {  Livvic } from 'next/font/google';
 import "@uploadthing/react/styles.css";
 import '@/shared/styles/globals.css';
 
-const spaceGrotesk = Space_Grotesk({
+const spaceGrotesk = Livvic({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-space-grotesk',
-  weight: ['300', '400', '500', '600', '700'],
+  style: ['normal', 'italic'],
+  weight: ['400', '500', '600', '700'],
 });
 
 interface RootLayoutProps {

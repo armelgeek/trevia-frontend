@@ -9,7 +9,7 @@ interface StatCardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
-  ({ className, value, label, sublabel, valueColor = "text-yellow-300", ...props }, ref) => {
+  ({ className, value, label, sublabel, valueColor = "text-primary", ...props }, ref) => {
     return (
       <div
         ref={ref}
@@ -56,7 +56,7 @@ const StatsContainer = React.forwardRef<HTMLDivElement, StatsContainerProps>(
           {(title || subtitle) && (
             <div className="">
               {title && (
-                <h2 className="text-3xl font-bold mb-4 font-saira text-red-500">{title}</h2>
+                <h2 className="text-3xl uppercase font-bold mb-3 font-saira text-red-500">{title}</h2>
               )}
               {subtitle && (
                 <p className={cn(
@@ -69,7 +69,7 @@ const StatsContainer = React.forwardRef<HTMLDivElement, StatsContainerProps>(
             </div>
           )}
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 pt-16 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {children}
           </div>
         </div>

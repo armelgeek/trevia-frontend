@@ -5,9 +5,11 @@ import { Button } from "@/shared/components/atoms/ui/button";
 import { UserNav } from "./user-nav";
 import { useAuth } from "@/shared/providers/auth-provider";
 import Link from "next/link";
+import { useActivePath } from "./use-active-path";
 
 const AppClientMenu = () => {
   const { session, isLoading } = useAuth();
+  const pathname = useActivePath();
 
   const ctaButton = () => {
     if (isLoading) {
@@ -31,13 +33,31 @@ const AppClientMenu = () => {
   };
 
   return (
-    <Navigation 
-      className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]"
+    <Navigation
+      className="w-full bg-white/80 backdrop-blur border-b border-gray-100 sticky top-0 z-30 px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] h-16"
       ctaButton={ctaButton()}
     >
-      <NavLink href="/" active>Accueil</NavLink>
-      <NavLink href="#destinations">Destinations</NavLink>
-      <NavLink href="#horaires">Horaires</NavLink>
+      <NavLink 
+        href="/" 
+        className="font-semibold px-3 py-2 transition-colors duration-150 hover:text-primary"
+        active={pathname === "/"}
+      >
+        Accueil
+      </NavLink>
+      <NavLink 
+        href="/destinations"
+        className="font-semibold px-3 py-2 transition-colors duration-150 hover:text-primary"
+        active={pathname.startsWith("/destinations")}
+      >
+        Destinations
+      </NavLink>
+      <NavLink 
+        href="/services"
+        className="font-semibold px-3 py-2 transition-colors duration-150 hover:text-primary"
+        active={pathname.startsWith("/services")}
+      >
+        Services
+      </NavLink>
     </Navigation>
   );
 };

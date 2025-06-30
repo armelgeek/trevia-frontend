@@ -67,6 +67,9 @@ export const API_ENDPOINTS = {
     recentBookings: '/api/admin/dashboard/recent-bookings',
     kpis: '/api/admin/dashboard',
     alerts: '/api/admin/dashboard/alerts',
-    // Ajoutez d'autres endpoints dashboard ici si besoin
+  },
+  locations: {
+    departureCities: '/api/locations/departure-cities',
+    destinations: (city: string) => `/api/locations/destinations?city=${encodeURIComponent(city)}`
   }
 };

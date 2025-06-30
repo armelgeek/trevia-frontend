@@ -1,13 +1,15 @@
 "use client";
 
-import { LabeledSection } from "./ui-section";
 import { Button } from "@/shared/components/atoms/ui/button";
 import { Badge } from "@/shared/components/atoms/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/atoms/ui/card";
 import { Clock, MapPin, Euro, Calendar, Users } from "lucide-react";
 import { useState } from "react";
+import { addDays, format, isBefore, isSameDay, startOfToday, endOfWeek } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Tabs, TabsList, TabsTrigger } from "@/shared/components/atoms/ui/tabs";
 
-interface Schedule {
+export interface Schedule {
   id: string;
   departure: string;
   arrival: string;
@@ -19,59 +21,72 @@ interface Schedule {
   stops?: string[];
 }
 
-interface ScheduleTableProps {
+export interface ScheduleTableProps {
   schedules: Schedule[];
   onBook?: (scheduleId: string) => void;
 }
 
-function ScheduleTable({ schedules, onBook }: ScheduleTableProps) {
-  const [selectedDay, setSelectedDay] = useState("today");
+export function ScheduleTable({ schedules, onBook }: ScheduleTableProps) {
+  // Calcul dynamique des jours de la semaine à partir d'aujourd'hui jusqu'à dimanche
+  const today = startOfToday();
+  const lastDay = endOfWeek(today, { weekStartsOn: 1 }); // dimanche
+  const days = [];
+  let d = today;
+  while (d <= lastDay) {
+    days.push({
+      value: format(d, "yyyy-MM-dd"),
+      label: format(d, "EEEE", { locale: fr }),
+      date: format(d, "d MMM", { locale: fr }),
+      isToday: isSameDay(d, today),
+      isPast: isBefore(d, today)
+    });
+    d = addDays(d, 1);
+  }
 
-  const days = [
-    { value: "today", label: "Aujourd'hui", date: "15 Juin" },
-    { value: "tomorrow", label: "Demain", date: "16 Juin" },
-    { value: "day2", label: "Mercredi", date: "17 Juin" },
-    { value: "day3", label: "Jeudi", date: "18 Juin" },
-    { value: "day4", label: "Vendredi", date: "19 Juin" },
-  ];
+  // Par défaut, sélectionne aujourd'hui
+  const [selectedDay, setSelectedDay] = useState(() => format(today, "yyyy-MM-dd"));
 
   const getAvailabilityColor = (available: number, total: number) => {
     const percentage = (available / total) * 100;
-    if (percentage > 50) return "text-green-600 bg-green-50";
-    if (percentage > 20) return "text-orange-600 bg-orange-50";
-    return "text-red-600 bg-red-50";
+    if (percentage > 50) return "text-green-700 bg-green-100 border-green-200";
+    if (percentage > 20) return "text-orange-700 bg-orange-100 border-orange-200";
+    return "text-red-700 bg-red-100 border-red-200";
   };
 
   const getVehicleBadgeColor = (type: string) => {
     switch (type) {
-      case "VIP": return "bg-purple-100 text-purple-800";
-      case "Premium": return "bg-blue-100 text-blue-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "VIP": return "bg-gradient-to-r from-purple-200 to-purple-100 text-purple-900 border border-purple-300";
+      case "Premium": return "bg-gradient-to-r from-blue-200 to-blue-100 text-blue-900 border border-blue-300";
+      default: return "bg-gradient-to-r from-gray-100 to-gray-50 text-gray-800 border border-gray-200";
     }
   };
 
   return (
     <div className="space-y-6">
-      {/* Day selector */}
-      <div className="flex flex-wrap gap-2">
-        {days.map((day) => (
-          <Button
-            key={day.value}
-            variant={selectedDay === day.value ? "default" : "outline"}
-            size="sm"
-            onClick={() => setSelectedDay(day.value)}
-            className="flex flex-col items-center p-3 h-auto"
-          >
-            <span className="text-xs font-medium">{day.label}</span>
-            <span className="text-xs opacity-75">{day.date}</span>
-          </Button>
-        ))}
-      </div>
+      {/* Day selector moderne avec Tabs */}
+      <Tabs value={selectedDay} onValueChange={setSelectedDay} className="w-full">
+        <TabsList className="flex flex-wrap justify-center gap-2 bg-transparent p-0">
+          {days.map((day) => (
+            <TabsTrigger
+              key={day.value}
+              value={day.value}
+              disabled={day.isPast}
+              className={`flex flex-col items-center px-4 py-2 h-auto rounded-lg transition-all border border-transparent
+                ${selectedDay === day.value ? 'bg-primary text-white shadow ring-2 ring-primary' : 'bg-gray-100 text-gray-800 hover:bg-primary/10'}
+                ${day.isPast ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <span className="text-xs font-semibold">{day.label.charAt(0).toUpperCase() + day.label.slice(1)}</span>
+              <span className="text-xs opacity-75">{day.date}</span>
+              {day.isToday && <span className="text-[10px] text-primary font-bold mt-1">Aujourd&apos;hui</span>}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       {/* Desktop table view */}
-      <div className="hidden md:block overflow-x-auto">
-        <table className="w-full border-collapse">
-          <thead>
+      <div className="hidden md:block overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm">
+        <table className="w-full border-collapse text-sm">
+          <thead className="bg-gray-50">
             <tr className="border-b border-gray-200">
               <th className="text-left p-4 font-semibold text-gray-700">Départ</th>
               <th className="text-left p-4 font-semibold text-gray-700">Arrivée</th>
@@ -86,47 +101,48 @@ function ScheduleTable({ schedules, onBook }: ScheduleTableProps) {
             {schedules.map((schedule) => (
               <tr 
                 key={schedule.id} 
-                className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                className="border-b border-gray-100 hover:bg-primary/5 transition-colors"
               >
-                <td className="p-4">
-                  <div className="flex items-center space-x-2">
-                    <Clock className="w-4 h-4 text-gray-400" />
-                    <span className="font-medium">{schedule.departure}</span>
+                <td className="p-4 whitespace-nowrap">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-primary" />
+                    <span className="font-semibold text-gray-900">{schedule.departure}</span>
                   </div>
                 </td>
-                <td className="p-4">
-                  <div className="flex items-center space-x-2">
-                    <MapPin className="w-4 h-4 text-gray-400" />
-                    <span className="font-medium">{schedule.arrival}</span>
+                <td className="p-4 whitespace-nowrap">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-highlight" />
+                    <span className="font-semibold text-gray-900">{schedule.arrival}</span>
                   </div>
                 </td>
-                <td className="p-4">
-                  <span className="text-gray-600">{schedule.duration}</span>
+                <td className="p-4 whitespace-nowrap">
+                  <span className="text-gray-600 font-mono">{schedule.duration}</span>
                 </td>
-                <td className="p-4">
+                <td className="p-4 whitespace-nowrap">
                   <Badge className={getVehicleBadgeColor(schedule.vehicleType)}>
                     {schedule.vehicleType}
                   </Badge>
                 </td>
-                <td className="p-4">
-                  <div className="flex items-center space-x-2">
+                <td className="p-4 whitespace-nowrap">
+                  <div className="flex items-center gap-2">
                     <Users className="w-4 h-4 text-gray-400" />
-                    <span className={`text-sm font-medium px-2 py-1 rounded ${getAvailabilityColor(schedule.availableSeats, schedule.totalSeats)}`}>
+                    <span className={`text-xs font-semibold px-2 py-1 rounded-full border ${getAvailabilityColor(schedule.availableSeats, schedule.totalSeats)}`}>
                       {schedule.availableSeats}/{schedule.totalSeats}
                     </span>
                   </div>
                 </td>
-                <td className="p-4">
-                  <div className="flex items-center space-x-1">
-                    <Euro className="w-4 h-4 text-gray-400" />
+                <td className="p-4 whitespace-nowrap">
+                  <div className="flex items-center gap-1">
+                    <Euro className="w-4 h-4 text-primary" />
                     <span className="text-lg font-bold text-primary">{schedule.price}€</span>
                   </div>
                 </td>
-                <td className="p-4">
+                <td className="p-4 whitespace-nowrap">
                   <Button 
                     size="sm" 
                     onClick={() => onBook?.(schedule.id)}
                     disabled={schedule.availableSeats === 0}
+                    className="rounded-full px-4"
                   >
                     {schedule.availableSeats === 0 ? "Complet" : "Réserver"}
                   </Button>
@@ -140,44 +156,43 @@ function ScheduleTable({ schedules, onBook }: ScheduleTableProps) {
       {/* Mobile card view */}
       <div className="md:hidden space-y-4">
         {schedules.map((schedule) => (
-          <Card key={schedule.id} className="hover:shadow-md transition-shadow">
+          <Card key={schedule.id} className="hover:shadow-md transition-shadow border border-gray-200 bg-white">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center gap-4">
                   <div className="text-center">
-                    <div className="text-lg font-bold">{schedule.departure}</div>
+                    <div className="text-lg font-bold text-primary">{schedule.departure}</div>
                     <div className="text-xs text-gray-500">Départ</div>
                   </div>
                   <div className="flex-1 text-center">
-                    <div className="text-sm text-gray-600">{schedule.duration}</div>
+                    <div className="text-sm text-gray-600 font-mono">{schedule.duration}</div>
                     <div className="h-px bg-gray-300 my-1"></div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold">{schedule.arrival}</div>
+                    <div className="text-lg font-bold text-highlight">{schedule.arrival}</div>
                     <div className="text-xs text-gray-500">Arrivée</div>
                   </div>
                 </div>
               </div>
-              
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center gap-4">
                   <Badge className={getVehicleBadgeColor(schedule.vehicleType)}>
                     {schedule.vehicleType}
                   </Badge>
-                  <div className="flex items-center space-x-1">
+                  <div className="flex items-center gap-1">
                     <Users className="w-4 h-4 text-gray-400" />
-                    <span className={`text-sm font-medium px-2 py-1 rounded ${getAvailabilityColor(schedule.availableSeats, schedule.totalSeats)}`}>
+                    <span className={`text-xs font-semibold px-2 py-1 rounded-full border ${getAvailabilityColor(schedule.availableSeats, schedule.totalSeats)}`}>
                       {schedule.availableSeats}/{schedule.totalSeats}
                     </span>
                   </div>
                 </div>
-                
-                <div className="flex items-center space-x-3">
-                  <span className="text-xl font-bold text-primary">{schedule.price}€</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-lg font-bold text-primary">{schedule.price}€</span>
                   <Button 
                     size="sm" 
                     onClick={() => onBook?.(schedule.id)}
                     disabled={schedule.availableSeats === 0}
+                    className="rounded-full px-4"
                   >
                     {schedule.availableSeats === 0 ? "Complet" : "Réserver"}
                   </Button>
@@ -252,31 +267,20 @@ export function ScheduleTableSample() {
 
   return (
     <div className="space-y-8">
-      <LabeledSection label="Tableau des Horaires - Paris → Lyon">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Calendar className="w-5 h-5" />
-              <span>Horaires disponibles</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ScheduleTable 
-              schedules={sampleSchedules}
-              onBook={(id) => console.log("Booking schedule:", id)}
-            />
-          </CardContent>
-        </Card>
-      </LabeledSection>
-
-      <LabeledSection label="Version Compacte">
-        <div className="max-w-2xl">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Calendar className="w-5 h-5" />
+            <span>Voyages de la semaine</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
           <ScheduleTable 
-            schedules={sampleSchedules.slice(0, 3)}
+            schedules={sampleSchedules}
             onBook={(id) => console.log("Booking schedule:", id)}
           />
-        </div>
-      </LabeledSection>
+        </CardContent>
+      </Card>
     </div>
   );
 }

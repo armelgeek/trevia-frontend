@@ -4,7 +4,7 @@ import { createField } from '@/shared/lib/admin/admin-generator';
 export const RouteSchema = z.object({
     departureCity: createField.string({ label: 'Ville de départ', display: { showInForm: true, showInTable: false } }),
     arrivalCity: createField.string({ label: "Ville d'arrivée", display: { showInForm: true, showInTable: false } }),
-    routeLabel: createField.string({ label: 'Route', placeholder: 'Ex: Paris - Lyon', display: { showInForm: false, showInTable: true } }),
+    routeLabel: createField.string({ label: 'Route', placeholder: 'Ex: Paris - Lyon', display: { showInForm: false, showInTable: true } }).optional(),
     distanceKm: createField.string({
         label: 'Distance', display: {
             showInForm: true,

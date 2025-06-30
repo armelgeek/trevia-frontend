@@ -245,7 +245,7 @@
         "status"?: "string"
       }
       ```
-- [ ] **Gestion des horaires (schedules)**
+- [x ] **Gestion des horaires (schedules)**
   - [ ] Lister les horaires (`GET /api/schedules`)
     - Use case : Consultation des horaires d’un voyage (admin)
     - Scénario nominal :
@@ -285,7 +285,7 @@
         "status": "active"
       }
       ```
-  - [ ] Mettre à jour un horaire (`PUT /api/schedules/{id}`)
+  - [ x] Mettre à jour un horaire (`PUT /api/schedules/{id}`)
     - Use case : Modifier un horaire
     - Scénario nominal :
       1. L’admin modifie les infos d’un horaire
@@ -305,7 +305,7 @@
         "status": "inactive"
       }
       ```
-  - [ ] Supprimer un horaire (`DELETE /api/schedules/{id}`)
+  - [ x] Supprimer un horaire (`DELETE /api/schedules/{id}`)
     - Use case : Suppression d’un horaire
     - Scénario nominal :
       1. L’admin supprime un horaire

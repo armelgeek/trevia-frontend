@@ -14,7 +14,6 @@ import { AdminFormsSample } from "./ui-admin-forms";
 import { AdminDashboardSample } from "./ui-admin-dashboard";
 import { DestinationCardSample } from "./ui-destination-card";
 import { FilterButtons } from "./ui-filter-buttons";
-import { ScheduleTableSample } from "./ui-schedule-table";
 import { ContactFormSample } from "./ui-contact-form";
 import { TestimonialsSample } from "./ui-testimonials";
 import { FAQ } from "./ui-faq";
@@ -29,6 +28,7 @@ import { AdminSettingsSample } from "./ui-admin-settings";
 import { AdminAuditLogSample } from "./ui-admin-audit-log";
 import { AdminResourceListSample } from "./ui-admin-resource-list";
 import { UiAdminGeneratorSample } from "./ui-admin-generator";
+import { ScheduleTableMultiDestinationSample } from "./ui-schedule-table-multi";
 
 export const Sample = {
     Button: ButtonSample,
@@ -43,7 +43,6 @@ export const Sample = {
     TransportPage: TransportPageSample,
     DestinationCard: DestinationCardSample,
     FilterButtons: FilterButtons,
-    ScheduleTable: ScheduleTableSample,
     ContactForm: ContactFormSample,
     Testimonials: TestimonialsSample,
     FAQ: FAQ,
@@ -61,5 +60,6 @@ export const Sample = {
     AdminSettings: AdminSettingsSample,
     AdminAuditLog: AdminAuditLogSample,
     AdminResourceList: AdminResourceListSample,
-    AdminGenerator: UiAdminGeneratorSample
+    AdminGenerator: UiAdminGeneratorSample,
+    ScheduleTableMulti: ScheduleTableMultiDestinationSample
 };

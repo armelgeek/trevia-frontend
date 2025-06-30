@@ -1,20 +1,22 @@
+import { Input } from './ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+
 import { add, format } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import { Calendar as CalendarIcon, Clock } from 'lucide-react';
+import { type Locale, enUS, fr } from 'date-fns/locale';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import * as React from 'react';
 import { useImperativeHandle, useRef } from 'react';
-import { DayPicker, DayPickerProps } from 'react-day-picker';
-import { cn } from '@/shared/lib/utils';
+
 import {
   Select,
-  SelectTrigger,
-  SelectValue,
   SelectContent,
   SelectItem,
-} from '@/shared/components/atoms/ui/select';
-import { Input } from '@/shared/components/atoms/ui/input';
-import { Popover, PopoverTrigger, PopoverContent } from '@/shared/components/atoms/ui/popover';
-
+  SelectTrigger,
+  SelectValue,
+} from './ui/select';
+import { DayPicker, DayPickerProps } from 'react-day-picker';
+import { cn } from '@/shared/lib/utils';
 
 // ---------- utils start ----------
 /**
@@ -207,6 +209,21 @@ function display12HourValue(hours: number) {
   return `0${hours % 12}`;
 }
 
+function genMonths(locale: Pick<Locale, 'options' | 'localize' | 'formatLong'>) {
+  return Array.from({ length: 12 }, (_, i) => ({
+    value: i,
+    label: format(new Date(2021, i), 'MMMM', { locale }),
+  }));
+}
+
+function genYears(yearRange = 50) {
+  const today = new Date();
+  return Array.from({ length: yearRange * 2 + 1 }, (_, i) => ({
+    value: today.getFullYear() - yearRange + i,
+    label: (today.getFullYear() - yearRange + i).toString(),
+  }));
+}
+
 // ---------- utils end ----------
 
 function Calendar({
@@ -216,6 +233,20 @@ function Calendar({
   yearRange = 50,
   ...props
 }: DayPickerProps & { yearRange?: number }) {
+  const MONTHS = React.useMemo(() => {
+    let locale: Pick<Locale, 'options' | 'localize' | 'formatLong'> = enUS;
+    const { options, localize, formatLong } = props.locale || {};
+    if (options && localize && formatLong) {
+      locale = {
+        options,
+        localize,
+        formatLong,
+      };
+    }
+    return genMonths(locale);
+  }, [props.locale]);
+
+  const YEARS = React.useMemo(() => genYears(yearRange), [yearRange]);
   const disableLeftNavigation = () => {
     const today = new Date();
     const startDate = new Date(today.getFullYear() - yearRange, 0, 1);
@@ -244,23 +275,89 @@ function Calendar({
       showOutsideDays={showOutsideDays}
       className={cn('p-3', className)}
       classNames={{
-        months: 'flex flex-col sm:flex-row space-y-4  sm:space-y-0 justify-center text-white',
+        months: 'flex flex-col sm:flex-row space-y-4  sm:space-y-0 justify-center text-black',
         month: 'flex flex-col items-center space-y-4',
-        caption: 'flex justify-center pt-1 relative items-center text-white',
-        caption_label: 'text-sm font-medium text-white',
-        nav: 'space-x-1 flex items-center text-white',
-        nav_button_previous: cn(
+        month_caption: 'flex justify-center pt-1 relative items-center text-black',
+        caption_label: 'text-sm font-medium text-black',
+        nav: 'space-x-1 flex items-center text-black',
+        button_previous: cn(
           'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 absolute left-5 top-5',
           disableLeftNavigation() && 'pointer-events-none',
         ),
-        nav_button_next: cn(
+        button_next: cn(
           'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 absolute right-5 top-5',
           disableRightNavigation() && 'pointer-events-none',
         ),
-        table: 'w-full border-collapse space-y-1',
-        row: 'flex w-full mt-2 text-white',
-        day: 'h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20 rounded-1 text-white',
+        month_grid: 'w-full border-collapse space-y-1',
+        weekdays: cn('flex text-black', props.showWeekNumber && 'justify-end'),
+        weekday: 'text-black rounded-md w-9 font-normal text-[0.8rem]',
+        week: 'flex w-full mt-2 text-black',
+        day: 'h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20 rounded-1 text-black',
+        day_button: cn(
+          'h-9 w-9 p-0 font-normal aria-selected:opacity-100 rounded-l-md rounded-r-md text-black hover:text-black',
+        ),
+        range_end: 'day-range-end',
+        selected:
+          'bg-primary text-black-foreground hover:bg-primary hover:text-black-foreground focus:bg-primary focus:text-black-foreground rounded-l-md rounded-r-md',
+        today: 'bg-primary/50 text-black',
+        outside:
+          'day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30',
+        disabled: 'text-muted-foreground opacity-50',
+        range_middle: 'aria-selected:bg-accent aria-selected:text-accent-foreground',
+        hidden: 'invisible',
         ...classNames,
+      }}
+      components={{
+        Chevron: ({ ...props }) =>
+          props.orientation === 'left' ? (
+            <ChevronLeft className="h-4 w-4" />
+          ) : (
+            <ChevronRight className="h-4 w-4" />
+          ),
+        MonthCaption: ({ calendarMonth }) => {
+          return (
+            <div className="inline-flex gap-2">
+              <Select
+                defaultValue={calendarMonth.date.getMonth().toString()}
+                onValueChange={(value) => {
+                  const newDate = new Date(calendarMonth.date);
+                  newDate.setMonth(Number.parseInt(value, 10));
+                  props.onMonthChange?.(newDate);
+                }}
+              >
+                <SelectTrigger className="focus:bg-primary focus:text-black w-fit gap-1 border-none p-0 text-black">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="z-[9999] bg-popover border border-primary text-black">
+                  {MONTHS.map((month) => (
+                    <SelectItem key={month.value} value={month.value.toString()} className="hover:bg-primary focus:bg-primary">
+                      {month.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                defaultValue={calendarMonth.date.getFullYear().toString()}
+                onValueChange={(value) => {
+                  const newDate = new Date(calendarMonth.date);
+                  newDate.setFullYear(Number.parseInt(value, 10));
+                  props.onMonthChange?.(newDate);
+                }}
+              >
+                <SelectTrigger className="focus:bg-accent focus:text-accent-foreground w-fit gap-1 border-none p-0">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="z-[9999] bg-popover border border-primary text-black">
+                  {YEARS.map((year) => (
+                    <SelectItem key={year.value} value={year.value.toString()} className="hover:bg-primary focus:bg-primary">
+                      {year.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          );
+        },
       }}
       {...props}
     />
@@ -310,9 +407,9 @@ const TimePeriodSelect = React.forwardRef<HTMLButtonElement, PeriodSelectorProps
           >
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="z-[9999] bg-[#0040B6] border border-[#006EB6] text-white">
-            <SelectItem value="AM" className="hover:bg-[#006EB6] focus:bg-[#006EB6]">AM</SelectItem>
-            <SelectItem value="PM" className="hover:bg-[#006EB6] focus:bg-[#006EB6]">PM</SelectItem>
+          <SelectContent className="z-[9999] bg-popover border border-primary text-black">
+            <SelectItem value="AM" className="hover:bg-primary focus:bg-primary">AM</SelectItem>
+            <SelectItem value="PM" className="hover:bg-primary focus:bg-primary">PM</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -541,6 +638,7 @@ type DateTimePickerProps = {
   value?: Date;
   onChange?: (date: Date | undefined) => void;
   onMonthChange?: (date: Date | undefined) => void;
+  disabled?: boolean;
   /** showing `AM/PM` or not. */
   hourCycle?: 12 | 24;
   placeholder?: string;
@@ -575,16 +673,15 @@ type DateTimePickerRef = {
 const DateTimePicker = React.forwardRef<Partial<DateTimePickerRef>, DateTimePickerProps>(
   (
     {
-      defaultPopupValue = new Date(2010, 0, 1, 0, 0, 0, 0),
+      defaultPopupValue = new Date(2000, 0, 1, 0, 0, 0, 0),
       value,
       onChange,
       onMonthChange,
       hourCycle = 24,
       yearRange = 50,
+      disabled = false,
       displayFormat,
       placeholder,
-      locale = fr,
-      granularity = 'second',
       ...props
     },
     ref,
@@ -593,9 +690,19 @@ const DateTimePicker = React.forwardRef<Partial<DateTimePickerRef>, DateTimePick
     const buttonRef = useRef<HTMLButtonElement>(null);
     const [displayDate, setDisplayDate] = React.useState<Date | undefined>(value ?? undefined);
     onMonthChange ||= onChange;
+
+    /**
+     * Makes sure display date updates when value change on
+     * parent component
+     */
     React.useEffect(() => {
       setDisplayDate(value);
     }, [value]);
+
+    /**
+     * carry over the current time when a user clicks a new day
+     * instead of resetting to 00:00
+     */
     const handleMonthChange = (newDay: Date | undefined) => {
       if (!newDay) {
         return;
@@ -617,6 +724,7 @@ const DateTimePicker = React.forwardRef<Partial<DateTimePickerRef>, DateTimePick
       onMonthChange?.(newDateFull);
       setMonth(newDateFull);
     };
+
     const onSelect = (newDay?: Date) => {
       if (!newDay) {
         return;
@@ -626,6 +734,7 @@ const DateTimePicker = React.forwardRef<Partial<DateTimePickerRef>, DateTimePick
       setDisplayDate(newDay);
       setOpen(false);
     };
+
     useImperativeHandle(
       ref,
       () => ({
@@ -634,6 +743,7 @@ const DateTimePicker = React.forwardRef<Partial<DateTimePickerRef>, DateTimePick
       }),
       [displayDate],
     );
+
     const initHourFormat = {
       hour24:
         displayFormat?.hour24 ??
@@ -642,21 +752,23 @@ const DateTimePicker = React.forwardRef<Partial<DateTimePickerRef>, DateTimePick
         displayFormat?.hour12 ??
         `dd MMMM yyyy`,
     };
+
     const [open, setOpen] = React.useState(false);
+    
     return (
       <Popover modal open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
+        <PopoverTrigger asChild disabled={disabled}>
           <button
-            className={'bg-meko-blue-transparent-2 text-white flex flex-row gap-2 items-center w-full rounded-xl focus:border-meko-blue-light-1 focus:border-2 outline-none px-5 py-2'}
+            className={'flex  border-2 border-red-500 flex-row gap-2 text-sm items-center w-full rounded-xl focus:border-primary focus:border-2 outline-none px-5 py-2'}
             ref={buttonRef}
           >
-            <CalendarIcon className="mr-2 h-4 w-4" />
+            <CalendarIcon className="mr-2 h-4 w-4 text-black" />
             {displayDate ? (
               format(
                 displayDate,
                 hourCycle === 24 ? initHourFormat.hour24 : initHourFormat.hour12,
                 {
-                  locale: locale,
+                  locale: fr,
                 },
               )
             ) : (
@@ -664,7 +776,7 @@ const DateTimePicker = React.forwardRef<Partial<DateTimePickerRef>, DateTimePick
             )}
           </button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 z-[9999] bg-[#0040B6] border border-[#006EB6]">
+        <PopoverContent className="w-auto p-0 z-[9999] bg-popover border border-primary">
           <Calendar
             mode="single"
             selected={displayDate}
@@ -681,10 +793,10 @@ const DateTimePicker = React.forwardRef<Partial<DateTimePickerRef>, DateTimePick
             }}
             onMonthChange={handleMonthChange}
             yearRange={yearRange}
-            locale={locale}
+            locale={fr}
             {...props}
           />
-          {granularity !== 'day' && (
+          {/**{granularity !== 'day' && (
             <div className="border-border border-t p-3">
               <TimePicker
                 onChange={(value) => {
@@ -699,12 +811,13 @@ const DateTimePicker = React.forwardRef<Partial<DateTimePickerRef>, DateTimePick
                 granularity={granularity}
               />
             </div>
-          )}
+          )}**/}
         </PopoverContent>
       </Popover>
     );
   },
 );
+
 DateTimePicker.displayName = 'DateTimePicker';
 
 export { DateTimePicker, TimePickerInput, TimePicker };

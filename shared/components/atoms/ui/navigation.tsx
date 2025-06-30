@@ -1,4 +1,5 @@
 import * as React from 'react';
+import Link from "next/link";
 import { cn } from '@/shared/lib/utils';
 import { Button } from './button';
 import { Logo } from './logo';
@@ -13,18 +14,18 @@ interface NavLinkProps {
 const NavLink = React.forwardRef<HTMLAnchorElement, NavLinkProps>(
   ({ href, children, active = false, className, ...props }, ref) => {
     return (
-      <a
+      <Link
         ref={ref}
         href={href}
         className={cn(
-          "nav-link px-2 py-2 text-sm font-medium transition-colors duration-200 hover:text-primary",
-          active && "active text-primary border-b-2 border-primary",
+          "px-2 py-2 transition-colors duration-200 hover:text-primary",
+          active && "border-b-2 border-primary text-primary font-bold",
           className
         )}
         {...props}
       >
         {children}
-      </a>
+      </Link>
     );
   }
 );

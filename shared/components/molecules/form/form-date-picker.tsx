@@ -39,7 +39,7 @@ export function ControlledDateTimePicker<T extends FieldValues>({
       />
 
       {fieldState.error && (
-        <p className="mt-1 font-bold text-meko-red text-xs">
+        <p className="mt-1 font-bold text-red text-xs">
           {fieldState.error.message || '' }
         </p>
       )}

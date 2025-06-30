@@ -17,21 +17,23 @@ interface HeroSectionProps extends React.HTMLAttributes<HTMLDivElement> {
   };
   image?: React.ReactNode;
   backgroundVariant?: 'white' | 'gradient';
+  menu?: React.ReactNode;
 }
 
 const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
-  ({ 
-    className, 
-    title, 
-    subtitle, 
-    primaryAction, 
+  ({
+    className,
+    title,
+    subtitle,
+    primaryAction,
     secondaryAction,
     backgroundVariant = 'white',
-    ...props 
+    menu,
+    ...props
   }, ref) => {
     const backgroundClasses = {
       white: 'bg-white text-gray-800 border-b border-gray-200',
-      gradient: 'bg-gradient-to-r from-primary to-accent text-white'
+      gradient: 'bg-gradient-to-br from-blue-500 to-purple-600 to-accent text-white'
     };
 
     return (
@@ -44,7 +46,7 @@ const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
         )}
         {...props}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl lg:px-40 xl:px-40 mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className={cn(
@@ -55,16 +57,21 @@ const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
               </h1>
               {subtitle && (
                 <p className={cn(
-                  "text-xl mb-8",
+                  "text-xl mb-4",
                   backgroundVariant === 'white' ? 'text-gray-600' : 'text-white/90'
                 )}>
                   {subtitle}
                 </p>
               )}
+              {menu && (
+                <div className="mb-6 flex flex-wrap gap-4">
+                  {menu}
+                </div>
+              )}
               <div className="flex flex-col sm:flex-row gap-4">
                 {primaryAction && (
-                  <Button 
-                    variant="primary" 
+                  <Button
+                    variant="primary"
                     size="lg"
                     className="font-bold py-3 px-6"
                     asChild
@@ -75,8 +82,8 @@ const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
                   </Button>
                 )}
                 {secondaryAction && (
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="secondary"
                     size="lg"
                     className="font-bold py-3 px-6"
                     asChild
@@ -88,10 +95,10 @@ const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
                 )}
               </div>
             </div>
-             <BookingForm
-            variant="detailed"
-            onSearch={(data) => console.log("Search data:", data)}
-          />
+            <BookingForm
+              variant="detailed"
+              onSearch={(data) => console.log("Search data:", data)}
+            />
           </div>
         </div>
       </section>

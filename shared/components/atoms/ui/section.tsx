@@ -66,7 +66,7 @@ const Section = React.forwardRef<HTMLElement, SectionProps>(
             <div className={cn('mb-12', titleAlignClasses[titleAlign])}>
               {title && (
                 <h2 className={cn(
-                  'text-3xl font-bold mb-4 font-saira',
+                  'text-3xl font-bold uppercase mb-4 font-saira',
                   backgroundVariant === 'gradient' ? 'text-white' : 'text-primary'
                 )}>
                   {title}

@@ -53,9 +53,6 @@ export default function Page() {
                    <Sample.DestinationCard />
                 </Section>
 
-                <Section title="Schedule Tables">
-                   <Sample.ScheduleTable />
-                </Section>
 
 
                 <Section title="Contact Forms">

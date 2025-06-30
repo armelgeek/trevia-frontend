@@ -2,7 +2,7 @@ import * as React from 'react';
 import { cn } from '@/shared/lib/utils';
 
 interface ServiceCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  icon: string;
+  icon: React.ReactNode;
   title: string;
   description: string;
   iconColor?: string;
@@ -20,7 +20,7 @@ const ServiceCard = React.forwardRef<HTMLDivElement, ServiceCardProps>(
         {...props}
       >
         <div className={cn("text-4xl mb-4", iconColor)}>
-          <i className={icon}></i>
+          {icon}
         </div>
         <h3 className="text-xl font-bold mb-2 text-gray-900">{title}</h3>
         <p className="text-gray-600">{description}</p>

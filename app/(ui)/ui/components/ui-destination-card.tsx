@@ -1,9 +1,9 @@
 "use client";
 
+import React from "react";
 import { LabeledSection } from "./ui-section";
 import { Card, CardContent } from "@/shared/components/atoms/ui/card";
 import { Badge } from "@/shared/components/atoms/ui/badge";
-import { Button } from "@/shared/components/atoms/ui/button";
 import { Clock, MapPin, Euro, Star } from "lucide-react";
 import Image from "next/image";
 
@@ -16,6 +16,7 @@ interface DestinationCardProps {
   isDirect?: boolean;
   image?: string;
   className?: string;
+  horaires?: string[];
 }
 
 export function DestinationCard({ 
@@ -26,7 +27,8 @@ export function DestinationCard({
   isPopular = false, 
   isDirect = true,
   image,
-  className 
+  className,
+  horaires
 }: DestinationCardProps) {
   return (
     <Card className={`overflow-hidden group cursor-pointer transition-all duration-300 hover:-translate-y-2 hover:shadow-xl ${className}`}>
@@ -88,12 +90,11 @@ export function DestinationCard({
         </div>
         
         {/* Route visualization */}
-        <div className="relative flex items-center justify-between mb-6">
+        <div className="relative flex items-center justify-between mb-4">
           <div className="flex flex-col items-center">
             <div className="w-3 h-3 bg-primary rounded-full border-2 border-white shadow-md"></div>
             <span className="text-xs font-medium mt-2 text-gray-700">{from}</span>
           </div>
-          
           <div className="flex-1 mx-4 relative">
             <div className="h-0.5 bg-gradient-to-r from-primary to-highlight"></div>
             <div className="absolute inset-0 flex items-center justify-center">
@@ -102,21 +103,22 @@ export function DestinationCard({
               </div>
             </div>
           </div>
-          
           <div className="flex flex-col items-center">
             <div className="w-3 h-3 bg-highlight rounded-full border-2 border-white shadow-md"></div>
             <span className="text-xs font-medium mt-2 text-gray-700">{to}</span>
           </div>
         </div>
-        
-        <div className="flex space-x-2">
-          <Button size="sm" className="flex-1">
-            Voir les horaires
-          </Button>
-          <Button size="sm" variant="outline" className="flex-1">
-            Réserver
-          </Button>
-        </div>
+        {/* Horaires sous forme de badges, toujours visibles */}
+        {Array.isArray(horaires) && horaires.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4 justify-center">
+            {horaires.map((h, idx) => (
+              <span key={idx} className="flex items-center gap-1 bg-white/80 border border-gray-200 px-2 py-0.5 rounded text-xs text-primary font-mono">
+                <Clock className="w-3 h-3 text-primary" />
+                {h}
+              </span>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -130,6 +132,7 @@ export function DestinationCardSample() {
       duration: "4h30",
       price: 35,
       isPopular: true,
+      horaires: ["08:00", "10:30", "14:00", "17:45"]
     },
     {
       from: "Lyon",
@@ -137,6 +140,7 @@ export function DestinationCardSample() {
       duration: "3h15",
       price: 28,
       isPopular: false,
+      horaires: ["09:00", "13:30", "18:00"]
     },
     {
       from: "Paris",
@@ -144,6 +148,7 @@ export function DestinationCardSample() {
       duration: "5h45",
       price: 42,
       isPopular: true,
+      horaires: ["07:15", "12:00", "16:30"]
     },
     {
       from: "Lille",
@@ -182,6 +187,7 @@ export function DestinationCardSample() {
               price={dest.price}
               isPopular={dest.isPopular}
               isDirect={dest.isDirect}
+              horaires={dest.horaires}
             />
           ))}
         </div>

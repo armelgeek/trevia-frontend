@@ -9,6 +9,8 @@ import { MapPin, Calendar as CalendarIcon, Users, Search, ArrowLeftRight } from 
 import { useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { useDepartureCities, useDestinations } from '@/features/location/hooks/use-location';
+import type { City } from '@/features/location/location.schema';
 
 export interface BookingFormProps {
   variant?: "simple" | "detailed" | "inline";
@@ -24,12 +26,6 @@ export interface BookingData {
   tripType: "one-way" | "round-trip";
 }
 
-const cities = [
-  "Paris", "Lyon", "Marseille", "Toulouse", "Nice", "Nantes", 
-  "Strasbourg", "Montpellier", "Bordeaux", "Lille", "Rennes", 
-  "Reims", "Le Havre", "Saint-Étienne", "Toulon", "Grenoble"
-];
-
 export function BookingForm({ variant = "detailed", onSearch }: BookingFormProps) {
   const [formData, setFormData] = useState<BookingData>({
     from: "",
@@ -41,6 +37,9 @@ export function BookingForm({ variant = "detailed", onSearch }: BookingFormProps
   });
   const [isDateOpen, setIsDateOpen] = useState(false);
   const [isReturnDateOpen, setIsReturnDateOpen] = useState(false);
+
+  const { data: departureCities = [] } = useDepartureCities();
+  const { data: destinationCities = [] } = useDestinations(formData.from);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,13 +59,13 @@ export function BookingForm({ variant = "detailed", onSearch }: BookingFormProps
       <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200">
         <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-4">
           <div className="flex-1 min-w-[120px]">
-            <Label htmlFor="from-inline" className="text-xs font-medium text-gray-600">Départ</Label>
+            <Label htmlFor="from-inline" className="text-xs font-medium text-white">Départ</Label>
             <Select value={formData.from} onValueChange={(value) => setFormData(prev => ({ ...prev, from: value }))}>
               <SelectTrigger id="from-inline" className="mt-1">
                 <SelectValue placeholder="Ville" />
               </SelectTrigger>
               <SelectContent>
-                {cities.map((city) => (
+                {departureCities.map((city: City) => (
                   <SelectItem key={city} value={city}>{city}</SelectItem>
                 ))}
               </SelectContent>
@@ -88,7 +87,7 @@ export function BookingForm({ variant = "detailed", onSearch }: BookingFormProps
                 <SelectValue placeholder="Ville" />
               </SelectTrigger>
               <SelectContent>
-                {cities.map((city) => (
+                {destinationCities.map((city: City) => (
                   <SelectItem key={city} value={city}>{city}</SelectItem>
                 ))}
               </SelectContent>
@@ -140,11 +139,11 @@ export function BookingForm({ variant = "detailed", onSearch }: BookingFormProps
 
   if (variant === "simple") {
     return (
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md border-white">
         <CardHeader>
           <CardTitle className="flex items-center  text-red-600 space-x-2">
             <Search className="w-5 h-5" />
-            <span className="text-red-600">Rechercher un voyage</span>
+            <span className="text-white">Rechercher un voyage</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -156,7 +155,7 @@ export function BookingForm({ variant = "detailed", onSearch }: BookingFormProps
                   <SelectValue placeholder="Sélectionnez une ville" />
                 </SelectTrigger>
                 <SelectContent>
-                  {cities.map((city) => (
+                  {departureCities.map((city: City) => (
                     <SelectItem key={city} value={city}>{city}</SelectItem>
                   ))}
                 </SelectContent>
@@ -169,7 +168,7 @@ export function BookingForm({ variant = "detailed", onSearch }: BookingFormProps
                   <SelectValue placeholder="Sélectionnez une ville" />
                 </SelectTrigger>
                 <SelectContent>
-                  {cities.map((city) => (
+                  {destinationCities.map((city: City) => (
                     <SelectItem key={city} value={city}>{city}</SelectItem>
                   ))}
                 </SelectContent>
@@ -223,11 +222,11 @@ export function BookingForm({ variant = "detailed", onSearch }: BookingFormProps
   }
 
   return (
-    <Card className="w-full">
+    <Card className="rounded-xl">
       <CardHeader>
-        <CardTitle className="flex text-transport-primary items-center space-x-2">
-          <Search className="w-5 h-5 text-primary" />
-          <span className="text-lg text-red-500">Rechercher un voyage</span>
+        <CardTitle className="flex text-white items-center space-x-2">
+          <Search className="w-5 h-5 text-white" />
+          <span className="text-lg text-white">Rechercher un voyage</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -235,23 +234,23 @@ export function BookingForm({ variant = "detailed", onSearch }: BookingFormProps
           {/* From/To with swap button */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center relative">
             <div className="space-y-2">
-              <Label htmlFor="from-detailed" className="flex items-center space-x-1">
+              <Label htmlFor="from-detailed" className="flex items-center space-x-1 text-white">
                 <MapPin className="w-4 h-4" />
                 <span>Départ</span>
               </Label>
-              <Select value={formData.from} onValueChange={(value) => setFormData(prev => ({ ...prev, from: value }))}>
+              <Select value={formData.from} onValueChange={(value) => setFormData(prev => ({ ...prev, from: value, to: '' }))}>
                 <SelectTrigger id="from-detailed">
                   <SelectValue placeholder="Ville de départ" />
                 </SelectTrigger>
                 <SelectContent>
-                  {cities.map((city) => (
+                  {departureCities.map((city: City) => (
                     <SelectItem key={city} value={city}>{city}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="to-detailed" className="flex items-center space-x-1">
+              <Label htmlFor="to-detailed" className="flex items-center space-x-1 text-white">
                 <MapPin className="w-4 h-4" />
                 <span>Destination</span>
               </Label>
@@ -260,7 +259,7 @@ export function BookingForm({ variant = "detailed", onSearch }: BookingFormProps
                   <SelectValue placeholder="Ville de destination" />
                 </SelectTrigger>
                 <SelectContent>
-                  {cities.map((city) => (
+                  {destinationCities.map((city: City) => (
                     <SelectItem key={city} value={city}>{city}</SelectItem>
                   ))}
                 </SelectContent>
@@ -270,7 +269,7 @@ export function BookingForm({ variant = "detailed", onSearch }: BookingFormProps
           {/* Dates */}
           <div className={`grid grid-cols-1 ${formData.tripType === "round-trip" ? "md:grid-cols-2" : ""} gap-4`}>
             <div className="space-y-2">
-              <Label className="flex items-center space-x-1">
+              <Label className="flex items-center space-x-1 text-white">
                 <CalendarIcon className="w-4 h-4" />
                 <span>Date de départ</span>
               </Label>
@@ -296,14 +295,14 @@ export function BookingForm({ variant = "detailed", onSearch }: BookingFormProps
             </div>
             {formData.tripType === "round-trip" && (
               <div className="space-y-2">
-                <Label className="flex items-center space-x-1">
+                <Label className="flex items-center space-x-1 text-white">
                   <CalendarIcon className="w-4 h-4" />
                   <span>Date de retour</span>
                 </Label>
                 <Popover open={isReturnDateOpen} onOpenChange={setIsReturnDateOpen}>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full justify-start text-left font-normal">
-                      <CalendarIcon className="mr-2 h-4 w-4" />
+                    <Button variant="outline" className="w-full border-white justify-start text-left font-normal">
+                      <CalendarIcon className="mr-2 h-4 w-4 text-white" />
                       {formData.returnDate ? format(formData.returnDate, "PPP", { locale: fr }) : "Sélectionnez une date"}
                     </Button>
                   </PopoverTrigger>
@@ -324,8 +323,8 @@ export function BookingForm({ variant = "detailed", onSearch }: BookingFormProps
           </div>
           {/* Passengers */}
           <div className="space-y-2">
-            <Label htmlFor="passengers-detailed" className="flex items-center space-x-1">
-              <Users className="w-4 h-4" />
+            <Label htmlFor="passengers-detailed" className="flex items-center space-x-1 text-white">
+              <Users className="w-4 h-4 " />
               <span>Nombre de passagers</span>
             </Label>
             <Select value={formData.passengers.toString()} onValueChange={(value) => setFormData(prev => ({ ...prev, passengers: parseInt(value) }))}>
