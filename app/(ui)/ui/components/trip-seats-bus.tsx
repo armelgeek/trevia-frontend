@@ -78,8 +78,9 @@ export function TripSeatsBus({ tripId, scheduleId, selectedSeats: controlledSeat
       const rows = [];
       const getSeatStatus = (seatNumber: string) => {
         const seatObj = seatsByNumber[seatNumber];
-        if (occupiedSeats.includes(seatNumber)) return 'unavailable';
-        if (seatObj && selectedSeats.some((s) => s.id === seatObj.id)) return 'selected';
+        if (!seatObj) return 'unavailable';
+        if (seatObj.status !== 'free') return 'unavailable';
+        if (selectedSeats.some((s) => s.id === seatObj.id)) return 'selected';
         return 'available';
       };
       // 2 sièges devant (1A, 1B)
@@ -238,8 +239,10 @@ export function TripSeatsBus({ tripId, scheduleId, selectedSeats: controlledSeat
           const generateBusLayout = (occupiedSeats: string[], capacity: number) => {
             const rows = [];
             const getSeatStatus = (seatNumber: string) => {
-              if (occupiedSeats.includes(seatNumber)) return 'unavailable';
-              if (selectedSeats.some((s) => s.seatNumber === seatNumber)) return 'selected';
+              const seatObj = seatsByNumber[seatNumber];
+              if (!seatObj) return 'unavailable';
+              if (seatObj.status !== 'free') return 'unavailable';
+              if (selectedSeats.some((s) => s.id === seatObj.id)) return 'selected';
               return 'available';
             };
             // 2 sièges devant (conducteur + passager)

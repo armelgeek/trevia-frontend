@@ -2,10 +2,9 @@
 
 import { authClient } from "@/shared/lib/config/auth-client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/atoms/ui/card";
-import { EditableProfilePhotoForm } from "@/shared/components/atoms/editable-profile-photo-form";
-import { ClientProfileForm } from '@/features/auth/components/organisms/client-profile-form';
 import { Skeleton } from "@/shared/components/atoms/ui/skeleton";
 import { useEffect, useState } from "react";
+import AccountTabs from "./account-tabs";
 
 interface User {
   name?: string;
@@ -93,13 +92,5 @@ export default function AccountPageClient() {
     );
   }
 
-  return (
-    <div className="space-y-6">
-      <EditableProfilePhotoForm
-        photoUrl={user.image ?? undefined}
-        disabled={false}
-      />
-      <ClientProfileForm user={user} onUserUpdate={handleUserUpdate} />
-    </div>
-  );
+  return <AccountTabs user={user} onUserUpdate={handleUserUpdate} />;
 }

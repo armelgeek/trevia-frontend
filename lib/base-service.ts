@@ -209,6 +209,21 @@ export class BaseService {
       },
     });
   }
+
+  /**
+   * Liste les réservations avec pagination
+   */
+  async list(params?: Record<string, string | number | boolean>) {
+    let query = '';
+    if (params) {
+      const search = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) search.append(key, String(value));
+      });
+      query = `?${search.toString()}`;
+    }
+    return this.request(query ? query : '');
+  }
 }
 
 // Instance par défaut

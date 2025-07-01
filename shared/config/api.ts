@@ -75,5 +75,7 @@ export const API_ENDPOINTS = {
   locations: {
     departureCities: '/api/locations/departure-cities',
     destinations: (city: string) => `/api/locations/destinations?city=${encodeURIComponent(city)}`
-  }
+  },
+  userBookings: '/api/user/bookings',
+  retryPayment: '/api/retry-payment'
 };
