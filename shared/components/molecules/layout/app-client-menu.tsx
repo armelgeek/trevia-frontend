@@ -39,24 +39,31 @@ const AppClientMenu = () => {
     >
       <NavLink 
         href="/" 
-        className="font-semibold px-3 py-2 transition-colors duration-150 hover:text-primary"
+        className="font-semibold  py-2 transition-colors duration-150 hover:text-primary"
         active={pathname === "/"}
       >
         Accueil
       </NavLink>
       <NavLink 
         href="/destinations"
-        className="font-semibold px-3 py-2 transition-colors duration-150 hover:text-primary"
+        className="font-semibold  py-2 transition-colors duration-150 hover:text-primary"
         active={pathname.startsWith("/destinations")}
       >
         Destinations
       </NavLink>
       <NavLink 
         href="/services"
-        className="font-semibold px-3 py-2 transition-colors duration-150 hover:text-primary"
+        className="font-semibold  py-2 transition-colors duration-150 hover:text-primary"
         active={pathname.startsWith("/services")}
       >
         Services
+      </NavLink>
+      <NavLink 
+        href="/contact"
+        className="font-semibold  py-2 transition-colors duration-150 hover:text-primary"
+        active={pathname.startsWith("/contact")}
+      >
+        Contact
       </NavLink>
     </Navigation>
   );

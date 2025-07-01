@@ -12,7 +12,6 @@ export default function BookingPage() {
   const searchParams = useSearchParams();
   const tripId = searchParams.get('tripId') || '';
   const scheduleId = searchParams.get('scheduleId') || undefined;
-  const router = useRouter();
   const { mutate: reserve, isPending: loading } = useBookingReservation();
   const [error, setError] = useState<string | null>(null);
 

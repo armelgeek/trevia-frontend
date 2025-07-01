@@ -2,10 +2,10 @@ import '@/features/admin-entities';
 import { Icons } from "@/shared/components/atoms/ui/icons";
 import { getRegisteredAdminEntities } from '@/shared/lib/admin/admin-generator';
 
-const kAppName = "Trevia Admin";
+const kAppName = "Trevia"
 const kAppAbbr = "TA";
 const kAppTagline = "Système d'administration ultra-simplifié";
-const kAppDescription = `Trevia Admin est une plateforme d'administration moderne qui permet de gérer facilement vos contenus, utilisateurs et paramètres avec des interfaces CRUD générées automatiquement.`;
+const kAppDescription = `Trevia est une plateforme d'administration moderne qui permet de gérer facilement vos contenus, utilisateurs et paramètres avec des interfaces CRUD générées automatiquement.`;
 
 export interface NavItem {
   title: string;

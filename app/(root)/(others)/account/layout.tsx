@@ -1,6 +1,5 @@
 import { Metadata } from "next";
 import { ReactNode } from "react";
-import AppProfileClient from "@/shared/components/molecules/layout/app-profile-client";
 import { Footer } from "@/shared/components/atoms/ui/footer";
 import { kAppName } from "@/shared/lib/constants/app.constant";
 
@@ -15,11 +14,9 @@ export const metadata: Metadata = {
 
 export default function Layout({ children }: Props) {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col mt-3">
       <div className="flex-1">
-        <AppProfileClient>
           {children}
-        </AppProfileClient>
       </div>
       <Footer variant="minimal" showNewsletter={false} showStats={false} />
     </div>

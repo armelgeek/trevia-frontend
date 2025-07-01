@@ -5,7 +5,7 @@ import { Button } from '@/shared/components/atoms/ui/button';
 import { Input } from '@/shared/components/atoms/ui/input';
 import { Label } from '@/shared/components/atoms/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/atoms/ui/card';
-import { EditIcon, CheckIcon, XIcon, Loader2 } from 'lucide-react';
+import { EditIcon, CheckIcon, XIcon, Loader2, User } from 'lucide-react';
 import { useUpdateProfile } from '@/features/auth/hooks/useUpdateProfile';
 import { authClient } from '@/shared/lib/config/auth-client';
 import { cn } from '@/shared/lib/utils';
@@ -36,11 +36,9 @@ function EditableField({
       setIsEditing(false);
       return;
     }
-
     setIsLoading(true);
     const success = await onUpdate(inputValue);
     setIsLoading(false);
-
     if (success) {
       setIsEditing(false);
     }
@@ -59,17 +57,18 @@ function EditableField({
   };
 
   return (
-    <div className="space-y-2">
-      <Label className="text-muted-foreground text-sm leading-none">
+    <div className="space-y-1">
+      <Label className="text-xs text-gray-500 font-medium tracking-wide">
         {label}
       </Label>
-      
       <div 
         className={cn(
-          "flex flex-row justify-between items-center min-h-[32px] cursor-pointer",
-          disabled && "cursor-not-allowed opacity-50"
+          "flex flex-row items-center min-h-[40px] rounded-lg border border-transparent px-2 py-1 transition-all bg-white hover:border-primary/30 focus-within:border-primary/70",
+          disabled && "cursor-not-allowed opacity-60 bg-gray-50"
         )}
+        tabIndex={disabled ? -1 : 0}
         onClick={handleEdit}
+        aria-disabled={disabled}
       >
         {isEditing ? (
           <div className="flex items-center gap-2 w-full">
@@ -78,21 +77,24 @@ function EditableField({
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder={placeholder}
-              className="flex-1"
+              className="flex-1 text-base px-2 py-1 border border-gray-200 rounded-md focus:border-primary focus:ring-1 focus:ring-primary/30"
               autoFocus
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleSave();
                 if (e.key === 'Escape') handleCancel();
               }}
+              aria-label={label}
             />
             <Button
-              variant="ghost"
+              variant="outline"
               size="icon"
+              className="border-green-500 text-green-600 hover:bg-green-50"
               onClick={(e) => {
                 e.stopPropagation();
                 handleSave();
               }}
               disabled={isLoading}
+              aria-label="Valider"
             >
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -101,13 +103,15 @@ function EditableField({
               )}
             </Button>
             <Button
-              variant="ghost"
+              variant="outline"
               size="icon"
+              className="border-red-500 text-red-600 hover:bg-red-50"
               onClick={(e) => {
                 e.stopPropagation();
                 handleCancel();
               }}
               disabled={isLoading}
+              aria-label="Annuler"
             >
               <XIcon className="h-4 w-4" />
             </Button>
@@ -115,13 +119,21 @@ function EditableField({
         ) : (
           <>
             <span className={cn(
-              "flex-1",
+              "flex-1 text-base px-2 py-1 border border-gray-300 rounded-lg py-1",
               !value && "text-muted-foreground text-sm"
             )}>
               {value || placeholder}
             </span>
             {!disabled && (
-              <EditIcon className="h-4 w-4 text-muted-foreground" />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="ml-1 text-primary hover:bg-primary/10"
+                tabIndex={-1}
+                aria-label={`Modifier ${label}`}
+              >
+                <EditIcon className="h-4 w-4" />
+              </Button>
             )}
           </>
         )}
@@ -191,9 +203,12 @@ export function ClientProfileForm({ user, onUserUpdate }: ClientProfileFormProps
   };
 
   return (
-    <Card>
+    <Card className='bg-white shadow-sm rounded-sm'>
       <CardHeader>
-        <CardTitle className="text-xl">Profile</CardTitle>
+        <CardTitle className="flex items-center space-x-2">
+          <User className="w-5 h-5" />
+          <span>Information personnelle</span>
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <EditableField

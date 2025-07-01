@@ -18,7 +18,7 @@ const NavLink = React.forwardRef<HTMLAnchorElement, NavLinkProps>(
         ref={ref}
         href={href}
         className={cn(
-          "px-2 py-2 transition-colors duration-200 hover:text-primary",
+          "py-2 transition-colors duration-200 hover:text-primary",
           active && "border-b-2 border-primary text-primary font-bold",
           className
         )}

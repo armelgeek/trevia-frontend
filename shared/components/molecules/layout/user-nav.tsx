@@ -12,7 +12,7 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger
 } from '@/shared/components/atoms/ui/dropdown-menu';
-import { User2Icon, LogOut, Settings, ShieldCheck } from 'lucide-react';
+import { User2Icon, LogOut, Settings, ShieldCheck, TimerIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -21,7 +21,7 @@ import { useAuth } from '@/shared/providers/auth-provider';
 export function UserNav() {
   const { session, logout } = useAuth();
   const router = useRouter();
-  
+
   const handleSignOut = async () => {
     try {
       await logout();
@@ -41,9 +41,9 @@ export function UserNav() {
         <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
           <Avatar className='h-8 w-8'>
             <AvatarImage
-              src={session.user?.image ?? ''}
+              src={session.user?.image ?? 'https://i.pravatar.cc/150?img=50'}
               alt={session.user?.name ?? ''}
-              className='h-8 w-8 rounded-full'
+              className='h-8 w-8 rounded-full border border-red-500 object-cover'
             />
             <AvatarFallback>
               {session.user?.name?.charAt(0).toUpperCase() ?? 'U'}
@@ -68,6 +68,12 @@ export function UserNav() {
             <Link href="/account" className="flex items-center">
               <User2Icon className="mr-2 h-4 w-4" />
               Mon profil
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/account/bookings" className="flex items-center">
+              <TimerIcon className="mr-2 h-4 w-4" />
+              Mes réservations
             </Link>
           </DropdownMenuItem>
           {session.user?.role === 'admin' && (

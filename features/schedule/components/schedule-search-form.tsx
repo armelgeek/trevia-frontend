@@ -53,56 +53,56 @@ export function ScheduleSearchForm({
   const formRef = useRef<HTMLFormElement>(null);
 
   return (
-    <div className="w-full flex flex-col items-center justify-center my-5 border border-gray-200 bg-white/90 z-20 sticky top-14 pt-0">
+    <div className="w-full flex flex-col mb-4  justify-center my-5 border border-gray-200 bg-white/90 z-20 sticky top-14 pt-0">
       <form
         ref={formRef}
-        className="flex flex-col md:flex-row items-center gap-4 w-full max-w-4xl mx-auto p-6 justify-center"
+        className="flex flex-col md:flex-row items-center gap-6 w-full max-w-4xl mx-auto p-6 justify-center"
         onSubmit={e => {
           e.preventDefault();
           onSubmit({ from, to, dateStart, dateEnd, passengers, search });
         }}
       >
-        <div className="flex flex-col w-full md:w-auto min-w-[180px]">
-          <label htmlFor="from" className="text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1"><MapPin className="w-4 h-4 text-primary" />Départ</label>
-          <Select value={from || 'all'} onValueChange={value => onChange({ from: value === 'all' ? '' : value, to, dateStart, dateEnd, passengers, search })}>
-            <SelectTrigger id="from">
+        <div className="flex flex-col w-full  w-[400px] text-base min-w-[400px] max-w-[340px]">
+          <label htmlFor="from" className="text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1"><MapPin className="w-4 h-4 text-primary" />Départ</label>
+          <Select value={from || 'all'} onValueChange={value => onChange({ from: value === 'all' ? '' : value, to, dateStart, dateEnd, passengers, search })} >
+            <SelectTrigger id="from" >
               <SelectValue placeholder="Choisir..." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tous</SelectItem>
+              <SelectItem value="all">Ville de départ</SelectItem>
               {uniqueFrom.map(city => (
                 <SelectItem key={city} value={city}>{city}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-        <div className="flex flex-col w-full md:w-auto min-w-[180px]">
-          <label htmlFor="to" className="text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1"><MapPin className="w-4 h-4 text-primary rotate-180" />Arrivée</label>
+        <div className="flex flex-col w-full w-[400px] text-base min-w-[400px] max-w-[340px]">
+          <label htmlFor="to" className="text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1"><MapPin className="w-4 h-4 text-primary rotate-180" />Arrivée</label>
           <Select value={to || 'all'} onValueChange={value => onChange({ from, to: value === 'all' ? '' : value, dateStart, dateEnd, passengers, search })}>
             <SelectTrigger id="to">
               <SelectValue placeholder="Choisir..." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tous</SelectItem>
+              <SelectItem value="all">ville de destination</SelectItem>
               {uniqueTo.map(city => (
                 <SelectItem key={city} value={city}>{city}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-        <div className="flex flex-col w-full md:w-auto min-w-[250px]">
-          <label htmlFor="dateStart" className="text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1"><Calendar className="w-4 h-4 text-primary" />Date</label>
+        <div className="flex flex-col w-full w-[400px] text-base min-w-[400px] max-w-[340px]">
+          <label htmlFor="dateStart" className="text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1"><Calendar className="w-4 h-4 text-primary" />Date</label>
           <DateTimePicker
             value={dateStart}
             onChange={d => onChange({ from, to, dateStart: d, dateEnd, passengers, search })}
             placeholder="Départ"
             displayFormat={{ hour24: 'dd MMMM yyyy' }}
             granularity="day"
-            className="w-[300px]"
+            className="w-[400px]"
           />
         </div>
-        <div className="flex flex-col w-full md:w-auto min-w-[120px]">
-          <label htmlFor="passengers" className="text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1"><Users className="w-4 h-4 text-primary" />Passagers</label>
+        <div className="flex flex-col">
+          <label htmlFor="passengers" className="text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1"><Users className="w-4 h-4 text-primary" />Passagers</label>
           <Input
             id="passengers"
             type="number"
@@ -114,12 +114,12 @@ export function ScheduleSearchForm({
             aria-label="Nombre de passagers"
           />
         </div>
-        
-        
-
-        <Button type="submit" className="px-6 font-semibold mt-2 md:mt-6 w-full md:w-auto">
+          <div className="flex flex-col">
+          <label className="text-sm font-semibold  text-gray-700 mb-5 flex items-center gap-1"></label>
+        <Button type="submit" className="px-6 font-semibold mt-7 md:mt-6 w-full md:w-auto">
           Vérifier les disponibilités
         </Button>
+        </div>
       </form>
     </div>
   );

@@ -49,10 +49,6 @@ export default function Page() {
                    <Sample.TransportPage />
                 </Section>
 
-                <Section title="Destination Cards">
-                   <Sample.DestinationCard />
-                </Section>
-
 
 
                 <Section title="Contact Forms">

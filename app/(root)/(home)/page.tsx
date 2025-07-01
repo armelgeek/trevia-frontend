@@ -1,7 +1,6 @@
 import { Section } from '@/shared/components/atoms/ui/section';
 import Hero from '@/shared/components/atoms/hero';
 import type { Metadata } from 'next';
-import { DestinationCard } from '../../(ui)/ui/components/ui-destination-card';
 import { Button } from '@/shared/components/atoms/ui/button';
 import { ServiceCard } from '@/shared/components/atoms/ui/service-card';
 import { Testimonials } from '@/shared/components/organisms/testimonials';
@@ -11,6 +10,7 @@ import { StatCard, StatsContainer } from '@/shared/components/atoms/ui/stat-card
 import { FAQ } from '@/shared/components/organisms/faq';
 import ScheduleTableMultiDestinationAccordion from '@/app/(ui)/ui/components/ui-schedule-table-multi';
 import PopularDestinationsSection from '@/shared/components/organisms/popular-destinations-section';
+import { ContactForm } from '@/app/(ui)/ui/components/ui-contact-form';
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -147,7 +147,7 @@ export default function Home() {
           </div>
         </Section>
 
-          <PopularDestinationsSection />
+        <PopularDestinationsSection />
 
         <div className='flex flex-row justify-center py-8'>
           <Button>Afficher tous les destinations {">>"}</Button>
@@ -163,6 +163,17 @@ export default function Home() {
         >
           <ScheduleTableMultiDestinationAccordion />
         </Section>
+ <CtaSection
+          title="Prêt à réserver votre prochain voyage ?"
+          subtitle="Rejoignez des milliers de voyageurs satisfaits et profitez de nos offres exclusives."
+          actions={[
+            { label: 'Réserver maintenant', href: '/booking', variant: 'primary', size: 'lg' },
+            { label: 'Découvrir nos destinations', href: '/destinations', variant: 'outline', size: 'lg' }
+          ]}
+          backgroundVariant="white"
+          layout="horizontal"
+          titleAlign="center"
+        />
 
         <Section
           title="CE QUE NOS CLIENTS DISENT"
@@ -172,7 +183,7 @@ export default function Home() {
           <Testimonials testimonials={testimonials} variant="grid" showRating showRoute />
         </Section>
 
-      
+
         <StatsContainer
           title="Pourquoi choisir Trevia Transport ?"
           subtitle="Des chiffres qui parlent d’eux-mêmes."
@@ -189,20 +200,20 @@ export default function Home() {
           subtitle="Retrouvez ici les réponses aux questions les plus courantes sur nos services, la réservation, le paiement et plus encore."
           backgroundVariant="white"
         >
-          <FAQ faqs={faqs} variant="accordion" showCategories />
+          <FAQ faqs={faqs} variant="searchable" showCategories />
         </Section>
 
-        <CtaSection
-          title="Prêt à réserver votre prochain voyage ?"
-          subtitle="Rejoignez des milliers de voyageurs satisfaits et profitez de nos offres exclusives."
-          actions={[
-            { label: 'Réserver maintenant', href: '/booking', variant: 'primary', size: 'lg' },
-            { label: 'Découvrir nos destinations', href: '/destinations', variant: 'outline', size: 'lg' }
-          ]}
+        
+        <Section
+          title="Contactez-nous"
+          subtitle="Nous sommes là pour vous aider"
           backgroundVariant="white"
-          layout="horizontal"
-          titleAlign="center"
-        />
+        >
+          <ContactForm
+            variant="detailed"
+          />
+        </Section>
+       
       </div>
     </>
   );

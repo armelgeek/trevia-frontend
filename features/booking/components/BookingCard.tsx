@@ -5,6 +5,7 @@ import { Calendar, Clock, Users, CreditCard, MapPin, Eye, Download, XCircle, Che
 import { Button } from "@/shared/components/atoms/ui/button";
 import { Separator } from "@/shared/components/atoms/ui/separator";
 import type { Booking } from '@/features/booking/booking.schema';
+import { useRetryPayment } from "../hooks/use-retry-payment";
 
 function getStatusColor(status: Booking["status"]) {
   switch (status) {
@@ -21,7 +22,7 @@ function getStatusColor(status: Booking["status"]) {
 
 function getStatusIcon(status: Booking["status"]) {
   switch (status) {
-    case "confirmed":
+    case "paid":
       return <CheckCircle className="w-4 h-4" />;
     case "pending":
       return <Clock className="w-4 h-4" />;
@@ -34,8 +35,8 @@ function getStatusIcon(status: Booking["status"]) {
 
 function getStatusText(status: Booking["status"]) {
   switch (status) {
-    case "confirmed":
-      return "Confirmée";
+    case "paid":
+      return "Payée";
     case "pending":
       return "En attente";
     case "cancelled":
@@ -46,6 +47,7 @@ function getStatusText(status: Booking["status"]) {
 }
 
 export function BookingCard({ booking, showUser = true }: { booking: Booking; showUser?: boolean }) {
+  const { mutate: retryPayment, isPending } = useRetryPayment();
   return (
     <Card className="w-full shadow-lg">
       <CardHeader className="pb-4">
@@ -102,6 +104,23 @@ export function BookingCard({ booking, showUser = true }: { booking: Booking; sh
         </div>
         <Separator />
         <div className="flex flex-wrap gap-2">
+          {booking.status === 'pending' && !showUser && (
+            <Button
+              size="sm"
+              disabled={isPending}
+              onClick={() => {
+                retryPayment(booking.id, {
+                  onSuccess: (res) => {
+                    if (res && res.paymentUrl) {
+                      window.location.href = res.paymentUrl;
+                    }
+                  },
+                });
+              }}
+            >
+              Régler / Réessayer le paiement
+            </Button>
+          )}
           <Button variant="outline" size="sm">
             <Eye className="w-4 h-4 mr-2" />
             Détails

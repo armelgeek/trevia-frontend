@@ -33,7 +33,7 @@ interface ContactData {
   category: string;
 }
 
-function ContactForm({ variant = "detailed", onSubmit }: ContactFormProps) {
+export function ContactForm({ variant = "detailed", onSubmit }: ContactFormProps) {
   const [formData, setFormData] = useState<ContactData>({
     name: "",
     email: "",

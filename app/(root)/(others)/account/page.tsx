@@ -1,8 +1,8 @@
 import { Metadata } from "next";
-import AccountPageClient from "./account-page-client";
+import UserProfileHome from "@/shared/components/user/user-profile-home";
 
 export const metadata: Metadata = { title: "Settings" };
 
 export default function Page() {
-  return <AccountPageClient />;
+  return <UserProfileHome />;
 }

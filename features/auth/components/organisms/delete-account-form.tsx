@@ -46,9 +46,9 @@ export function DeleteAccount({ className }: Props) {
       toast.error(errorMessage);
     }
   };
-
   return (
     <Dialog
+      modal
       open={_isOpen}
       onOpenChange={(isOpen) => {
         setIsOpen(isOpen);
@@ -56,36 +56,36 @@ export function DeleteAccount({ className }: Props) {
       }}
     >
       <DialogTrigger asChild>
-        <Button variant="destructive" size="sm" className={className}>
+        <Button variant="destructive" size="sm" className={`font-semibold shadow-sm px-4 py-2 rounded-md ${className || ''}`.trim()}>
           <Trash2 className="mr-2 h-4 w-4" />
           Supprimer le compte
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="w-[400px] rounded-2xl border-0 bg-gradient-to-br from-white to-red-50 dark:from-red-950/40 dark:to-red-900/30 shadow-xl">
         <DialogHeader className="space-y-3">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-destructive/10 rounded-full">
               <AlertTriangle className="h-6 w-6 text-destructive" />
             </div>
             <div>
-              <DialogTitle className="text-xl">Supprimer le compte</DialogTitle>
+              <DialogTitle className="text-xl font-bold text-destructive">Supprimer le compte</DialogTitle>
               <DialogDescription className="text-sm text-muted-foreground">
-                Cette action est irréversible
+                Cette action est <span className="font-semibold text-destructive">irréversible</span>
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        <Alert className="border-destructive/20 bg-destructive/5">
+        <Alert className="border-destructive/20 bg-destructive/5 rounded-lg">
           <AlertTriangle className="h-4 w-4 text-destructive" />
           <AlertDescription className="text-sm">
-            <strong>Attention :</strong> La suppression de votre compte entraînera la perte définitive de toutes vos données, 
+            <strong>Attention :</strong> La suppression de votre compte entraînera la perte définitive de toutes vos données,
             y compris votre profil, vos préférences et votre historique. Cette action ne peut pas être annulée.
           </AlertDescription>
         </Alert>
 
         <form
-          className="space-y-5"
+          className="space-y-6 mt-2"
           autoComplete="off"
           onSubmit={handleSubmit(handleAccountDelete)}
         >
@@ -106,7 +106,7 @@ export function DeleteAccount({ className }: Props) {
                 <Input
                   id="__verify"
                   placeholder="Tapez 'supprimer mon compte'"
-                  className="border-destructive/30 focus:border-destructive"
+                  className="border-destructive/30 focus:border-destructive rounded-md"
                   {...field}
                 />
                 {fieldState.error && (
@@ -137,7 +137,7 @@ export function DeleteAccount({ className }: Props) {
                   id="__password"
                   placeholder="Entrez votre mot de passe"
                   type="password"
-                  className="border-destructive/30 focus:border-destructive"
+                  className="border-destructive/30 focus:border-destructive rounded-md"
                   {...field}
                 />
                 {fieldState.error && (
@@ -154,7 +154,7 @@ export function DeleteAccount({ className }: Props) {
             <Button
               type="button"
               variant="outline"
-              className="flex-1"
+              className="flex-1 rounded-md"
               onClick={() => setIsOpen(false)}
               disabled={formState.isSubmitting}
             >
@@ -163,8 +163,9 @@ export function DeleteAccount({ className }: Props) {
             <Button
               type="submit"
               variant="destructive"
-              className="flex-1"
+              className="flex-1 rounded-md font-semibold shadow-sm"
               disabled={formState.isSubmitting}
+              aria-label="Supprimer définitivement le compte"
             >
               {formState.isSubmitting ? (
                 <>
@@ -182,5 +183,5 @@ export function DeleteAccount({ className }: Props) {
         </form>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

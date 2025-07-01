@@ -229,7 +229,7 @@ export function BookingForm({ variant = "detailed" }: BookingFormProps) {
   }
 
   return (
-    <Card className="rounded-xl">
+    <Card className="rounded-xl ml-10 w-[450px]">
       <CardHeader>
         <CardTitle className="flex text-white items-center space-x-2">
           <Search className="w-5 h-5 text-white" />
