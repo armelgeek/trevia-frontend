@@ -149,10 +149,6 @@ export default function Home() {
 
         <PopularDestinationsSection />
 
-        <div className='flex flex-row justify-center py-8'>
-          <Button>Afficher tous les destinations {">>"}</Button>
-        </div>
-
 
         <Section
           id="voyages-semaine"
@@ -163,17 +159,7 @@ export default function Home() {
         >
           <ScheduleTableMultiDestinationAccordion />
         </Section>
- <CtaSection
-          title="Prêt à réserver votre prochain voyage ?"
-          subtitle="Rejoignez des milliers de voyageurs satisfaits et profitez de nos offres exclusives."
-          actions={[
-            { label: 'Réserver maintenant', href: '/booking', variant: 'primary', size: 'lg' },
-            { label: 'Découvrir nos destinations', href: '/destinations', variant: 'outline', size: 'lg' }
-          ]}
-          backgroundVariant="white"
-          layout="horizontal"
-          titleAlign="center"
-        />
+
 
         <Section
           title="CE QUE NOS CLIENTS DISENT"
@@ -194,7 +180,18 @@ export default function Home() {
             <StatCard key={i} {...stat} />
           ))}
         </StatsContainer>
-
+        
+        <CtaSection
+          title="Prêt à réserver votre prochain voyage ?"
+          subtitle="Rejoignez des milliers de voyageurs satisfaits et profitez de nos offres exclusives."
+          actions={[
+            { label: 'Réserver maintenant', href: '/booking', variant: 'primary', size: 'lg' },
+            { label: 'Découvrir nos destinations', href: '/destinations', variant: 'outline', size: 'lg' }
+          ]}
+          backgroundVariant="white"
+          layout="horizontal"
+          titleAlign="center"
+        />
         <Section
           title="Questions fréquentes"
           subtitle="Retrouvez ici les réponses aux questions les plus courantes sur nos services, la réservation, le paiement et plus encore."
@@ -203,7 +200,7 @@ export default function Home() {
           <FAQ faqs={faqs} variant="searchable" showCategories />
         </Section>
 
-        
+
         <Section
           title="Contactez-nous"
           subtitle="Nous sommes là pour vous aider"
@@ -213,7 +210,7 @@ export default function Home() {
             variant="detailed"
           />
         </Section>
-       
+
       </div>
     </>
   );

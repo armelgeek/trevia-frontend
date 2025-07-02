@@ -26,7 +26,7 @@ export default function BookingSuccessPage() {
         votre voyage.
       </p>
       <Button asChild>
-        <Link href="/">Retour à l’accueil</Link>
+        <Link href="/account/bookings">Voir les commandes</Link>
       </Button>
     </div>
   );

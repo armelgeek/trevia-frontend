@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { createField } from '@/shared/lib/admin/admin-generator';
 
 export const VehicleSchema = z.object({
-  id: createField.string({ label: 'ID', display: { showInForm: false } }),
+  id: createField.string({ label: 'ID', display: { showInForm: false } }).optional(),
   model: createField.string({ label: 'Modèle', display: { showInForm: true } }),
   registration: createField.string({ label: 'Immatriculation', display: { showInForm: true } }),
   seatCount: createField.string({ label: 'Capacité', display: { showInForm: true } }),

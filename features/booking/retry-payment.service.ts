@@ -1,10 +1,11 @@
 import { BaseService } from '@/lib/base-service';
 import { API_ENDPOINTS } from '@/shared/config/api';
+import { API_URL } from '../../shared/lib/config/api';
 
 export const retryPaymentService = new BaseService(API_ENDPOINTS.retryPayment);
 
 export async function retryPayment(bookingId: string) {
-  return fetch(API_ENDPOINTS.retryPayment, {
+  return fetch(API_URL + API_ENDPOINTS.retryPayment, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
