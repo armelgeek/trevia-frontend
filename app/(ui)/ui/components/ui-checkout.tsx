@@ -1,1 +1,1 @@
-export { CheckoutForm as default } from '@/shared/components/organisms/checkout-form';
+export { CheckoutForm as default } from '@/features/booking/components/checkout-form';

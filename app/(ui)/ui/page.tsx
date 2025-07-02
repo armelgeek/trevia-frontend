@@ -71,10 +71,6 @@ export default function Page() {
                    <Sample.UserReservations />
                 </Section>
 
-                <Section title="Checkout Process">
-                   <Sample.Checkout />
-                </Section>
-
                 <Section title="Notifications & Alerts">
                    <Sample.Notifications />
                 </Section>
@@ -107,9 +103,6 @@ export default function Page() {
                     </Section>
                     <Section title="Admin Settings">
                         <Sample.AdminSettings />
-                    </Section>
-                    <Section title="Admin Audit Log">
-                        <Sample.AdminAuditLog />
                     </Section>
                     <Section title="Admin Resource List">
                         <Sample.AdminResourceList />

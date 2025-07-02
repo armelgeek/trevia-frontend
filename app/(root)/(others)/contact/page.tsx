@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import { ContactForm } from '../../../(ui)/ui/components/ui-contact-form';
+import { ContactForm } from '../../../../shared/components/organisms/contact-form';
 import { Section } from '@/shared/components/atoms/ui/section';
 
 export default function Home() {

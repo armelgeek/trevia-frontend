@@ -5,7 +5,7 @@ import { BookingFilters, BookingCard } from '@/features/booking/components';
 import { Skeleton } from '@/shared/components/atoms/ui/skeleton';
 import { BookingStats } from '@/features/booking/components/BookingStats';
 import { userBookingService } from '@/features/booking/booking-user.service';
-import { useEntityQuery } from '@/lib/use-entity-query';
+import { useEntityQuery } from '@/shared/hooks/use-entity-query';
 import { Breadcrumb } from '@/shared/components/atoms/ui/breadcrumb';
 import Link from 'next/link';
 

@@ -47,13 +47,13 @@ export class BaseService {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
-    let url: string;
-    if (!endpoint) {
-      url = this.baseUrl;
-    } else {
-      url = `${this.baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+    let url = `${this.baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+    // Corrige tout '/?' par '?' dans l'URL, même si ce n'est pas à la fin
+    url = url.replace('/?', '?');
+    // Supprime le slash final si l'URL ne contient pas de query string ni de sous-ressource
+    if (url.endsWith('/') && !url.includes('?', url.length - 2) && !/\/.+\//.test(endpoint)) {
+      url = url.slice(0, -1);
     }
-    
     const config: RequestInit = {
       ...options,
       credentials: 'include',
@@ -137,13 +137,15 @@ export class BaseService {
       });
       const searchParams = new URLSearchParams(filteredParams);
       if (searchParams.toString()) {
-        // Si endpoint est vide, ne pas ajouter de /, juste le ?
-        url += `?${searchParams.toString()}`;
+        url += (url.includes('?') ? '&' : '?') + searchParams.toString();
       }
     }
-    // Si url commence par ?, endpoint était vide, donc on passe '' à request
-    const finalUrl = url.startsWith('?') ? '' : url;
-    return this.request<T>(finalUrl, { method: 'GET' });
+    const response = await this.request<T>(url, { method: 'GET' });
+    // Toujours retourner un objet avec la clé data (jamais un tableau brut)
+    if (!('data' in response)) {
+      return { data: response as unknown as T };
+    }
+    return response;
   }
 
   /**
@@ -206,6 +208,21 @@ export class BaseService {
         ),
       },
     });
+  }
+
+  /**
+   * Liste les réservations avec pagination
+   */
+  async list(params?: Record<string, string | number | boolean>) {
+    let query = '';
+    if (params) {
+      const search = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) search.append(key, String(value));
+      });
+      query = `?${search.toString()}`;
+    }
+    return this.request(query ? query : '');
   }
 }
 

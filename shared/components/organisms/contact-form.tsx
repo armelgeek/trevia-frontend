@@ -1,6 +1,6 @@
 "use client";
 
-import { LabeledSection } from "./ui-section";
+import { LabeledSection } from "../../../app/(ui)/ui/components/ui-section";
 import { Button } from "@/shared/components/atoms/ui/button";
 import { Input } from "@/shared/components/atoms/ui/input";
 import { Label } from "@/shared/components/atoms/ui/label";

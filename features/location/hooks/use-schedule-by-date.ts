@@ -1,4 +1,5 @@
-import { useEntityQuery } from '@/lib/use-entity-query';
+
+import { useEntityQuery } from '@/shared/hooks/use-entity-query';
 import { scheduleByDateService } from '../schedule-by-date.service';
 
 export function useSchedulesByDate(date: string) {

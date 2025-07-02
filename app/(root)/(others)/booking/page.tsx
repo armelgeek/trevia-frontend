@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { CheckoutForm } from '@/shared/components/organisms/checkout-form';
+import { CheckoutForm } from '@/features/booking/components/checkout-form';
 import { TripSeatsBus } from '@/app/(ui)/ui/components/trip-seats-bus';
 import { useBookingReservation } from '@/features/booking/hooks/use-booking-reservation';
 import { SeatType } from '@/app/(ui)/ui/components/trip-seats-bus';

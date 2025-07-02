@@ -59,7 +59,7 @@ export interface AdminConfig<T = Record<string, unknown>> {
     update?: boolean;
     delete?: boolean;
     bulk?: boolean;
-
+  
   };
   ui?: {
     table?: {
@@ -68,7 +68,7 @@ export interface AdminConfig<T = Record<string, unknown>> {
       pageSize?: number;
     };
     form?: {
-      layout?: 'sections' | 'simple' | 'two-cols' | 'horizontal';
+      layout?: 'sections' | 'simple'| 'two-cols' | 'horizontal';
       sections?: {
         title: string;
         fields: string[];
@@ -97,12 +97,7 @@ export type ChildConfig = {
 };
 
 export interface AdminConfigWithServices<T extends Record<string, unknown>> extends AdminConfigWithAccessor {
-  parent?: {
-    key: string;
-    routeParam: string;
-    parentEntity?: string;
-    parentLabel?: string;
-  };
+  parent: any | undefined;
   services?: CrudService<T>;
   queryKey?: string[];
   parseEditItem?: (item: Partial<T>) => Partial<T> | T;

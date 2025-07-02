@@ -9,8 +9,8 @@ import { Bus, Clock, Leaf, Wifi, Shield, Euro } from "lucide-react";
 import { StatCard, StatsContainer } from '@/shared/components/atoms/ui/stat-card';
 import { FAQ } from '@/shared/components/organisms/faq';
 import ScheduleTableMultiDestinationAccordion from '@/app/(ui)/ui/components/ui-schedule-table-multi';
-import PopularDestinationsSection from '@/shared/components/organisms/popular-destinations-section';
-import { ContactForm } from '@/app/(ui)/ui/components/ui-contact-form';
+import PopularDestinationsSection from '@/features/trip/components/popular-destinations-section';
+import { ContactForm } from '@/shared/components/organisms/contact-form';
 
 export const metadata: Metadata = {
   title: 'Create Next App',

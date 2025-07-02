@@ -1,7 +1,7 @@
 
 import { Metadata } from 'next';
 import { cookies } from 'next/headers';
-import AdminLayoutClient from './admin-layout-client';
+import AdminLayoutClient from '../../shared/layout/admin/admin-layout-client';
 
 export const metadata: Metadata = {
   title: 'Admin Dashboard',

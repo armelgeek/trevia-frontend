@@ -1,4 +1,4 @@
-import { BaseService } from '@/lib/base-service';
+import BaseService from '@/shared/lib/services/base-service';
 import { API_ENDPOINTS } from '@/shared/config/api';
 
 const baseService = new BaseService();

@@ -1,4 +1,4 @@
-import { useEntityQuery } from '@/lib/use-entity-query';
+import { useEntityQuery } from '@/shared/hooks/use-entity-query';
 import { tripPopularityService } from '../trip-popularity.service';
 
 export function usePopularTrips(params?: Record<string, string>) {

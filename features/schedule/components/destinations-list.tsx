@@ -1,11 +1,11 @@
 "use client";
 
-import { DestinationCard } from "@/app/(ui)/ui/components/ui-destination-card";
-import { DestinationCardHorizontal } from "@/app/(ui)/ui/components/ui-destination-card-horizontal";
+import { DestinationCard } from "@/features/trip/components/ui-destination-card";
+import { DestinationCardHorizontal } from "@/features/trip/components/ui-destination-card-horizontal";
 import { Skeleton } from "@/shared/components/atoms/ui/skeleton";
 
-import type { DestinationCardProps } from "@/app/(ui)/ui/components/ui-destination-card";
-import type { DestinationCardHorizontalProps } from "@/app/(ui)/ui/components/ui-destination-card-horizontal";
+import type { DestinationCardProps } from "@/features/trip/components/ui-destination-card";
+import type { DestinationCardHorizontalProps } from "@/features/trip/components/ui-destination-card-horizontal";
 
 interface DestinationsListProps {
   results: (Partial<DestinationCardProps & DestinationCardHorizontalProps>)[];

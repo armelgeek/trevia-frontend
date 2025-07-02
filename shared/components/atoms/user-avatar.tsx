@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  BadgeCheck,
   LogOut,
   User2Icon,
   UserIcon,

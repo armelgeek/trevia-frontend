@@ -1,7 +1,7 @@
 "use client";
 import { Section } from '@/shared/components/atoms/ui/section';
 import { Skeleton } from '@/shared/components/atoms/ui/skeleton';
-import { DestinationCard } from '@/app/(ui)/ui/components/ui-destination-card';
+import { DestinationCard } from '@/features/trip/components/ui-destination-card';
 import { usePopularTrips } from '@/features/location/hooks/use-trip-popularity';
 
 

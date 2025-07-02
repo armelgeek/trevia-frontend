@@ -1,4 +1,4 @@
-import { useEntityQuery } from '@/lib/use-entity-query';
+import { useEntityQuery } from '@/shared/hooks/use-entity-query';
 import { tripSeatsService } from '../trip.service';
 
 export interface TripSeat {

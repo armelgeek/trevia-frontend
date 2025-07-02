@@ -53,7 +53,7 @@ export const [entity]Service = createMockService(mock[Entity
    - Crée le fichier `features/[entity]/[entity].service.ts` :
 
 ```ts
-import { BaseService } from '@/lib/base-service';
+import BaseService from '@/shared/lib/services/base-service';
 import { API_ENDPOINTS } from '@/shared/config/api';
 
 export const [entity]Service = new BaseService<[Entity]>(
@@ -306,7 +306,7 @@ export const API_ENDPOINTS = {
 #### Service HTTP
 ```ts
 // features/category/category.service.ts
-import { BaseService } from '@/lib/base-service';
+import BaseService from '@/shared/lib/services/base-service';
 import { API_ENDPOINTS } from '@/lib/api-endpoints';
 
 export const categoryService = new BaseService<Category>(
@@ -521,7 +521,7 @@ Si tu utilises une vraie API (et non un mock) pour l’admin :
    - Crée le fichier `features/[entity]/[entity].service.ts` :
 
 ```ts
-import { BaseService } from '@/lib/base-service';
+import BaseService from '@/shared/lib/services/base-service';
 import { API_ENDPOINTS } from '@/lib/api-endpoints';
 
 export const [entity]Service = new BaseService<[Entity]>(
@@ -704,13 +704,13 @@ Pour personnaliser l’affichage d’un champ (ex : prix, devise, format custom
      ```
   2. Crée le service :
      ```ts
-     import { BaseService } from '@/lib/base-service';
+     import BaseService from '@/shared/lib/services/base-service';
      import { API_ENDPOINTS } from '@/shared/config/api';
      export const bookingDistributionService = new BaseService(API_ENDPOINTS.dashboard.bookingDistribution);
      ```
   3. Utilise le hook générique :
      ```ts
-     import { useEntityQuery } from '@/lib/use-entity-query';
+     import { useEntityQuery } from '@/shared/hooks/use-entity-query';
      export function useBookingDistribution(params?: Record<string, unknown>) {
        return useEntityQuery({
          service: bookingDistributionService,

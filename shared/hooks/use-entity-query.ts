@@ -1,13 +1,14 @@
 import { useQuery, useMutation, QueryKey } from '@tanstack/react-query';
-import { BaseService } from '@/shared/lib/services/base-service';
+import BaseService from '../lib/services/base-service';
 
-export function useEntityQuery<T, TVariables = unknown>({
+export function useEntityQuery<T, TVariables = unknown, TSelected = T>({
   service,
   queryKey,
   params,
   enabled = true,
   mutationFn,
-  mutationOptions
+  mutationOptions,
+  select,
 }: {
   service: BaseService;
   queryKey: QueryKey;
@@ -15,11 +16,13 @@ export function useEntityQuery<T, TVariables = unknown>({
   enabled?: boolean;
   mutationFn?: (variables: TVariables) => Promise<unknown>;
   mutationOptions?: Record<string, unknown>;
+  select?: (data: T) => TSelected;
 }) {
-  const query = useQuery<T>({
+  const query = useQuery<T, Error, TSelected>({
     queryKey: [queryKey, params],
     queryFn: () => service.get<T>('', params as Record<string, string> | undefined).then(r => r.data),
     enabled,
+    select,
   });
   const mutation = useMutation({
     mutationFn: mutationFn ?? ((variables: TVariables) => service.post('', variables)),
