@@ -16,7 +16,7 @@ export default function BookingAdminPage() {
     parseAsJson<{ from?: string; to?: string }>(() => ({})).withDefault({})
   );
   const [page, setPage] = useQueryState('page', parseAsInteger.withDefault(1));
-  const [limit, setLimit] = useQueryState('limit', parseAsInteger.withDefault(10));
+  const [limit] = useQueryState('limit', parseAsInteger.withDefault(10));
 
   const filters = {
     status: status || '',
@@ -68,7 +68,7 @@ export default function BookingAdminPage() {
   }
 
   const bookingItems =
-    data && typeof data === 'object' && data !== null && 'data' in data && Array.isArray((data as any).data)
+    data && typeof data === 'object' && data !== null && 'data' in data && Array.isArray((data as { data: unknown }).data)
       ? (data as { data: Booking[] }).data
       : [];
 

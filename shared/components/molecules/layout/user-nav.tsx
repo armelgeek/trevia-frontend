@@ -17,11 +17,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useAuth } from '@/shared/providers/auth-provider';
+import { authClient } from '@/shared/lib/config/auth-client';
 
 export function UserNav() {
-  const { session, logout } = useAuth();
+  const { logout } = useAuth();
+  const { data } = authClient.useSession();
+  const session  = data?.session;
   const router = useRouter();
-
+  console.log('session',session);
   const handleSignOut = async () => {
     try {
       await logout();
@@ -33,7 +36,11 @@ export function UserNav() {
     }
   };
 
-  if (!session) return null;
+  if (!session) return (
+    <div>
+      <p>Loading...</p>
+    </div>
+  );
 
   return (
     <DropdownMenu>

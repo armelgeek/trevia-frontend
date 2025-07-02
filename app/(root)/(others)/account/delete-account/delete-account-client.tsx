@@ -39,7 +39,7 @@ const DeletionConsequences = () => (
       <strong>Attention :</strong> La suppression de votre compte entraînera :
       <ul className="mt-2 ml-4 list-disc space-y-1 text-sm">
         <li>Suppression définitive de toutes vos données</li>
-        <li>Perte de l'accès à votre historique</li>
+        <li>{"Perte de l'accès à votre historique"}</li>
         <li>Annulation de tous vos abonnements</li>
         <li>Impossibilité de récupérer vos informations</li>
       </ul>

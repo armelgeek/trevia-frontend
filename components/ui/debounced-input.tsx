@@ -28,7 +28,7 @@ const DebouncedInput = React.forwardRef<
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [value, debounce]);
+  }, [value, debounce, initialValue, onChange]);
 
   return (
     <Input

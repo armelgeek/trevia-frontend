@@ -465,6 +465,7 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
             <div className="flex items-center justify-between mb-2">
               <div />
               <DataTablePagination
+             
                 table={{
                   getState: () => ({
                     pagination: {
@@ -479,7 +480,7 @@ export function SimpleAdminPage<T extends Record<string, unknown>>({
                   getCanNextPage: () => meta ? (page ?? 1) < meta.totalPages : false,
                   previousPage: () => setPage(Math.max(1, (page ?? 1) - 1)),
                   nextPage: () => meta ? setPage(Math.min(meta.totalPages, (page ?? 1) + 1)) : undefined,
-                } as unknown as any}
+                } as unknown}
               />
             </div>
           )}

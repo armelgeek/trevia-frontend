@@ -15,7 +15,6 @@ interface AuthState {
   isAuthenticated: boolean;
 }
 
-// Système global de gestion d'état auth
 const authStateListeners: Array<(state: AuthState) => void> = [];
 let currentAuthState: AuthState = {
   user: null,
@@ -25,14 +24,20 @@ let currentAuthState: AuthState = {
 
 const notifyAuthStateChange = (newState: AuthState) => {
   currentAuthState = newState;
-  console.log('🔐 Auth state changed:', newState);
   authStateListeners.forEach(listener => listener(newState));
-  
-  // Déclencher aussi l'événement pour compatibilité
   if (typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent('authStateChanged', { 
-      detail: newState 
-    }));
+    window.dispatchEvent(new CustomEvent('authStateChanged', { detail: newState }));
+  }
+};
+
+const fetchAuthState = async (): Promise<AuthState> => {
+  try {
+    const { data: session } = await authClient.getSession();
+    return session?.user
+      ? { user: session.user, isLoading: false, isAuthenticated: true }
+      : { user: null, isLoading: false, isAuthenticated: false };
+  } catch {
+    return { user: null, isLoading: false, isAuthenticated: false };
   }
 };
 
@@ -40,99 +45,60 @@ export function useAuth() {
   const [authState, setAuthState] = useState<AuthState>(currentAuthState);
 
   const checkAuth = useCallback(async () => {
-    try {
-      const { data: session } = await authClient.getSession();
-      
-      const newState: AuthState = session?.user ? {
-        user: session.user,
-        isLoading: false,
-        isAuthenticated: true,
-      } : {
-        user: null,
-        isLoading: false,
-        isAuthenticated: false,
-      };
-
-      notifyAuthStateChange(newState);
-      
-    } catch (error) {
-      console.error('Auth check failed:', error);
-      const errorState: AuthState = {
-        user: null,
-        isLoading: false,
-        isAuthenticated: false,
-      };
-      notifyAuthStateChange(errorState);
-    }
+    const newState = await fetchAuthState();
+    notifyAuthStateChange(newState);
   }, []);
 
   useEffect(() => {
-    // S'abonner aux changements d'état
+    let mounted = true;
     const handleAuthStateChange = (newState: AuthState) => {
-      setAuthState(newState);
+      if (mounted) setAuthState(newState);
     };
-    
     authStateListeners.push(handleAuthStateChange);
-    
-    // Vérification initiale seulement si on n'a pas encore d'état
+
     if (currentAuthState.isLoading) {
       checkAuth();
     } else {
       setAuthState(currentAuthState);
     }
 
-    // Vérification périodique réduite
-    const interval = setInterval(checkAuth, 60000); // 1 minute
+    const interval = setInterval(checkAuth, 30000);
 
-    // Écouter les événements de stockage pour les changements de session
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key?.includes('session') || e.key?.includes('auth')) {
         checkAuth();
       }
     };
-    
-    // Écouter les événements de focus pour vérifier à nouveau
-    const handleFocus = () => {
-      checkAuth();
-    };
+    const handleFocus = () => checkAuth();
 
     if (typeof window !== 'undefined') {
       window.addEventListener('storage', handleStorageChange);
       window.addEventListener('focus', handleFocus);
+      window.addEventListener('authStateChanged', (e: any) => {
+        if (e?.detail) setAuthState(e.detail);
+      });
     }
 
     return () => {
-      // Supprimer le listener
+      mounted = false;
       const index = authStateListeners.indexOf(handleAuthStateChange);
-      if (index > -1) {
-        authStateListeners.splice(index, 1);
-      }
-      
+      if (index > -1) authStateListeners.splice(index, 1);
       clearInterval(interval);
       if (typeof window !== 'undefined') {
         window.removeEventListener('storage', handleStorageChange);
         window.removeEventListener('focus', handleFocus);
+        window.removeEventListener('authStateChanged', () => {});
       }
     };
   }, [checkAuth]);
 
   const signOut = async () => {
-    try {
-      await authClient.signOut();
-      const newState: AuthState = {
-        user: null,
-        isLoading: false,
-        isAuthenticated: false,
-      };
-      notifyAuthStateChange(newState);
-    } catch (error) {
-      console.error('Sign out failed:', error);
-    }
+    await authClient.signOut();
+    const newState = { user: null, isLoading: false, isAuthenticated: false };
+    notifyAuthStateChange(newState);
   };
 
-  const refreshAuth = () => {
-    checkAuth();
-  };
+  const refreshAuth = () => checkAuth();
 
   return {
     ...authState,
@@ -141,29 +107,8 @@ export function useAuth() {
   };
 }
 
-// Export pour forcer la mise à jour depuis n'importe où
-export const forceAuthStateRefresh = () => {
-  // Fonction pour forcer une vérification d'auth depuis n'importe où dans l'app
-  return authClient.getSession().then(({ data: session }) => {
-    const newState: AuthState = session?.user ? {
-      user: session.user,
-      isLoading: false,
-      isAuthenticated: true,
-    } : {
-      user: null,
-      isLoading: false,
-      isAuthenticated: false,
-    };
-    notifyAuthStateChange(newState);
-    return newState;
-  }).catch((error) => {
-    console.error('Force auth refresh failed:', error);
-    const errorState: AuthState = {
-      user: null,
-      isLoading: false,
-      isAuthenticated: false,
-    };
-    notifyAuthStateChange(errorState);
-    return errorState;
-  });
+export const forceAuthStateRefresh = async () => {
+  const newState = await fetchAuthState();
+  notifyAuthStateChange(newState);
+  return newState;
 };

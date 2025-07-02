@@ -95,7 +95,7 @@ export const LoginForm = () => {
               Forgot your password?
             </Link>
             <div className="w-full border-t border-gray-300"></div>
-            <p className="text-gray-600">Don't have an account?</p>
+            <p className="text-gray-600">{"Don't have an account?"}</p>
             <Link href="/register" className="px-6 py-2 border border-gray-500 rounded-full hover:bg-green-50 transition-colors duration-200 font-semibold">
               Create an account
             </Link>

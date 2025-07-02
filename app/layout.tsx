@@ -3,7 +3,6 @@ import { Toaster } from '@/shared/components/atoms/ui/sonner';
 import { Provider } from '@/shared/providers';
 import NextTopLoader from 'nextjs-toploader';
 import {  Livvic } from 'next/font/google';
-import "@uploadthing/react/styles.css";
 import '@/shared/styles/globals.css';
 
 const spaceGrotesk = Livvic({

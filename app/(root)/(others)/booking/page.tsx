@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { CheckoutForm } from '@/features/booking/components/checkout-form';
 import { TripSeatsBus } from '@/app/(ui)/ui/components/trip-seats-bus';
 import { useBookingReservation } from '@/features/booking/hooks/use-booking-reservation';
