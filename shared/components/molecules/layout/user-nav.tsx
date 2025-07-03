@@ -29,13 +29,12 @@ type Session = {
   [key: string]: unknown;
 };
 export function UserNav() {
-  const { logout } = useAuth();
+  const {logout } = useAuth();
   const { data } = authClient.useSession();
 
   const session = data?.session as Session;
-  const user = session?.user;
+  const user = data?.user as SessionUser;
   const router = useRouter();
-
   const handleSignOut = async () => {
     try {
       await logout();
@@ -46,8 +45,7 @@ export function UserNav() {
       console.error('Logout error:', error);
     }
   };
-
-  if (!session || !user) return (
+  if (!session) return (
     <div>
       <p>Loading...</p>
     </div>
@@ -59,12 +57,14 @@ export function UserNav() {
         <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
           <Avatar className='h-8 w-8'>
             <AvatarImage
-              src={user.image ?? 'https://i.pravatar.cc/150?img=50'}
-              alt={user.name ?? ''}
+              src={typeof user.image === 'string' && user.image.length > 0 ? user.image : 'https://i.pravatar.cc/150?img=50'}
+              alt={typeof user.name === 'string' ? user.name : ''}
               className='h-8 w-8 rounded-full border border-red-500 object-cover'
             />
             <AvatarFallback>
-              {user.name?.charAt(0).toUpperCase() ?? 'U'}
+              {typeof user.name === 'string' && user.name.length > 0
+                ? user.name.charAt(0).toUpperCase()
+                : 'U'}
             </AvatarFallback>
           </Avatar>
         </Button>
@@ -73,10 +73,10 @@ export function UserNav() {
         <DropdownMenuLabel className='font-normal'>
           <div className='flex flex-col space-y-1'>
             <p className='text-sm font-medium leading-none'>
-              {user.name ?? 'Utilisateur'}
+              {typeof user.name === 'string' && user.name.length > 0 ? user.name : 'Utilisateur'}
             </p>
             <p className='text-xs leading-none text-muted-foreground'>
-              {user.email}
+              {typeof user.email === 'string' ? user.email : ''}
             </p>
           </div>
         </DropdownMenuLabel>

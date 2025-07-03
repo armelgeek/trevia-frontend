@@ -7,3 +7,11 @@ export function useTrip() {
     queryFn: () => tripService.get(''),
   });
 }
+
+export function useTripInfo(tripId: string) {
+  return useQuery({
+    queryKey: ['trip', tripId],
+    queryFn: () => tripService.get(tripId),
+    enabled: !!tripId,
+  });
+}

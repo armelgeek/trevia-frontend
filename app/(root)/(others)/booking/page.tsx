@@ -5,6 +5,18 @@ import { CheckoutForm } from '@/features/booking/components/checkout-form';
 import { TripSeatsBus } from '@/app/(ui)/ui/components/trip-seats-bus';
 import { useBookingReservation } from '@/features/booking/hooks/use-booking-reservation';
 import { SeatType } from '@/app/(ui)/ui/components/trip-seats-bus';
+import { useTripInfo } from "@/features/trip/hooks/use-trip";
+import { Skeleton } from "@/shared/components/atoms/ui/skeleton";
+
+type TripData = {
+  from?: string;
+  to?: string;
+  date?: string;
+  time?: string;
+  duration?: string;
+  pricePerSeat?: number;
+  vehicle?: string;
+};
 
 export default function BookingPage() {
   const [selectedSeats, setSelectedSeats] = useState<SeatType[]>([]);
@@ -14,19 +26,37 @@ export default function BookingPage() {
   const scheduleId = searchParams.get('scheduleId') || undefined;
   const { mutate: reserve, isPending: loading } = useBookingReservation();
   const [error, setError] = useState<string | null>(null);
+  const { data: trip, isLoading: tripLoading } = useTripInfo(tripId);
+  if (tripLoading) {
+    return (
+      <section className="max-w-3xl mx-auto text-center py-10 px-2 md:px-0 rounded-xl shadow-sm">
+        <div className="bg-white rounded-lg shadow p-6">
+          <Skeleton className="h-8 w-1/2 mb-4" />
+          <Skeleton className="h-6 w-1/3 mb-2" />
+          <Skeleton className="h-40 w-full" />
+        </div>
+      </section>
+    );
+  }
 
-  // Dummy booking details for résumé (à remplacer par les vraies données du trip/schedule)
+  if (!trip || !trip?.data) return null;
+
+  const tripData: TripData = trip.data || {};
+
   const booking = {
     tripId,
-    from: 'Départ', // à remplacer par la vraie valeur
-    to: 'Arrivée', // à remplacer par la vraie valeur
-    date: 'Date', // à remplacer par la vraie valeur
-    time: 'Heure', // à remplacer par la vraie valeur
-    duration: 'Durée', // à remplacer par la vraie valeur
+    from: tripData.from || '',
+    to: tripData.to || '',
+    date: tripData.date
+      ? new Date(tripData.date).toLocaleDateString()
+      : '',
+    time: tripData.time || '',
+    duration: tripData.duration || '',
     seats: selectedSeats.map(s => s.seatNumber),
-    pricePerSeat: 10, // à remplacer par la vraie valeur
-    vehicle: 'Bus', // à remplacer par la vraie valeur
+    pricePerSeat: tripData.pricePerSeat || 0,
+    vehicle: tripData.vehicle || '',
   };
+
 
   const handlePayment = () => {
     setError(null);
@@ -89,7 +119,12 @@ export default function BookingPage() {
       {step === 2 && (
         <div className="flex flex-col items-center">
           <div className="bg-white rounded-lg shadow p-6 w-full max-w-lg">
-            <CheckoutForm booking={booking} />
+            <CheckoutForm
+              booking={booking}
+              onPay={handlePayment}
+              loading={loading}
+              disabled={loading || selectedSeats.length === 0}
+            />
             <div className="mt-6 flex justify-between items-center">
               <button
                 className="text-primary underline text-sm font-medium hover:text-primary/80"
@@ -102,15 +137,8 @@ export default function BookingPage() {
               >
                 ← Retour à la sélection
               </button>
-              <button
-                className="bg-primary text-white px-6 py-2 rounded-lg font-semibold shadow hover:bg-primary/90 transition disabled:opacity-50"
-                disabled={loading || selectedSeats.length === 0}
-                onClick={handlePayment}
-              >
-                {loading ? 'Redirection...' : 'Payer'}
-              </button>
+                {error && <div className="text-red-500 mt-4">{error}</div>}
             </div>
-            {error && <div className="text-red-500 mt-4">{error}</div>}
           </div>
         </div>
       )}

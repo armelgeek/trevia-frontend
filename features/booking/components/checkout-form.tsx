@@ -3,7 +3,7 @@ import { Button } from "@/shared/components/atoms/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/atoms/ui/card";
 import { Separator } from "@/shared/components/atoms/ui/separator";
 import { Alert, AlertDescription } from "@/shared/components/atoms/ui/alert";
-import {  Shield, MapPin, Calendar, Clock, Users, Lock, Info } from "lucide-react";
+import { Shield, MapPin, Calendar, Clock, Users, Lock, Info } from "lucide-react";
 
 interface BookingDetails {
   tripId: string;
@@ -88,11 +88,12 @@ interface CheckoutFormProps {
   booking: BookingDetails;
   onPay?: () => void;
   loading?: boolean;
+  disabled?: boolean
+
 }
 
-export function CheckoutForm({ booking, onPay, loading }: CheckoutFormProps) {
+export function CheckoutForm({ booking, onPay, loading, disabled }: CheckoutFormProps) {
   if (!booking) return null;
-  const seats = booking.seats;
   return (
     <div className="gap-8">
       <div className="space-y-6">
@@ -106,14 +107,14 @@ export function CheckoutForm({ booking, onPay, loading }: CheckoutFormProps) {
       </div>
       <div className="space-y-6 mt-6">
         <BookingSummary booking={booking} />
-        <Button 
-          className="w-full" 
+        <Button
+          className="w-full"
           size="lg"
           onClick={onPay}
-          disabled={loading}
+          disabled={loading || disabled}
         >
           <Lock className="w-4 h-4 mr-2" />
-          Confirmer et payer
+          {loading ? 'Redirection...' : 'Confirmer et payer'}
         </Button>
         <div className="flex items-center justify-center space-x-2 text-xs text-gray-500">
           <Shield className="w-3 h-3" />
