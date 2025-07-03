@@ -53,16 +53,16 @@ export function ScheduleSearchForm({
   const formRef = useRef<HTMLFormElement>(null);
 
   return (
-    <div className="w-full flex flex-col mb-4  justify-center my-5 border border-gray-200 bg-white/90 z-20 sticky top-14 pt-0">
+    <div className="w-full flex flex-col mb-4  justify-center  border border-gray-200 bg-white/90 z-20 sticky top-14 pt-0">
       <form
         ref={formRef}
-        className="flex flex-col md:flex-row items-center gap-6 w-full max-w-4xl mx-auto p-6 justify-center"
+        className="flex flex-col md:flex-row items-center gap-6 w-full mx-auto p-6  px-40 justify-center"
         onSubmit={e => {
           e.preventDefault();
           onSubmit({ from, to, dateStart, dateEnd, passengers, search });
         }}
       >
-        <div className="flex flex-col w-full  w-[400px] text-base min-w-[400px] max-w-[340px]">
+        <div className="flex flex-col w-full   text-base max-w-[340px]">
           <label htmlFor="from" className="text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1"><MapPin className="w-4 h-4 text-primary" />Départ</label>
           <Select value={from || 'all'} onValueChange={value => onChange({ from: value === 'all' ? '' : value, to, dateStart, dateEnd, passengers, search })} >
             <SelectTrigger id="from" >
@@ -76,7 +76,7 @@ export function ScheduleSearchForm({
             </SelectContent>
           </Select>
         </div>
-        <div className="flex flex-col w-full w-[400px] text-base min-w-[400px] max-w-[340px]">
+        <div className="flex flex-col w-full  text-base  max-w-[340px]">
           <label htmlFor="to" className="text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1"><MapPin className="w-4 h-4 text-primary rotate-180" />Arrivée</label>
           <Select value={to || 'all'} onValueChange={value => onChange({ from, to: value === 'all' ? '' : value, dateStart, dateEnd, passengers, search })}>
             <SelectTrigger id="to">
@@ -90,7 +90,7 @@ export function ScheduleSearchForm({
             </SelectContent>
           </Select>
         </div>
-        <div className="flex flex-col w-full w-[400px] text-base min-w-[400px] max-w-[340px]">
+        <div className="flex flex-col w-full  text-base max-w-[340px]">
           <label htmlFor="dateStart" className="text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1"><Calendar className="w-4 h-4 text-primary" />Date</label>
           <DateTimePicker
             value={dateStart}
@@ -98,7 +98,6 @@ export function ScheduleSearchForm({
             placeholder="Départ"
             displayFormat={{ hour24: 'dd MMMM yyyy' }}
             granularity="day"
-            className="w-[400px]"
           />
         </div>
         <div className="flex flex-col">
@@ -116,7 +115,7 @@ export function ScheduleSearchForm({
         </div>
           <div className="flex flex-col">
           <label className="text-sm font-semibold  text-gray-700 mb-5 flex items-center gap-1"></label>
-        <Button type="submit" className="px-6 font-semibold mt-7 md:mt-6 w-full md:w-auto">
+        <Button type="submit" className="px-6 font-semibold w-full md:w-auto">
           Vérifier les disponibilités
         </Button>
         </div>

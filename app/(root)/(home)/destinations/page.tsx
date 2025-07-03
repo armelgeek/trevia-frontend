@@ -176,8 +176,9 @@ export default function DestinationsPage() {
               onChange={params => setForm(params)}
               onSubmit={handleFormSubmit}
             />
-            <div className="flex flex-col md:flex-row gap-8">
-                <DestinationsFilterSidebar
+            
+            <div className="flex flex-col md:flex-row gap-8 max-w-screen-2xl lg:px-40 xl:px-40 min-h-screen">
+              {/** <DestinationsFilterSidebar
                   from={form.from}
                   to={form.to}
                   search={form.search}
@@ -198,14 +199,14 @@ export default function DestinationsPage() {
                   onSortChange={handleSortChange}
                   onReset={handleReset}
                   onViewChange={handleViewChange}
-                />
+                />**/}
                 <div className="md:hidden bg-white/90 rounded-xl p-4 mb-8 shadow-sm flex flex-col gap-4">
                     <div className="flex items-center gap-2 mb-2">
                         <Search className="w-4 h-4 text-primary" />
                         <span className="font-semibold text-base">Filtres</span>
                     </div>
                 </div>
-                <main className="flex-1 mb-10">
+                <main className="flex-1 mb-10 px-12">
                   <DestinationsList
                     results={mappedResults}
                     isLoading={isLoading}

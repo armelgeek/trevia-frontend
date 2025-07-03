@@ -18,13 +18,24 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useAuth } from '@/shared/providers/auth-provider';
 import { authClient } from '@/shared/lib/config/auth-client';
-
+type SessionUser = {
+  name?: string;
+  email?: string;
+  image?: string;
+  role?: string;
+};
+type Session = {
+  user?: SessionUser;
+  [key: string]: unknown;
+};
 export function UserNav() {
   const { logout } = useAuth();
   const { data } = authClient.useSession();
-  const session  = data?.session;
+
+  const session = data?.session as Session;
+  const user = session?.user;
   const router = useRouter();
-  console.log('session',session);
+
   const handleSignOut = async () => {
     try {
       await logout();
@@ -36,7 +47,7 @@ export function UserNav() {
     }
   };
 
-  if (!session) return (
+  if (!session || !user) return (
     <div>
       <p>Loading...</p>
     </div>
@@ -48,12 +59,12 @@ export function UserNav() {
         <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
           <Avatar className='h-8 w-8'>
             <AvatarImage
-              src={session.user?.image ?? 'https://i.pravatar.cc/150?img=50'}
-              alt={session.user?.name ?? ''}
+              src={user.image ?? 'https://i.pravatar.cc/150?img=50'}
+              alt={user.name ?? ''}
               className='h-8 w-8 rounded-full border border-red-500 object-cover'
             />
             <AvatarFallback>
-              {session.user?.name?.charAt(0).toUpperCase() ?? 'U'}
+              {user.name?.charAt(0).toUpperCase() ?? 'U'}
             </AvatarFallback>
           </Avatar>
         </Button>
@@ -62,10 +73,10 @@ export function UserNav() {
         <DropdownMenuLabel className='font-normal'>
           <div className='flex flex-col space-y-1'>
             <p className='text-sm font-medium leading-none'>
-              {session.user?.name ?? 'Utilisateur'}
+              {user.name ?? 'Utilisateur'}
             </p>
             <p className='text-xs leading-none text-muted-foreground'>
-              {session.user?.email}
+              {user.email}
             </p>
           </div>
         </DropdownMenuLabel>
@@ -83,7 +94,7 @@ export function UserNav() {
               Mes réservations
             </Link>
           </DropdownMenuItem>
-          {session.user?.role === 'admin' && (
+          {user.role === 'admin' && (
             <DropdownMenuItem asChild>
               <Link href="/d" className="flex items-center">
                 <ShieldCheck className="mr-2 h-4 w-4" />

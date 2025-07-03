@@ -43,7 +43,7 @@ export function DestinationCard({
             priority
           />
         )}
-        <div className="absolute inset-0 z-10 bg-gradient-to-br from-blue-500/80 via-purple-600/60 to-black/60"></div>
+        <div className="absolute inset-0 z-10 bg-gradient-to-br from-blue-500 to-purple-600 to-black/60"></div>
         <div className="absolute inset-0 z-20 bg-black bg-opacity-20"></div>
         <div className="absolute bottom-4 left-4 text-white z-30">
           <h3 className="text-2xl font-bold mb-1">{routeLabel}</h3>
