@@ -11,7 +11,7 @@ export default async function BaseLayout({ children }: RootLayoutProps) {
   return (
     <div>
       <AppClientMenu />
-      <main className="max-w-screen-2xl lg:px-40 xl:px-40 min-h-screen">
+      <main className="lg:px-60ss xl:px-60 min-h-screen">
         {children}
       </main>
       <Footer variant="detailed" />

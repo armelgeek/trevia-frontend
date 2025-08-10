@@ -52,7 +52,7 @@ const StatsContainer = React.forwardRef<HTMLDivElement, StatsContainerProps>(
         )}
         {...props}
       >
-        <div className="max-w-7xl">
+        <div>
           {(title || subtitle) && (
             <div className="">
               {title && (

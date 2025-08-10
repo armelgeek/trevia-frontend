@@ -177,7 +177,7 @@ export default function DestinationsPage() {
               onSubmit={handleFormSubmit}
             />
             
-            <div className="flex flex-col md:flex-row gap-8 max-w-screen-2xl lg:px-40 xl:px-40 min-h-screen">
+            <div className="flex flex-col md:flex-row gap-8  lg:px-40 xl:px-40 min-h-screen">
               {/** <DestinationsFilterSidebar
                   from={form.from}
                   to={form.to}
