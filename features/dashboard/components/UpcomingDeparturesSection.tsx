@@ -78,12 +78,7 @@ export default function UpcomingDeparturesSection({ upcoming, isLoading }: Upcom
                     <tr key={dep.scheduleId} className="border-b last:border-0 hover:bg-muted/40 transition">
                       <td className="px-3 py-2 font-medium text-primary">{dep.routeLabel}</td>
                       <td className="px-3 py-2 whitespace-nowrap">
-                        {new Date(dep.departureTime).toLocaleDateString('fr-FR', {
-                          day: 'numeric',
-                          month: 'short',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
+                        {dep.departureTime}
                       </td>
                       <td className="px-3 py-2">
                         <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
